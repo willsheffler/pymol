@@ -1,5 +1,5 @@
 # -*- mode:python;tab-width:2;indent-tabs-mode:t;show-trailing-whitespace:t;rm-trailing-spaces:t -*-
-import sys,os
+import sys,os,inspect
 newpath = os.path.dirname(inspect.getfile(inspect.currentframe())) # script directory
 if not newpath in sys.path: sys.path.append(newpath)
 import string,re,gzip,itertools
