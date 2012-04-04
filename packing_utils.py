@@ -94,8 +94,5 @@ cmd.extend("useOccRadii",useOccRadii)
 cmd.extend("useOccColors",useOccColors)
 cmd.extend("useTempRadii",useTempRadii)
 cmd.extend("useTempColors",useTempColors)
-cmd.extend('useRosettaRadii', useRosettaRadii)
-cmd.extend('expandRadii',expandRadii)
-cmd.extend('contractRadii',contractRadii)
 
 

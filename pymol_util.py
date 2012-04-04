@@ -1,7 +1,8 @@
 # -*- mode:python;tab-width:2;indent-tabs-mode:t;show-trailing-whitespace:t;rm-trailing-spaces:t -*-
-import sys,os
-newpath = os.path.abspath(os.path.dirname(__file__))
-if not newpath in sys.path: sys.path.append(newpath)
+import sys,os,inspect
+newpath = os.path.dirname(inspect.getfile(inspect.currentframe())) # script directory
+if not newpath in sys.path:
+		sys.path.append(newpath)
 import string
 import re
 import gzip
@@ -1425,3 +1426,6 @@ cmd.extend("bond_zns", bond_zns)
 cmd.extend("meancoords", meancoords)
 cmd.extend("swell", swell)
 cmd.extend("axes",showaxes)
+cmd.extend('useRosettaRadii', useRosettaRadii)
+cmd.extend('expandRadii',expandRadii)
+cmd.extend('contractRadii',contractRadii)
