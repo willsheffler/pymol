@@ -14,6 +14,7 @@ from pymol.cgo import *
 from random import randrange
 from math import sqrt
 from LA import *
+from functools import partial
 
 numcom = 0
 numvec = 0
@@ -1187,11 +1188,13 @@ def makecx(sel = 'all', n = 5):
 	for i in range(n): rot("C%i_%i"%(n, i), Z, 360.0*float(i)/float(n))
 	for i in range(n): cmd.alter("C%i_%i"%(n, i), "chain = '%s'"%chains[i])
 
+for i in range(2,21):
+		globals()['makec%i'%i] = partial(makecx,n=i)
+
 def makecxauto():
 	for o in cmd.get_object_list():
 		n = int(re.search("_C\d+_", o).group(0)[2:-1])
 		makecx(o, n)
-
 
 
 def floats2vecs(i):
