@@ -361,12 +361,18 @@ def trans(sel, v):
 	#cmd.load_model(m, sel, 1, discrete = 1)
 #cmd.extend("trans", trans)
 
+
 def rot(sel, axis, ang, cen = la.Vec(0, 0, 0)):
 	# if cen is None: cen = com(sel)
 	if abs(axis.x) < 0.00001: axis.x = 0.0
 	if abs(axis.y) < 0.00001: axis.y = 0.0
 	if abs(axis.z) < 0.00001: axis.z = 0.0
 	cmd.rotate([axis.x, axis.y, axis.z], ang, sel, 0, 0, None, [cen.x, cen.y, cen.z])
+
+def xform(sel,x):
+	a,r = la.rotation_axis(x.rot)
+	rot(sel,a,math.degrees(r))
+	trans(sel,x.cen)
 
 def rot_by_matrix(sel, R, cen = la.Vec(0, 0, 0)):
   m = cmd.get_model(sel)

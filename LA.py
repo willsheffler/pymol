@@ -73,9 +73,9 @@ class Vec(object):
       u.normalize()
       return u
    def outer(u,v):
-		return Mat( u.x*v.x, u.x*v.y, u.x*v.z,
-		            u.y*v.x, u.y*v.y, u.y*v.z,
-		            u.z*v.x, u.z*v.y, u.z*v.z		 )
+      return Mat( u.x*v.x, u.x*v.y, u.x*v.z,
+                  u.y*v.x, u.y*v.y, u.y*v.z,
+                  u.z*v.x, u.z*v.y, u.z*v.z      )
    def __eq__(self,other):
       return ( abs(self.x-other.x) < TOLERANCE and 
                abs(self.y-other.y) < TOLERANCE and
@@ -87,7 +87,7 @@ Y = Vec(0,1,0)
 Z = Vec(0,0,1)
 
 def randvec():
-	return Vec(random.gauss(0,1),random.gauss(0,1),random.gauss(0,1))
+   return Vec(random.gauss(0,1),random.gauss(0,1),random.gauss(0,1))
 
 class Mat(object):
    """docstring for Mat
@@ -369,75 +369,78 @@ def dihedral(p1,p2,p3,p4):
 
 
 def angle(p1,p2,p3=None):
-	if p3 is None:
-   		return math.acos( p1.normalized().dot(p2.normalized()) ) * 180.0 / 3.14159
-	else:
-   		a = ( p2 - p1 ).normalized()
-   		b = ( p2 - p3 ).normalized()
-   		return math.acos( a.dot(b) ) * 180.0 / 3.14159
+   if p3 is None:
+         return math.acos( p1.normalized().dot(p2.normalized()) ) * 180.0 / 3.14159
+   else:
+         a = ( p2 - p1 ).normalized()
+         b = ( p2 - p3 ).normalized()
+         return math.acos( a.dot(b) ) * 180.0 / 3.14159
 
 
 def sin_cos_range(x):
-	assert -1.001 < x < 1.001
-	return min(1.0,max(-1.0,x))
+   assert -1.001 < x < 1.001
+   return min(1.0,max(-1.0,x))
 
 def rotation_axis(R):
-	cos_theta = sin_cos_range((R.trace()-1.0)/2.0);
-	if cos_theta > -1.0+TOLERANCE and cos_theta < 1.0-TOLERANCE:
-		x = ( 1.0 if R.zy > R.yz else -1.0 ) * math.sqrt( ( R.xx - cos_theta ) / ( 1.0 - cos_theta ) )
-		y = ( 1.0 if R.xz > R.zx else -1.0 ) * math.sqrt( ( R.yy - cos_theta ) / ( 1.0 - cos_theta ) )
-		z = ( 1.0 if R.yx > R.xy else -1.0 ) * math.sqrt( ( R.zz - cos_theta ) / ( 1.0 - cos_theta ) )
-		theta = math.acos( cos_theta );
-		assert abs( x*x + y*y + z*z - 1 ) <= 0.01
-		return Vec(x,y,z),theta
-	elif cos_theta >= 1.0-TOLERANCE:
-		return Vec(1.0,0.0,0.0),0.0
-	else:
-		nnT = R.add_diagonal(Vec(1.0,1.0,1.0)) / 2.0
-		x,y,z = 0.0,0.0,0.0;
-		if nnT.xx > TOLERANCE:
-			x = math.sqrt( nnT.xx )
-			y = nnT.yx / x
-			z = nnT.zx / x
-		elif nnT.yy > TOLERANCE:
-			x = ZERO
-			y = math.sqrt(nnT.yy)
-			z = nnT.zy / y
-		else:
-			assert( nnT.zz > TOLERANCE );
-			x = ZERO
-			y = ZERO
-			z = sqrt( nnT.zz )
-		assert abs( x*x + y*y + z*z - 1.0 ) <= 0.01
-		return Vec( x, y, z ),math.pi
+   """
+   >>> assert rotation_axis( rotation_matrix_radians(Vec(1,2,3).normalized(),1.23) ) == (Vec(1,2,3).normalized(),1.23)
+   """
+   cos_theta = sin_cos_range((R.trace()-1.0)/2.0);
+   if cos_theta > -1.0+TOLERANCE and cos_theta < 1.0-TOLERANCE:
+      x = ( 1.0 if R.zy > R.yz else -1.0 ) * math.sqrt( ( R.xx - cos_theta ) / ( 1.0 - cos_theta ) )
+      y = ( 1.0 if R.xz > R.zx else -1.0 ) * math.sqrt( ( R.yy - cos_theta ) / ( 1.0 - cos_theta ) )
+      z = ( 1.0 if R.yx > R.xy else -1.0 ) * math.sqrt( ( R.zz - cos_theta ) / ( 1.0 - cos_theta ) )
+      theta = math.acos( cos_theta );
+      assert abs( x*x + y*y + z*z - 1 ) <= 0.01
+      return Vec(x,y,z),theta
+   elif cos_theta >= 1.0-TOLERANCE:
+      return Vec(1.0,0.0,0.0),0.0
+   else:
+      nnT = R.add_diagonal(Vec(1.0,1.0,1.0)) / 2.0
+      x,y,z = 0.0,0.0,0.0;
+      if nnT.xx > TOLERANCE:
+         x = math.sqrt( nnT.xx )
+         y = nnT.yx / x
+         z = nnT.zx / x
+      elif nnT.yy > TOLERANCE:
+         x = ZERO
+         y = math.sqrt(nnT.yy)
+         z = nnT.zy / y
+      else:
+         assert( nnT.zz > TOLERANCE );
+         x = ZERO
+         y = ZERO
+         z = sqrt( nnT.zz )
+      assert abs( x*x + y*y + z*z - 1.0 ) <= 0.01
+      return Vec( x, y, z ),math.pi
 
 def test_rotation_mat():
-	import random
-	for i in range(10000):
-		a0 = Vec(random.gauss(0.0,1.0),random.gauss(0.0,1.0),random.gauss(0.0,1.0)).normalized()
-		t0 = random.uniform(0,math.pi)
-		a,t = rotation_axis(rotation_matrix_radians(a0,t0))
-		if t == 0.0 and t0 < 0.001:
-			continue
-		if abs(t-math.pi) < 0.00001:
-			if (abs(a.x-a0.x) < 0.001 and abs(a.y-a0.y) < 0.001 and abs(a.z-a0.z) < 0.001) or \
-			   (abs(a.x+a0.x) < 0.001 and abs(a.y+a0.y) < 0.001 and abs(a.z+a0.z) < 0.001):
-				continue
-			else:
-				print a0
-				print a
-				continue
-		if not abs(t-t0) < 0.0001 or not (a.normalized()-a0.normalized()).length() < 0.0001:
-			print a0.normalized(), t0
-			print a.normalized() , t
-			print "FAIL"
-			return
-	print "test_rotation_mat PASS"
+   import random
+   for i in range(10000):
+      a0 = Vec(random.gauss(0.0,1.0),random.gauss(0.0,1.0),random.gauss(0.0,1.0)).normalized()
+      t0 = random.uniform(0,math.pi)
+      a,t = rotation_axis(rotation_matrix_radians(a0,t0))
+      if t == 0.0 and t0 < 0.001:
+         continue
+      if abs(t-math.pi) < 0.00001:
+         if (abs(a.x-a0.x) < 0.001 and abs(a.y-a0.y) < 0.001 and abs(a.z-a0.z) < 0.001) or \
+            (abs(a.x+a0.x) < 0.001 and abs(a.y+a0.y) < 0.001 and abs(a.z+a0.z) < 0.001):
+            continue
+         else:
+            print a0
+            print a
+            continue
+      if not abs(t-t0) < 0.0001 or not (a.normalized()-a0.normalized()).length() < 0.0001:
+         print a0.normalized(), t0
+         print a.normalized() , t
+         print "FAIL"
+         return
+   print "test_rotation_mat PASS"
 
 
 
 def test():
-	test_rotation_mat()
+   test_rotation_mat()
 
 if __name__ == '__main__':
    test()
