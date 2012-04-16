@@ -4,7 +4,7 @@ newpath = os.path.dirname(inspect.getfile(inspect.currentframe())) # script dire
 if not newpath in sys.path: sys.path.append(newpath)
 import string,re,gzip,itertools
 from pymol import cmd
-from LA import *
+import LA as la
 from sym_util import *
 from pymol_util import *
 
@@ -85,7 +85,7 @@ def processhomomers():
 def iscontig(sel):
 	m = cmd.get_model(sel+" and name N+CA+C").atom
 	for i in range(1,len(m)):
-		if ( Vec(m[i-1].coord) - Vec(m[i].coord) ).length() > 1.8:  return False
+		if ( la.Vec(m[i-1].coord) - la.Vec(m[i].coord) ).length() > 1.8:  return False
 		return True
 
 def procCdat(N=3,lfile=None,biod="/data/biounit",outd=None):
@@ -159,15 +159,15 @@ def procCdat(N=3,lfile=None,biod="/data/biounit",outd=None):
 				for i in range(1,N+1):
 					trans("sub%i"%i,-cm)
 				a = [cmd.get_model("sub%i and name CA"%i).atom for i in range(1,N+1)]
-				axis = Vec(0,0,0)
+				axis = la.Vec(0,0,0)
 				for i in range(len(a[0])):
-					axis1 = Vec(0,0,0)
-					for j in range(N): axis1 += Vec(a[j][i].coord)
+					axis1 = la.Vec(0,0,0)
+					for j in range(N): axis1 += la.Vec(a[j][i].coord)
 					if axis1.length() > 0.0001 and axis.dot(axis1) < 0: axis1 *= -1
 					axis += axis1
 				axis.normalize()
 				for i in range(1,N+1):
-					alignaxis("sub%i"%i,Vec(0,0,1),axis,Vec(0,0,0))
+					alignaxis("sub%i"%i,la.Vec(0,0,1),axis,la.Vec(0,0,0))
 				#cmd.create("final1","mxatm")
 				#cmd.create("final2","mxatm")
 				#cmd.create("final3","mxatm")
@@ -235,16 +235,16 @@ def procD2dat(lfile=None,biod="/data/biounit",outd=None):
 			if len(cc) < N:
 				sym = cmd.get_symmetry("m")
 				if   sym[6] == "I 2 2 2":
-					trans('m',Vec(0,-sym[1],0))
+					trans('m',la.Vec(0,-sym[1],0))
 					print pdb
 				#elif sym[6] == "P 21 21 2" and len(cc)==2:
-				#   trans('m',Vec(-sym[0]/2.0,-sym[1]/2.0,0))
+				#   trans('m',la.Vec(-sym[0]/2.0,-sym[1]/2.0,0))
 				#   cmd.create("sub1","m and chain %s and not (HET and not resn MSE+CSW)"%(cc[0][1]),1,1)
 				#   cmd.create("sub2","m and chain %s and not (HET and not resn MSE+CSW)"%(cc[1][1]),1,1)
 				#   cmd.create("sub3","m and chain %s and not (HET and not resn MSE+CSW)"%(cc[0][1]),1,1)
 				#   cmd.create("sub4","m and chain %s and not (HET and not resn MSE+CSW)"%(cc[1][1]),1,1)
-				#   rot("sub3",Vec(0,0,1),180,Vec(0,0,0))
-				#   rot("sub4",Vec(0,0,1),180,Vec(0,0,0))
+				#   rot("sub3",la.Vec(0,0,1),180,la.Vec(0,0,0))
+				#   rot("sub4",la.Vec(0,0,1),180,la.Vec(0,0,0))
 				elif sym[6] in ('C 1 2 1','P 21 21 21','P 62 2 2','P 64 2 2','P 65 2 2','P 63 2 2','P 61 2 2','C 2 2 21'):
 					Nnsym += 1
 					#if pid != "1y2k_2": return
@@ -288,30 +288,30 @@ def procD2dat(lfile=None,biod="/data/biounit",outd=None):
 		for i in range(1,N+1):
 			trans("sub%i"%i,-cm)
 		a = [cmd.get_model("sub%i and name CA"%i).atom for i in range(1,N+1)]
-		a1 = Vec(0,0,0)
+		a1 = la.Vec(0,0,0)
 		for i in range(len(a[0])):
-			axis1 = Vec(a[0][i].coord) + Vec(a[1][i].coord)
+			axis1 = la.Vec(a[0][i].coord) + la.Vec(a[1][i].coord)
 			if axis1.length() > 0.0001 and a1.dot(axis1) < 0: axis1 *= -1
 			a1 += axis1
 		a1.normalize()
 		for i in range(1,N+1):
-			alignaxis("sub%i"%i,Vec(1,0,0),a1,Vec(0,0,0))
+			alignaxis("sub%i"%i,la.Vec(1,0,0),a1,la.Vec(0,0,0))
 		a = [cmd.get_model("sub%i and name CA"%i).atom for i in range(1,N+1)]
-		a1 = Vec(0,0,0)
+		a1 = la.Vec(0,0,0)
 		for i in range(len(a[0])):
-			axis1 = Vec(a[0][i].coord) + Vec(a[2][i].coord)
+			axis1 = la.Vec(a[0][i].coord) + la.Vec(a[2][i].coord)
 			if axis1.length() > 0.0001 and a1.dot(axis1) < 0: axis1 *= -1
 			a1 += axis1
 		a1.normalize()
 		for i in range(1,N+1):
-			alignaxis("sub%i"%i,Vec(0,1,0),a1,Vec(0,0,0))
+			alignaxis("sub%i"%i,la.Vec(0,1,0),a1,la.Vec(0,0,0))
 		cmd.align("mxatm","sub1")
 		cmd.create("final2","mxatm")
 		cmd.create("final3","mxatm")
 		cmd.create("final4","mxatm")
-		rot('final2',Vec(1,0,0),180,Vec(0,0,0))
-		rot('final3',Vec(0,1,0),180,Vec(0,0,0))
-		rot('final4',Vec(0,0,1),180,Vec(0,0,0))
+		rot('final2',la.Vec(1,0,0),180,la.Vec(0,0,0))
+		rot('final3',la.Vec(0,1,0),180,la.Vec(0,0,0))
+		rot('final4',la.Vec(0,0,1),180,la.Vec(0,0,0))
 		n1 = cmd.select('mxatm within 4 of final2')
 		n2 = cmd.select('mxatm within 4 of final3')
 		n3 = cmd.select('mxatm within 4 of final4')
