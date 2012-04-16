@@ -12,6 +12,9 @@
 # serve to show the default.
 
 import sys, os
+sys.path.append("/Users/sheffler/pymol/")
+sys.path.append("/Applications/MacPyMOL.app/pymol/modules/")
+import LA
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

@@ -1,9 +1,13 @@
+"""
+Easy 3D Linear Algebra, like xyz\* in rosetta
+"""
 import math,random
 
 TOLERANCE = 0.000000001
 
 class Vec(object):
    """a Vector like xyzVector<Real> in rosetta
+
    >>> v = Vec(1,2,3)
    >>> print v, 10*v
    (1.000000,2.000000,3.000000) (10.000000,20.000000,30.000000)
@@ -91,6 +95,7 @@ def randvec():
 
 class Mat(object):
    """docstring for Mat
+
    >>> m = Mat(2,0,0,0,1,0,0,0,1)
    >>> print m
    Mat[ (2.000000,0.000000,0.000000), (0.000000,1.000000,0.000000), (0.000000,0.000000,1.000000) ]
@@ -260,6 +265,7 @@ class RT(object):
    >>> assert  x * ~x == RTI
 
    Frames / RTs are interchangable:
+
    >>> fr = RT(rotation_matrix(Vec(1,2,3), 65.64),cen=Vec(3,2,1))
    >>> to = RT(rotation_matrix(Vec(7,5,3),105.44),cen=Vec(10,9,8))
    >>> x = RT(frm=fr,to=to)
@@ -344,6 +350,7 @@ def rotation_matrix_radians(axis,angle):
    return R;
 def rotation_matrix(axis,angle):
    """ get a rotation matrix
+
    >>> rx180 = rotation_matrix(Vec(1,0,0),180.0)
    >>> rx90  = rotation_matrix(Vec(1,0,0),90.0)
    >>> print rx90*rx90 == rx180

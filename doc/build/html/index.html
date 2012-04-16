@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to Will’s PyMOL Scripts’s documentation! &mdash; Will&#39;s PyMOL Scripts 0.2 documentation</title>
+    <title>Module Documentation &mdash; Will&#39;s PyMOL Scripts 0.2 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -34,6 +34,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li><a href="#">Will&#39;s PyMOL Scripts 0.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -43,12 +46,141 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="welcome-to-will-s-pymol-scripts-s-documentation">
-<h1>Welcome to Will&#8217;s PyMOL Scripts&#8217;s documentation!<a class="headerlink" href="#welcome-to-will-s-pymol-scripts-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Contents:</p>
-<div class="toctree-wrapper compound">
-<ul class="simple">
-</ul>
+  <div class="section" id="module-documentation">
+<h1>Module Documentation<a class="headerlink" href="#module-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-LA">
+<span id="la"></span><h2>LA<a class="headerlink" href="#module-LA" title="Permalink to this headline">¶</a></h2>
+<p>Easy 3D Linear Algebra, like xyz* in rosetta</p>
+<dl class="class">
+<dt id="LA.Jump">
+<em class="property">class </em><tt class="descclassname">LA.</tt><tt class="descname">Jump</tt><big>(</big><em>rot</em>, <em>trans</em><big>)</big><a class="reference internal" href="_modules/LA.html#Jump"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LA.Jump" title="Permalink to this definition">¶</a></dt>
+<dd><p>docstring for Jump</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="LA.Mat">
+<em class="property">class </em><tt class="descclassname">LA.</tt><tt class="descname">Mat</tt><big>(</big><em>xx=None</em>, <em>xy=None</em>, <em>xz=None</em>, <em>yx=None</em>, <em>yy=None</em>, <em>yz=None</em>, <em>zx=None</em>, <em>zy=None</em>, <em>zz=None</em><big>)</big><a class="reference internal" href="_modules/LA.html#Mat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LA.Mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>docstring for Mat</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">Mat</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">m</span>
+<span class="go">Mat[ (2.000000,0.000000,0.000000), (0.000000,1.000000,0.000000), (0.000000,0.000000,1.000000) ]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">m</span><span class="o">*</span><span class="n">m</span>
+<span class="go">Mat[ (4.000000,0.000000,0.000000), (0.000000,1.000000,0.000000), (0.000000,0.000000,1.000000) ]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">Mat</span><span class="p">(</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span> <span class="o">*</span> <span class="n">Mat</span><span class="p">(</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">19</span><span class="p">))</span>
+<span class="go">Mat[ (84.000000,90.000000,96.000000), (201.000000,216.000000,231.000000), (318.000000,342.000000,366.000000) ]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">Mat</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">2.0</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span> <span class="o">==</span> <span class="n">Mat</span><span class="p">(</span><span class="o">-</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">6.0</span><span class="p">,</span><span class="mf">7.0</span><span class="p">,</span><span class="mf">8.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">Mat</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">det</span><span class="p">()</span>
+<span class="go">-297.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">Mat</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">m</span> <span class="o">*</span> <span class="o">~</span><span class="n">m</span> <span class="o">==</span> <span class="n">Identity</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="LA.RT">
+<em class="property">class </em><tt class="descclassname">LA.</tt><tt class="descname">RT</tt><big>(</big><em>rot=None</em>, <em>cen=None</em>, <em>a=None</em>, <em>b=None</em>, <em>c=None</em>, <em>frm=None</em>, <em>to=None</em><big>)</big><a class="reference internal" href="_modules/LA.html#RT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LA.RT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coordinate frame like rosetta RT, behaves also as a rosetta Stub</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">RT</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">Identity</span><span class="p">,</span><span class="n">cen</span><span class="o">=</span><span class="n">Z</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">x</span>
+<span class="go">RT( Mat[ (1.000000,0.000000,0.000000), (0.000000,1.000000,0.000000), (0.000000,0.000000,1.000000) ], (0.000000,0.000000,1.000000) )</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="n">RT</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">Identity</span><span class="p">,</span><span class="n">cen</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">Z</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">RT</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">Vec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="mf">90.0</span><span class="p">),</span><span class="n">cen</span><span class="o">=</span><span class="n">Vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">x</span>
+<span class="go">RT( Mat[ (1.000000,0.000000,0.000000), (0.000000,0.000000,-1.000000), (0.000000,1.000000,0.000000) ], (0.000000,0.000000,0.000000) )</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">==</span> <span class="n">RTI</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">cen</span> <span class="o">=</span> <span class="n">X</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">==</span> <span class="n">RT</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">Identity</span><span class="p">,</span><span class="n">cen</span><span class="o">=</span><span class="mi">4</span><span class="o">*</span><span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">cen</span> <span class="o">=</span> <span class="n">Z</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">x</span>
+<span class="go">RT( Mat[ (1.000000,0.000000,0.000000), (0.000000,0.000000,-1.000000), (0.000000,1.000000,0.000000) ], (0.000000,0.000000,1.000000) )</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">x</span>               <span class="o">==</span> <span class="n">RT</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">),</span><span class="n">cen</span><span class="o">=</span><span class="n">Vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span>             <span class="o">==</span> <span class="n">RT</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="mf">180.0</span><span class="p">),</span><span class="n">cen</span><span class="o">=</span><span class="n">Vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span>           <span class="o">==</span> <span class="n">RT</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="mf">270.0</span><span class="p">),</span><span class="n">cen</span><span class="o">=</span><span class="n">Vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span>         <span class="o">==</span> <span class="n">RT</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">),</span><span class="n">cen</span><span class="o">=</span><span class="n">Vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span>       <span class="o">==</span> <span class="n">RT</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">),</span><span class="n">cen</span><span class="o">=</span><span class="n">Vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span>     <span class="o">==</span> <span class="n">RT</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="mf">180.0</span><span class="p">),</span><span class="n">cen</span><span class="o">=</span><span class="n">Vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span>   <span class="o">==</span> <span class="n">RT</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="mf">270.0</span><span class="p">),</span><span class="n">cen</span><span class="o">=</span><span class="n">Vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">==</span> <span class="n">RT</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">,</span>  <span class="mf">0.0</span><span class="p">),</span><span class="n">cen</span><span class="o">=</span><span class="n">Vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">RT</span><span class="p">(</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">Vec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="mi">123</span><span class="p">),</span><span class="n">Vec</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">9</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="o">~</span><span class="n">x</span> <span class="o">*</span>  <span class="n">x</span> <span class="o">==</span> <span class="n">RTI</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span>  <span class="n">x</span> <span class="o">*</span> <span class="o">~</span><span class="n">x</span> <span class="o">==</span> <span class="n">RTI</span>
+</pre></div>
+</div>
+<p>Frames / RTs are interchangable:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fr</span> <span class="o">=</span> <span class="n">RT</span><span class="p">(</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">Vec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="mf">65.64</span><span class="p">),</span><span class="n">cen</span><span class="o">=</span><span class="n">Vec</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">to</span> <span class="o">=</span> <span class="n">RT</span><span class="p">(</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">Vec</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="mf">105.44</span><span class="p">),</span><span class="n">cen</span><span class="o">=</span><span class="n">Vec</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">RT</span><span class="p">(</span><span class="n">frm</span><span class="o">=</span><span class="n">fr</span><span class="p">,</span><span class="n">to</span><span class="o">=</span><span class="n">to</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">RT</span><span class="p">(</span><span class="n">frm</span><span class="o">=</span><span class="n">RTI</span><span class="p">,</span><span class="n">to</span><span class="o">=</span><span class="n">to</span><span class="p">)</span> <span class="o">==</span>  <span class="n">to</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">RT</span><span class="p">(</span><span class="n">frm</span><span class="o">=</span><span class="n">fr</span><span class="p">,</span><span class="n">to</span><span class="o">=</span><span class="n">RTI</span><span class="p">)</span> <span class="o">==</span> <span class="o">~</span><span class="n">fr</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="p">(</span><span class="n">to</span> <span class="o">*</span> <span class="o">~</span><span class="n">fr</span><span class="p">)</span> <span class="o">*</span> <span class="n">fr</span> <span class="o">==</span> <span class="n">to</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">x</span> <span class="o">*</span> <span class="n">fr</span> <span class="o">==</span> <span class="n">to</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="LA.Vec">
+<em class="property">class </em><tt class="descclassname">LA.</tt><tt class="descname">Vec</tt><big>(</big><em>x</em>, <em>y=None</em>, <em>z=None</em><big>)</big><a class="reference internal" href="_modules/LA.html#Vec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LA.Vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>a Vector like xyzVector&lt;Real&gt; in rosetta</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">v</span> <span class="o">=</span> <span class="n">Vec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">v</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="n">v</span>
+<span class="go">(1.000000,2.000000,3.000000) (10.000000,20.000000,30.000000)</span>
+</pre></div>
+</div>
+<p>multiplication is a dot prod at the moment
+&gt;&gt;&gt; v*v
+14.0
+&gt;&gt;&gt; assert Vec(1,0,-0) == Vec(1,-0,0)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LA.proj">
+<tt class="descclassname">LA.</tt><tt class="descname">proj</tt><big>(</big><em>u</em>, <em>v</em><big>)</big><a class="reference internal" href="_modules/LA.html#proj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LA.proj" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">Vec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span> <span class="n">v</span> <span class="o">=</span> <span class="n">Vec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+<span class="go">Vec( 1.000000, 0.000000, 0.000000 )</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="LA.projperp">
+<tt class="descclassname">LA.</tt><tt class="descname">projperp</tt><big>(</big><em>u</em>, <em>v</em><big>)</big><a class="reference internal" href="_modules/LA.html#projperp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LA.projperp" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">Vec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span> <span class="n">v</span> <span class="o">=</span> <span class="n">Vec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">projperp</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+<span class="go">Vec( 0.000000, 1.000000, 1.000000 )</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="LA.rotation_axis">
+<tt class="descclassname">LA.</tt><tt class="descname">rotation_axis</tt><big>(</big><em>R</em><big>)</big><a class="reference internal" href="_modules/LA.html#rotation_axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LA.rotation_axis" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">rotation_axis</span><span class="p">(</span> <span class="n">rotation_matrix_radians</span><span class="p">(</span><span class="n">Vec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">normalized</span><span class="p">(),</span><span class="mf">1.23</span><span class="p">)</span> <span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">Vec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">normalized</span><span class="p">(),</span><span class="mf">1.23</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="LA.rotation_matrix">
+<tt class="descclassname">LA.</tt><tt class="descname">rotation_matrix</tt><big>(</big><em>axis</em>, <em>angle</em><big>)</big><a class="reference internal" href="_modules/LA.html#rotation_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LA.rotation_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>get a rotation matrix</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">rx180</span> <span class="o">=</span> <span class="n">rotation_matrix</span><span class="p">(</span><span class="n">Vec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="mf">180.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rx90</span>  <span class="o">=</span> <span class="n">rotation_matrix</span><span class="p">(</span><span class="n">Vec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="mf">90.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">rx90</span><span class="o">*</span><span class="n">rx90</span> <span class="o">==</span> <span class="n">rx180</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">rotation_matrix</span><span class="p">(</span><span class="n">Vec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="mf">45.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">r</span>
+<span class="go">Mat[ (1.000000,0.000000,0.000000), (0.000000,0.707107,-0.707107), (0.000000,0.707107,0.707107) ]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">r</span><span class="o">*</span><span class="n">r</span> <span class="o">==</span> <span class="n">rx90</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span> <span class="o">==</span> <span class="n">rx180</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span> <span class="o">==</span> <span class="n">Identity</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="o">~</span><span class="n">r</span> <span class="o">==</span> <span class="n">r</span><span class="o">.</span><span class="n">transposed</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -68,7 +200,8 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Welcome to Will&#8217;s PyMOL Scripts&#8217;s documentation!</a><ul>
+<li><a class="reference internal" href="#">Module Documentation</a><ul>
+<li><a class="reference internal" href="#module-LA">LA</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
@@ -102,6 +235,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li><a href="#">Will&#39;s PyMOL Scripts 0.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
