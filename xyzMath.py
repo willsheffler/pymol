@@ -4,13 +4,13 @@ Easy 3D Linear Algebra, like xyz\* in rosetta
 import math,random
 from itertools import chain,product
 
-TOLERANCE = 0.0000001
+EPS = 0.000000001
+SQRTEPS = math.sqrt(EPS)
 
-def isnum(x):
-   return (type(x) in (int,float))
-
-def isiter(x):
-   return hasattr(x,"__iter__")
+def isnum(x): return (type(x) in (int,float))
+def isiter(x): return hasattr(x,"__iter__")
+def radians(deg): return deg/180.0*math.pi
+def degrees(rad): return rad/math.pi*180.0
 
 class Vec(object):
    """a Vector like xyzVector<Real> in rosetta
@@ -43,14 +43,24 @@ class Vec(object):
       assert type(self.z) is float
    def dot(u,v):
       return u.x*v.x+u.y*v.y+u.z*v.z
+   def normdot(u,v):
+      return u.dot(v)/u.length()/v.length()
+   def angle(u,v):
+      return math.acos( u.normdot(v) )
+   def angle_degrees(u,v):
+      return degrees(math.acos( u.normdot(v) ))
+   def lineangle(u,v):
+      if u.length() < SQRTEPS or v.length < SQRTEPS: return 0.0
+      return abs(math.acos( u.normdot(v) ))
+   def lineangle_degrees(u,v):
+      if u.length() < SQRTEPS or v.length < SQRTEPS: return 0.0
+      return degrees(abs(math.acos( u.normdot(v) )))
    def length(u):
       return math.sqrt(u.dot(u))
    def distance(u,v):
       return (u-v).length()
    def distance_squared(u,v):
       return u.x*v.x+u.y*v.y+u.z*v.z
-   def d(u,v):
-      return (u-v).length()
    def cross(u,v):
       return Vec(u.y*v.z-u.z*v.y,u.z*v.x-u.x*v.z,u.x*v.y-u.y*v.x)
    def __mul__(u,a):
@@ -90,9 +100,9 @@ class Vec(object):
                   u.y*v.x, u.y*v.y, u.y*v.z,
                   u.z*v.x, u.z*v.y, u.z*v.z      )
    def __eq__(self,other):
-      return ( abs(self.x-other.x) < TOLERANCE and 
-               abs(self.y-other.y) < TOLERANCE and
-               abs(self.z-other.z) < TOLERANCE )
+      return ( abs(self.x-other.x) < EPS and 
+               abs(self.y-other.y) < EPS and
+               abs(self.z-other.z) < EPS )
    def rounded(self,sd):
       return Vec(round(self.x,sd), round(self.y,sd), round(self.z,sd) )
       
@@ -233,15 +243,15 @@ class Mat(object):
       return (m.colx().isnormal() and m.coly().isnormal() and m.colz().isnormal() and
               m.rowx().isnormal() and m.rowy().isnormal() and m.rowz().isnormal()   )
    def __eq__(self,other):
-      return ( abs(self.xx-other.xx) < TOLERANCE and 
-               abs(self.xy-other.xy) < TOLERANCE and
-               abs(self.xz-other.xz) < TOLERANCE and
-               abs(self.yx-other.yx) < TOLERANCE and
-               abs(self.yy-other.yy) < TOLERANCE and
-               abs(self.yz-other.yz) < TOLERANCE and
-               abs(self.zx-other.zx) < TOLERANCE and
-               abs(self.zy-other.zy) < TOLERANCE and
-               abs(self.zz-other.zz) < TOLERANCE )
+      return ( abs(self.xx-other.xx) < EPS and 
+               abs(self.xy-other.xy) < EPS and
+               abs(self.xz-other.xz) < EPS and
+               abs(self.yx-other.yx) < EPS and
+               abs(self.yy-other.yy) < EPS and
+               abs(self.yz-other.yz) < EPS and
+               abs(self.zx-other.zx) < EPS and
+               abs(self.zy-other.zy) < EPS and
+               abs(self.zz-other.zz) < EPS )
 
 
 Identity = Mat(1,0,0,0,1,0,0,0,1)
@@ -249,7 +259,7 @@ Identity = Mat(1,0,0,0,1,0,0,0,1)
 def projection_matrix(v):
    m = Mat( v.x * v.x, v.x * v.y, v.x * v.z, v.y * v.x, v.y * v.y, v.y * v.z, v.z * v.x, v.z * v.y, v.z * v.z )
    return m / v.dot(v)
-def rotation_matrix_radians(axis,angle):
+def rotation_matrix(axis,angle):
    n = axis.normalized()
    sin_theta = math.sin( angle )
    cos_theta = math.cos( angle )
@@ -259,14 +269,15 @@ def rotation_matrix_radians(axis,angle):
    R.yx += sin_theta * n.z; R.yy += cos_theta;       R.yz -= sin_theta * n.x
    R.zx -= sin_theta * n.y; R.zy += sin_theta * n.x; R.zz += cos_theta
    return R;
-def rotation_matrix(axis,angle):
+
+def rotation_matrix_degrees(axis,angle):
    """ get a rotation matrix
 
-   >>> rx180 = rotation_matrix(Vec(1,0,0),180.0)
-   >>> rx90  = rotation_matrix(Vec(1,0,0),90.0)
+   >>> rx180 = rotation_matrix_degrees(Vec(1,0,0),180.0)
+   >>> rx90  = rotation_matrix_degrees(Vec(1,0,0),90.0)
    >>> print rx90*rx90 == rx180
    True
-   >>> r = rotation_matrix(Vec(1,0,0),45.0)
+   >>> r = rotation_matrix_degrees(Vec(1,0,0),45.0)
    >>> print r
    Mat[ (1.000000,0.000000,0.000000), (0.000000,0.707107,-0.707107), (0.000000,0.707107,0.707107) ]
    >>> assert r*r == rx90
@@ -278,20 +289,21 @@ def rotation_matrix(axis,angle):
    >>> v = randvec()
    >>> axs = randnorm()
    >>> while(abs(v.dot(axs))>0.9): axs = randnorm()
-   >>> u = rotation_matrix(projperp(v,axs),ang)*v
-   >>> assert abs( angle(v,U0,u) - abs(ang) ) < 0.01
+   >>> u = rotation_matrix_degrees(projperp(v,axs),ang)*v
+   >>> assert abs(u.angle_degrees(v)-abs(ang)) < SQRTEPS
    >>> test_rotation_mat()
    test_rotation_mat PASS
    """
-   return rotation_matrix_radians(axis,angle*math.pi/180.0)
+   return rotation_matrix(axis,radians(angle))
+
 def test_rotation_mat():
    import random
    for i in range(100):
       a0 = randnorm()
-      t0 = random.uniform(0,math.pi)
-      a,t = rotation_axis(rotation_matrix_radians(a0,t0))
+      t0 = random.uniform(-math.pi,math.pi)
+      a,t = rotation_axis(rotation_matrix(a0,t0))
       if t0 < 0.01: continue
-      if abs(t-math.pi) < 0.00001:
+      if abs(t-math.pi) < EPS:
          if (abs(a.x-a0.x) < 0.001 and abs(a.y-a0.y) < 0.001 and abs(a.z-a0.z) < 0.001) or \
             (abs(a.x+a0.x) < 0.001 and abs(a.y+a0.y) < 0.001 and abs(a.z+a0.z) < 0.001):
             continue
@@ -299,7 +311,7 @@ def test_rotation_mat():
             print a0
             print a
             return False
-      if not abs(t-t0) < 0.0001 or not (a.normalized()-a0.normalized()).length() < 0.0001:
+      if not abs(t-t0) < EPS or not (a.normalized()-a0.normalized()).length() < EPS:
          print a0.normalized(), t0
          print a.normalized() , t
          print "FAIL"
@@ -308,8 +320,8 @@ def test_rotation_mat():
 
 
 def randrot(n=1):
-   if n is 1: return rotation_matrix(randvec(),random.random()*360)
-   return (rotation_matrix(randvec(),random.random()*360) for i in range(n))
+   if n is 1: return rotation_matrix_degrees(randvec(),random.random()*360)
+   return (rotation_matrix_degrees(randvec(),random.random()*360) for i in range(n))
 
 class Xform(object):
    """Coordinate frame like rosetta Xform, behaves also as a rosetta Stub
@@ -318,7 +330,7 @@ class Xform(object):
    >>> print x
    Xform( Mat[ (1.000000,0.000000,0.000000), (0.000000,1.000000,0.000000), (0.000000,0.000000,1.000000) ], (0.000000,0.000000,1.000000) )
    >>> assert (x*x) == Xform(R=Identity,t=2*Uz)
-   >>> x = Xform(R=rotation_matrix(Vec(1,0,0),90.0),t=Vec(0,0,0))
+   >>> x = Xform(R=rotation_matrix_degrees(Vec(1,0,0),90.0),t=Vec(0,0,0))
    >>> print x
    Xform( Mat[ (1.000000,0.000000,0.000000), (0.000000,0.000000,-1.000000), (0.000000,1.000000,0.000000) ], (0.000000,0.000000,0.000000) )
    >>> assert x*x*x*x == RTI
@@ -327,22 +339,22 @@ class Xform(object):
    >>> x.t = Uz
    >>> print x
    Xform( Mat[ (1.000000,0.000000,0.000000), (0.000000,0.000000,-1.000000), (0.000000,1.000000,0.000000) ], (0.000000,0.000000,1.000000) )
-   >>> assert x               == Xform(R=rotation_matrix(Ux, 90.0),t=Vec(0, 0,1))
-   >>> assert x*x             == Xform(R=rotation_matrix(Ux,180.0),t=Vec(0,-1,1))
-   >>> assert x*x*x           == Xform(R=rotation_matrix(Ux,270.0),t=Vec(0,-1,0))
-   >>> assert x*x*x*x         == Xform(R=rotation_matrix(Ux,  0.0),t=Vec(0, 0,0))
-   >>> assert x*x*x*x*x       == Xform(R=rotation_matrix(Ux, 90.0),t=Vec(0, 0,1))
-   >>> assert x*x*x*x*x*x     == Xform(R=rotation_matrix(Ux,180.0),t=Vec(0,-1,1))
-   >>> assert x*x*x*x*x*x*x   == Xform(R=rotation_matrix(Ux,270.0),t=Vec(0,-1,0))
-   >>> assert x*x*x*x*x*x*x*x == Xform(R=rotation_matrix(Ux,  0.0),t=Vec(0, 0,0))
-   >>> x = Xform(rotation_matrix(Vec(1,2,3),123),Vec(5,7,9))
+   >>> assert x               == Xform(R=rotation_matrix_degrees(Ux, 90.0),t=Vec(0, 0,1))
+   >>> assert x*x             == Xform(R=rotation_matrix_degrees(Ux,180.0),t=Vec(0,-1,1))
+   >>> assert x*x*x           == Xform(R=rotation_matrix_degrees(Ux,270.0),t=Vec(0,-1,0))
+   >>> assert x*x*x*x         == Xform(R=rotation_matrix_degrees(Ux,  0.0),t=Vec(0, 0,0))
+   >>> assert x*x*x*x*x       == Xform(R=rotation_matrix_degrees(Ux, 90.0),t=Vec(0, 0,1))
+   >>> assert x*x*x*x*x*x     == Xform(R=rotation_matrix_degrees(Ux,180.0),t=Vec(0,-1,1))
+   >>> assert x*x*x*x*x*x*x   == Xform(R=rotation_matrix_degrees(Ux,270.0),t=Vec(0,-1,0))
+   >>> assert x*x*x*x*x*x*x*x == Xform(R=rotation_matrix_degrees(Ux,  0.0),t=Vec(0, 0,0))
+   >>> x = Xform(rotation_matrix_degrees(Vec(1,2,3),123),Vec(5,7,9))
    >>> assert ~x *  x == RTI
    >>> assert  x * ~x == RTI
 
    Frames / RTs are interchangable:
 
-   >>> fr = Xform(rotation_matrix(Vec(1,2,3), 65.64),t=Vec(3,2,1))
-   >>> to = Xform(rotation_matrix(Vec(7,5,3),105.44),t=Vec(10,9,8))
+   >>> fr = Xform(rotation_matrix_degrees(Vec(1,2,3), 65.64),t=Vec(3,2,1))
+   >>> to = Xform(rotation_matrix_degrees(Vec(7,5,3),105.44),t=Vec(10,9,8))
    >>> x = to/fr
    >>> assert to/RTI ==  to
    >>> assert RTI/fr == ~fr
@@ -352,33 +364,33 @@ class Xform(object):
    >>> a1 = randnorm()
    >>> b1 = randnorm()
    >>> ang = random.random()*360.0-180.0
-   >>> a2 = rotation_matrix(a1.cross(randnorm()),ang) * a1
-   >>> b2 = rotation_matrix(b1.cross(randnorm()),ang) * b1
-   >>> assert abs(angle(a1,a2) - angle(b1,b2)) < 0.0001
+   >>> a2 = rotation_matrix_degrees(a1.cross(randnorm()),ang) * a1
+   >>> b2 = rotation_matrix_degrees(b1.cross(randnorm()),ang) * b1
+   >>> assert abs(angle(a1,a2) - angle(b1,b2)) < EPS
    >>> xa = Xform().from_two_vecs(a1,a2)
    >>> xb = Xform().from_two_vecs(b1,b2)
-   >>> assert xa.tolocal(a1).distance(xb.tolocal(b1)) < 0.000001
-   >>> assert xa.tolocal(a2).distance(xb.tolocal(b2)) < 0.000001
-   >>> assert (~xa*a1).distance(~xb*b1) < 0.000001
-   >>> assert (~xa*a2).distance(~xb*b2) < 0.000001   
-   >>> assert b1.distance((xb/xa)*a1) < 0.00001
-   >>> assert b2.distance((xb/xa)*a2) < 0.00001
+   >>> assert xa.tolocal(a1).distance(xb.tolocal(b1)) < EPS
+   >>> assert xa.tolocal(a2).distance(xb.tolocal(b2)) < EPS
+   >>> assert (~xa*a1).distance(~xb*b1) < EPS
+   >>> assert (~xa*a2).distance(~xb*b2) < EPS   
+   >>> assert b1.distance((xb/xa)*a1) < EPS
+   >>> assert b2.distance((xb/xa)*a2) < EPS
    >>> x = randxform()
    >>> u,v = randvec(2)
-   >>> assert ((x*v)+u).distance((u+x)*v) < 0.00001
-   >>> assert (x*(v+u)).distance((x+u)*v) < 0.00001
-   >>> assert (Xform(u)*x*v).distance((u+x)*v) < 0.00001
-   >>> assert (x*Xform(u)*v).distance((x+u)*v) < 0.00001
-   >>> assert ((x*v)-u).distance((u-x)*v) < 0.00001
-   >>> assert (x*(v-u)).distance((x-u)*v) < 0.00001
+   >>> assert ((x*v)+u).distance((u+x)*v) < EPS
+   >>> assert (x*(v+u)).distance((x+u)*v) < EPS
+   >>> assert (Xform(u)*x*v).distance((u+x)*v) < EPS
+   >>> assert (x*Xform(u)*v).distance((x+u)*v) < EPS
+   >>> assert ((x*v)-u).distance((u-x)*v) < EPS
+   >>> assert (x*(v-u)).distance((x-u)*v) < EPS
    >>> R = randrot()
-   >>> assert ((R*x)*u).distance(R*(x*u)) < 0.00001
-   >>> assert ((x*R)*u).distance(x*(R*u)) < 0.00001
-   >>> assert ((Xform(R)*x)*u).distance(Xform(R,U0)*(x*u)) < 0.00001
-   >>> assert ((x*Xform(R))*u).distance(x*(Xform(R,U0)*u)) < 0.00001
-   >>> assert ((x/x)*v).distance(v) < 0.00001
+   >>> assert ((R*x)*u).distance(R*(x*u)) < EPS
+   >>> assert ((x*R)*u).distance(x*(R*u)) < EPS
+   >>> assert ((Xform(R)*x)*u).distance(Xform(R,U0)*(x*u)) < EPS
+   >>> assert ((x*Xform(R))*u).distance(x*(Xform(R,U0)*u)) < EPS
+   >>> assert ((x/x)*v).distance(v) < EPS
    >>> y = randxform()
-   >>> assert ((x/y)*v).distance(x*~y*v) < 0.00001
+   >>> assert ((x/y)*v).distance(x*~y*v) < EPS
    """
    def __init__(self, R=None, t=None):
       super(Xform, self).__init__()
@@ -445,7 +457,7 @@ class Xform(object):
       return "Xform( %s, %s )" % (str(self.R),str(self.t))
    def pretty(self):
       a,r = rotation_axis(self.R)
-      if self.t.length() > 0.00001:
+      if self.t.length() > EPS:
          return "Xform( axis=%s, ang=%f, dir=%s, dis=%f )"%(str(a),math.degrees(r),str(self.t.normalized()),self.t.length())
       else:
          return "Xform( axis=%s, ang=%f, dir=%s, dis=%f )"%(str(a),math.degrees(r),str(U0),0)         
@@ -474,7 +486,7 @@ def projperp(u,v):
    return v - proj(u,v)
 
 def rotation_around(axs,ang,cen):
-   R = rotation_matrix(axs,ang)
+   R = rotation_matrix_degrees(axs,ang)
    return Xform(R,R*-cen+cen)
 
 def test():
@@ -487,16 +499,16 @@ def dihedral(p1,p2,p3,p4):
    c = ( p4 - p3 ).normalized()
    x = -a.dot(c) + a.dot(b) * b.dot(c)
    y =  a.dot( b.cross(c) );
-   return abs(math.atan2(y,x)) * 180.0 / 3.14159
+   return abs(math.atan2(y,x))
 
 
 def angle(p1,p2,p3=None):
    if p3 is None:
-         return math.acos( p1.normalized().dot(p2.normalized()) ) * 180.0 / 3.14159
+         return math.acos( p1.normalized().dot(p2.normalized()) )
    else:
          a = ( p2 - p1 ).normalized()
          b = ( p2 - p3 ).normalized()
-         return math.acos( a.dot(b) ) * 180.0 / 3.14159
+         return math.acos( a.dot(b) )
 
 
 def sin_cos_range(x):
@@ -505,31 +517,31 @@ def sin_cos_range(x):
 
 def rotation_axis(R):
    """
-   >>> assert rotation_axis( rotation_matrix_radians(Vec(1,2,3).normalized(),1.23) ) == (Vec(1,2,3).normalized(),1.23)
+   >>> assert rotation_axis( rotation_matrix(Vec(1,2,3).normalized(),1.23) ) == (Vec(1,2,3).normalized(),1.23)
    """
    cos_theta = sin_cos_range((R.trace()-1.0)/2.0);
-   if cos_theta > -1.0+TOLERANCE and cos_theta < 1.0-TOLERANCE:
+   if cos_theta > -1.0+EPS and cos_theta < 1.0-EPS:
       x = ( 1.0 if R.zy > R.yz else -1.0 ) * math.sqrt( ( R.xx - cos_theta ) / ( 1.0 - cos_theta ) )
       y = ( 1.0 if R.xz > R.zx else -1.0 ) * math.sqrt( ( R.yy - cos_theta ) / ( 1.0 - cos_theta ) )
       z = ( 1.0 if R.yx > R.xy else -1.0 ) * math.sqrt( ( R.zz - cos_theta ) / ( 1.0 - cos_theta ) )
       theta = math.acos( cos_theta );
       assert abs( x*x + y*y + z*z - 1 ) <= 0.01
       return Vec(x,y,z),theta
-   elif cos_theta >= 1.0-TOLERANCE:
+   elif cos_theta >= 1.0-EPS:
       return Vec(1.0,0.0,0.0),0.0
    else:
       nnT = R.add_diagonal(Vec(1.0,1.0,1.0)) / 2.0
       x,y,z = 0.0,0.0,0.0;
-      if nnT.xx > TOLERANCE:
+      if nnT.xx > EPS:
          x = math.sqrt( nnT.xx )
          y = nnT.yx / x
          z = nnT.zx / x
-      elif nnT.yy > TOLERANCE:
+      elif nnT.yy > EPS:
          x = 0
          y = math.sqrt(nnT.yy)
          z = nnT.zy / y
       else:
-         assert( nnT.zz > TOLERANCE );
+         assert( nnT.zz > EPS );
          x = 0
          y = 0
          z = math.sqrt( nnT.zz )
@@ -568,8 +580,11 @@ def line_line_distance(a1,c1,a2,c2):
    c = c2-c1
    n = abs(c.dot(a.cross(b)))
    d = a.cross(b).length()
-   if abs(d) < 0.000001: return 0
+   if abs(d) < EPS: return 0
    return n/d
+
+def alignvector(a,b):
+   return rotation_around(a.cross(b),-a.angle(b))
 
 def alignvectors(aa,ab,ba,bb):
    """
@@ -577,13 +592,13 @@ def alignvectors(aa,ab,ba,bb):
    >>> a1 = randvec()
    >>> b1 = randnorm()*a1.length()
    >>> l2 = random.gauss(0,1)
-   >>> a2 = rotation_matrix(a1.cross(randnorm()),ang) * a1 * l2
-   >>> b2 = rotation_matrix(b1.cross(randnorm()),ang) * b1 * l2
-   >>> assert abs(angle(a1,a2) - angle(b1,b2)) < 0.0001
+   >>> a2 = rotation_matrix_degrees(a1.cross(randnorm()),ang) * a1 * l2
+   >>> b2 = rotation_matrix_degrees(b1.cross(randnorm()),ang) * b1 * l2
+   >>> assert abs(angle(a1,a2) - angle(b1,b2)) < EPS
    >>> Xa2b = alignvectors(a1,a2,b1,b2)
-   >>> assert Xa2b.t.length() < 0.00001
-   >>> assert (Xa2b*a1).distance(b1) < 0.000001
-   >>> assert (Xa2b*a2).distance(b2) < 0.000001
+   >>> assert Xa2b.t.length() < EPS
+   >>> assert (Xa2b*a1).distance(b1) < EPS
+   >>> assert (Xa2b*a2).distance(b2) < EPS
    """
    xa = Xform().from_two_vecs(ab,aa)
    xb = Xform().from_two_vecs(bb,ba)
@@ -641,9 +656,9 @@ def get_cell_bounds_orthogonal_only(G,n=6,c=Vec(1,3,10)):
    """
    mnx,mny,mnz = 9e9,9e9,9e9
    for i in (I.t for I in find_identities(G,n)):
-      if abs(i.x) > 0.0001 and abs(i.y) < 0.0001 and abs(i.z) < 0.0001: mnx = min(mnx,abs(i.x))
-      if abs(i.x) < 0.0001 and abs(i.y) > 0.0001 and abs(i.z) < 0.0001: mny = min(mny,abs(i.y))
-      if abs(i.x) < 0.0001 and abs(i.y) < 0.0001 and abs(i.z) > 0.0001: mnz = min(mnz,abs(i.z))
+      if abs(i.x) > SQRTEPS and abs(i.y) < SQRTEPS and abs(i.z) < SQRTEPS: mnx = min(mnx,abs(i.x))
+      if abs(i.x) < SQRTEPS and abs(i.y) > SQRTEPS and abs(i.z) < SQRTEPS: mny = min(mny,abs(i.y))
+      if abs(i.x) < SQRTEPS and abs(i.y) < SQRTEPS and abs(i.z) > SQRTEPS: mnz = min(mnz,abs(i.z))
    return round(mnx,3),round(mny,3),round(mnz,3)
 
 

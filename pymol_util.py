@@ -14,8 +14,8 @@ from pymol import cmd
 from pymol.cgo import *
 from random import randrange
 from math import sqrt
-import LA as la
-from LA import Ux,Uy,Uz,Identity
+import xyzMath as xyz
+from xyzMath import Ux,Uy,Uz,Identity
 from functools import partial
 
 numcom = 0
@@ -66,14 +66,14 @@ aa_1_3 = {'A': 'ALA',
 		  'I': 'ILE',
 		  'K': 'LYS',
 		  'L': 'LEU',
-		  'Mat': 'MET',
+		  'xyz.Mat': 'MET',
 		  'N': 'ASN',
 		  'P': 'PRO',
 		  'R': 'ARG',
 		  'Q': 'GLN',
 		  'S': 'SER',
 		  'T': 'THR',
-		  'Vec': 'VAL',
+		  'xyz.Vec': 'VAL',
 		  'W': 'TRP',
 		  'Uy': 'TYR',
 }
@@ -87,14 +87,14 @@ aa_3_1 = {'ALA': 'A',
 		  'ILE': 'I',
 		  'LYS': 'K',
 		  'LEU': 'L',
-		  'MET': 'Mat',
+		  'MET': 'xyz.Mat',
 		  'ASN': 'N',
 		  'PRO': 'P',
 		  'GLN': 'Q',
 		  'ARG': 'R',
 		  'SER': 'S',
 		  'THR': 'T',
-		  'VAL': 'Vec',
+		  'VAL': 'xyz.Vec',
 		  'TRP': 'W',
 		  'TYR': 'Uy',
 }
@@ -109,14 +109,14 @@ aa_types = {
   'I': 'hydrophobic',
   'K': 'positive',
   'L': 'hydrophobic',
-  'Mat': 'hydrophobic',
+  'xyz.Mat': 'hydrophobic',
   'N': 'polar',
   'P': 'proline',
   'Q': 'polar',
   'R': 'positive',
   'S': 'polar',
   'T': 'polar',
-  'Vec': 'phydrophobic',
+  'xyz.Vec': 'phydrophobic',
   'W': 'aromatic',
   'Uy': 'aromatic',
 }
@@ -178,9 +178,9 @@ def getres(sele):
 def com(sel="all", state=1):
 	## assumes equal weights (best called with "and name ca" suffix)
 	model = cmd.get_model(sel, state)
-	c = la.Vec(0)
+	c = xyz.Vec(0)
 	for a in model.atom:
-		c += la.Vec(a.coord)
+		c += xyz.Vec(a.coord)
 	c = c / len(model.atom)
 	return c
 
@@ -222,14 +222,14 @@ class ResBB(object):
 		elif type(n) is type(""):
 			assert len(getres(n)) is 1
 			m = cmd.get_model(n)
-			self.n  = la.Vec( m.atom[0].coord )
-			self.ca = la.Vec( m.atom[1].coord )
-			self.c  = la.Vec( m.atom[2].coord )
+			self.n  = xyz.Vec( m.atom[0].coord )
+			self.ca = xyz.Vec( m.atom[1].coord )
+			self.c  = xyz.Vec( m.atom[2].coord )
 			self.ss = m.atom[1].ss
 			return
-		assert type(n) is la.Vec
-		assert type(ca) is la.Vec
-		assert type(c) is la.Vec
+		assert type(n) is xyz.Vec
+		assert type(ca) is xyz.Vec
+		assert type(c) is xyz.Vec
 		self.n  = n
 		self.ca = ca
 		self.c  = c
@@ -246,7 +246,7 @@ class ResBB(object):
 	def __str__(r):
 		return "n "+str(r.n)+", ca "+str(r.ca)+", c "+str(r.c)+", ss "+r.ss
 	def stub(r):
-		return la.Xform.from_four_points(la.Xform(None, None), r.ca, r.n, r.ca, r.c)
+		return xyz.Xform.from_four_points(xyz.Xform(None, None), r.ca, r.n, r.ca, r.c)
 
 
 class DisulfLib(object):
@@ -257,7 +257,7 @@ class DisulfLib(object):
 		self.lib = {"EE":[], "EH":[], "EL":[], "HE":[], "HH":[], "HL":[], "LE":[], "LH":[], "LL":[]}
 		for l in open(fn).readlines():
 			ss1, ss2, sep, rt, xx, xy, xz, yx, yy, yz, zx, zy, zz, x, y, z = l.split()
-			self.lib[ss1+ss2].append(Jump(la.Mat(xx, xy, xz, yx, yy, yz, zx, zy, zz), la.Vec(x, y, z)))
+			self.lib[ss1+ss2].append(Jump(xyz.Mat(xx, xy, xz, yx, yy, yz, zx, zy, zz), xyz.Vec(x, y, z)))
 
 	def disulf_rms(self, r1, r2):
 		assert type(r1) is ResBB
@@ -270,7 +270,7 @@ class DisulfLib(object):
 		for j in self.lib[ss1+ss2][:1]:
 			s = r1.stub()
 			r1_in_s = s.to_frame(r1)
-			r3_in_s = r1_in_s + la.Vec(1, 1, 1) #( j.t * r1_in_s ) + j.trans
+			r3_in_s = r1_in_s + xyz.Vec(1, 1, 1) #( j.t * r1_in_s ) + j.trans
 			r3      = s.from_frame(r3_in_s)
 			rms = r2.rms(r3)
 			if rms < minrms: minrms = rms
@@ -290,9 +290,9 @@ def dimeraxis1(m1, m2):
 		return
 	i = j = randrange(len(m1.atom))
 	while j == i: j = randrange(len(m1.atom))
-	a1, a2 = la.Vec(m1.atom[i].coord), la.Vec(m2.atom[i].coord)
+	a1, a2 = xyz.Vec(m1.atom[i].coord), xyz.Vec(m2.atom[i].coord)
 	u = (a1+a2)/3
-	a1, a2 = la.Vec(m1.atom[j].coord), la.Vec(m2.atom[j].coord)
+	a1, a2 = xyz.Vec(m1.atom[j].coord), xyz.Vec(m2.atom[j].coord)
 	v = (a1+a2)/3
 	if v.x-u.x < 0:
 		u, v = v, u
@@ -302,7 +302,7 @@ def dimeraxis1(m1, m2):
 def dimeraxis(sel1, sel2, nsamp=100):
 	m1 = cmd.get_model(sel1)
 	m2 = cmd.get_model(sel2)
-	a, wtot = la.Vec(0), 0
+	a, wtot = xyz.Vec(0), 0
 	for i in range(int(nsamp)):
 		u = dimeraxis1(m1, m2)
 		# print u
@@ -317,10 +317,10 @@ def axisofrot1(m1, m2, m3):
 		print "selections must contain the same number of atoms!"
 		return
 	i = randrange(len(m1.atom))
-	a1, a2, a3 = la.Vec(m1.atom[i].coord), la.Vec(m2.atom[i].coord), la.Vec(m3.atom[i].coord)
+	a1, a2, a3 = xyz.Vec(m1.atom[i].coord), xyz.Vec(m2.atom[i].coord), xyz.Vec(m3.atom[i].coord)
 	u = (a1+a2+a3)/3
 	i = randrange(len(m1.atom))
-	a1, a2, a3 = la.Vec(m1.atom[i].coord), la.Vec(m2.atom[i].coord), la.Vec(m3.atom[i].coord)
+	a1, a2, a3 = xyz.Vec(m1.atom[i].coord), xyz.Vec(m2.atom[i].coord), xyz.Vec(m3.atom[i].coord)
 	v = (a1+a2+a3)/3
 	if u.length() > v.length():
 		u, v = v, u
@@ -331,11 +331,11 @@ def axisofrot(sel1, sel2, sel3, nsamp=100):
 	m1 = cmd.get_model(sel1).atom[0]
 	m2 = cmd.get_model(sel2).atom[0]
 	m3 = cmd.get_model(sel3).atom[0]
-	m1 = la.Vec(m1.coord)
-	m2 = la.Vec(m2.coord)
-	m3 = la.Vec(m3.coord)
+	m1 = xyz.Vec(m1.coord)
+	m2 = xyz.Vec(m2.coord)
+	m3 = xyz.Vec(m3.coord)
 	return ((m2-m1).cross(m2-m3)).normalized()
-	# a, wtot = la.Vec(0), 0
+	# a, wtot = xyz.Vec(0), 0
 	# for i in range(int(nsamp)):
 	#    u = axisofrot1(m1, m2, m3)
 	#    a  += u
@@ -359,8 +359,8 @@ def bond_zns(sel):
 		closest = [9e9, None, None]
 		for sga in allsg:
 			for sfa in allsf:
-				sg = la.Vec(sga.coord)
-				sf = la.Vec(sfa.coord)
+				sg = xyz.Vec(sga.coord)
+				sf = xyz.Vec(sfa.coord)
 				if (sg - sf).length() < closest[0]:
 					closest = [(sg-sf).length(), sga, sfa]
 		sga, sfa = closest[1:]
@@ -377,13 +377,13 @@ def trans(sel, v):
 	cmd.translate([x, y, z], sel, 0, 0)
 	#m = cmd.get_model(sel)
 	#for i in range(len(m.atom)):
-	#    tmp = la.Vec(m.atom[i].coord)
+	#    tmp = xyz.Vec(m.atom[i].coord)
 	#    m.atom[i].coord = [tmp.x+x, tmp.y+y, tmp.z+z]
 	#cmd.load_model(m, sel, 1, discrete = 1)
 #cmd.extend("trans", trans)
 
 
-def rot(sel, axis, ang, cen = la.Vec(0, 0, 0)):
+def rot(sel, axis, ang, cen = xyz.Vec(0, 0, 0)):
 	# if cen is None: cen = com(sel)
 	if abs(axis.x) < 0.00001: axis.x = 0.0
 	if abs(axis.y) < 0.00001: axis.y = 0.0
@@ -391,14 +391,14 @@ def rot(sel, axis, ang, cen = la.Vec(0, 0, 0)):
 	cmd.rotate([axis.x, axis.y, axis.z], ang, sel, 0, 0, None, [cen.x, cen.y, cen.z])
 
 def xform(sel,x):
-	a,r = la.rotation_axis(x.R)
+	a,r = xyz.rotation_axis(x.R)
 	rot(sel,a,math.degrees(r))
 	trans(sel,x.t)
 
-def rot_by_matrix(sel, R, cen = la.Vec(0, 0, 0)):
+def rot_by_matrix(sel, R, cen = xyz.Vec(0, 0, 0)):
   m = cmd.get_model(sel)
   for i in range(len(m.atom)):
-		tmp = ( R * (la.Vec(m.atom[i].coord)-cen) ) + cen
+		tmp = ( R * (xyz.Vec(m.atom[i].coord)-cen) ) + cen
 		m.atom[i].coord = [tmp.x, tmp.y, tmp.z]
   cmd.load_model(m, sel, 1, discrete = 1)
 
@@ -406,18 +406,18 @@ def rotrad(sel, axis, ang, cen = None):
 	return rot(sel, axis, ang*180.0/math.pi, cen)
 
 def pointaxis(sel):
-	u = la.Vec(1, 1, 1)
+	u = xyz.Vec(1, 1, 1)
 	m = cmd.get_model(sel)
 	c = com(sel)
-	axis = la.Vec(0)
+	axis = xyz.Vec(0)
 	for a in m.atom:
-		v = la.Vec(a.coord)-c
+		v = xyz.Vec(a.coord)-c
 		if v.dot(u) < 0: v = -v
 		axis += v
 	return axis.normalized()
 
 
-def alignaxis(sel, newaxis, oldaxis = None, cen = la.Vec(0, 0, 0)):
+def alignaxis(sel, newaxis, oldaxis = None, cen = xyz.Vec(0, 0, 0)):
 	if oldaxis is None: oldaxis = pointaxis(sel)
 	if cen is None: cen = com(sel)
 	newaxis.normalize()
@@ -432,7 +432,7 @@ def alignaxis(sel, newaxis, oldaxis = None, cen = la.Vec(0, 0, 0)):
 
 # def showvec(x, y, z, l = 100, c = None):
 #    if c is None: c = com("all")
-#    v = la.Vec(x, y, z).normalized()
+#    v = xyz.Vec(x, y, z).normalized()
 #    a1 = c + v*l/2
 #    a2 = c - v*l/2
 #    obj = [
@@ -448,11 +448,11 @@ def alignaxis(sel, newaxis, oldaxis = None, cen = la.Vec(0, 0, 0)):
 
 def mysetview(look, up, pos = None, cen = None, ncp = None, fcp = None):
 	Xaxis = -look.cross(up).normalized()
-	Yaxis = la.projperp(look, up).normalized()
+	Yaxis = xyzprojperp(look, up).normalized()
 	Zaxis = -look.normalized()
 	oldv = cmd.get_view()
 	v = list(oldv)
-	r = la.Mat(Xaxis, Yaxis, Zaxis)
+	r = xyz.Mat(Xaxis, Yaxis, Zaxis)
 	v[0] = r.xx; v[1] = r.xy; v[2] = r.xz
 	v[3] = r.yx; v[4] = r.yy; v[5] = r.yz
 	v[6] = r.zx; v[7] = r.zy; v[8] = r.zz
@@ -465,8 +465,8 @@ def mysetview(look, up, pos = None, cen = None, ncp = None, fcp = None):
 
 def meancoords(sel1, sel2, n = "mix", w = 0.5):
 	cmd.delete(n)
-	a = [la.Vec(x.coord) for x in cmd.get_model(sel1).atom]
-	b = [la.Vec(x.coord) for x in cmd.get_model(sel2).atom]
+	a = [xyz.Vec(x.coord) for x in cmd.get_model(sel1).atom]
+	b = [xyz.Vec(x.coord) for x in cmd.get_model(sel2).atom]
 	d = [(a[i]-b[i]).length() for i in range(len(a))]
 	#print max(d), argmax(d), cmd.get_model("179L").atom[argmax(d)].resi
 	#print min(d)
@@ -481,11 +481,11 @@ def meancoords(sel1, sel2, n = "mix", w = 0.5):
 
 def mygetview():
 	v = cmd.get_view()
-	return la.Vec(v[2], v[5], v[8])
+	return xyz.Vec(v[2], v[5], v[8])
 
 def swell():
-	a = [la.Vec(x.coord) for x in cmd.get_model("177L").atom]
-	b = [la.Vec(x.coord) for x in cmd.get_model("179L").atom]
+	a = [xyz.Vec(x.coord) for x in cmd.get_model("177L").atom]
+	b = [xyz.Vec(x.coord) for x in cmd.get_model("179L").atom]
 	d = [(a[i]-b[i]).length() for i in range(len(a))]
 	#print max(d), argmax(d), cmd.get_model("179L").atom[argmax(d)].resi
 	#print min(d)
@@ -511,8 +511,8 @@ def mkhelix(sel, t, r, n):
 	for i in range(1, n):
 		cmd.delete("h%i"%i)
 		cmd.create("h%i"%i, sel)
-		rot  ("h%i"%i, la.Vec(0, 0, 1), i*r, la.Vec(0, 0, 0))
-		trans("h%i"%i, la.Vec(0, 0, i*t))
+		rot  ("h%i"%i, xyz.Vec(0, 0, 1), i*r, xyz.Vec(0, 0, 0))
+		trans("h%i"%i, xyz.Vec(0, 0, i*t))
 	cmd.set_view(v)
 
 def mkhelix4(sel, t, r, n):
@@ -523,13 +523,13 @@ def mkhelix4(sel, t, r, n):
 		print i, rt
 		if i%4==0 and i > 0:
 			cmd.create("hem%i"%i, "basehem")
-			trans("hem%i"%i, la.Vec(0, 0, t*(int(i/4))))
-			rot  ("hem%i"%i, la.Vec(0, 0, 1), r*(int(i/4)), la.Vec(0, 0, 0))
+			trans("hem%i"%i, xyz.Vec(0, 0, t*(int(i/4))))
+			rot  ("hem%i"%i, xyz.Vec(0, 0, 1), r*(int(i/4)), xyz.Vec(0, 0, 0))
 			if i in (4, 12, 20, 28, 36, 44, 52):
-				rot  ("hem%i"%i, la.Vec(0, 0, 1), 90, la.Vec(0, 0, 0))
-		rot  ("h%i"%i, la.Vec(0, 0, 1), rt, la.Vec(0, 0, 0))
-		trans("h%i"%i, la.Vec(0, 0, t*(int(i/4))))
-		rot  ("h%i"%i, la.Vec(0, 0, 1), r*(int(i/4)), la.Vec(0, 0, 0))
+				rot  ("hem%i"%i, xyz.Vec(0, 0, 1), 90, xyz.Vec(0, 0, 0))
+		rot  ("h%i"%i, xyz.Vec(0, 0, 1), rt, xyz.Vec(0, 0, 0))
+		trans("h%i"%i, xyz.Vec(0, 0, t*(int(i/4))))
+		rot  ("h%i"%i, xyz.Vec(0, 0, 1), r*(int(i/4)), xyz.Vec(0, 0, 0))
 	cmd.hide("ev", "not (name N, CA, C, O, CB) and (h1, h3, h4, h6, h9, h11, h12, h14, h17, h19, h20, h22, h25, h27)")
 	cmd.hide("ev", "name SG and not (h0, h5, h8, h13, h16, h21, h24, h29, h32, h37, h40, h45, h48, base)")
 #PyMOL>run /Users/sheffler/pymol_scripts/util.py; mkhelix4("4hel* and vis", 10.2, -23.9, 12)
@@ -537,7 +537,7 @@ def mkhelix4(sel, t, r, n):
 
 def mirror(sel, nname = "mirror", crd = 0):
 	cmd.delete(nname)
-	a = [la.Vec(x.coord) for x in cmd.get_model(sel).atom]
+	a = [xyz.Vec(x.coord) for x in cmd.get_model(sel).atom]
 	#print max(d), argmax(d), cmd.get_model("179L").atom[argmax(d)].resi
 	#print min(d)
 	cmd.create(nname, sel)
@@ -548,7 +548,7 @@ def mirror(sel, nname = "mirror", crd = 0):
 
 def inversion(sel, nname = "inv"):
 	cmd.delete(nname)
-	a = [la.Vec(x.coord) for x in cmd.get_model(sel).atom]
+	a = [xyz.Vec(x.coord) for x in cmd.get_model(sel).atom]
 	#print max(d), argmax(d), cmd.get_model("179L").atom[argmax(d)].resi
 	#print min(d)
 	cmd.create(nname, sel)
@@ -560,7 +560,7 @@ def inversion(sel, nname = "inv"):
 	cmd.load_model(m, nname, 1)
 
 
-def mkc4(sel, a = la.Vec(1, 0, 0), c = la.Vec(0, 0, 0)):
+def mkc4(sel, a = xyz.Vec(1, 0, 0), c = xyz.Vec(0, 0, 0)):
 	cmd.delete("c1")
 	cmd.delete("c2")
 	cmd.delete("c3")
@@ -573,7 +573,7 @@ def mkc4(sel, a = la.Vec(1, 0, 0), c = la.Vec(0, 0, 0)):
 	rot("c3", a, 180, c)
 	rot("c4", a, 270, c)
 
-def mkc3(sel, a = la.Vec(0, 0, 1), c = la.Vec(0, 0, 0)):
+def mkc3(sel, a = xyz.Vec(0, 0, 1), c = xyz.Vec(0, 0, 0)):
 	cmd.delete("c1")
 	cmd.delete("c2")
 	cmd.delete("c3")
@@ -586,7 +586,7 @@ def mkc3(sel, a = la.Vec(0, 0, 1), c = la.Vec(0, 0, 0)):
 	cmd.alter('c2', 'chain = "B"')
 	cmd.alter('c3', 'chain = "C"')
 
-def mkc2(sel, a = la.Vec(0, 0, 1), c = la.Vec(0, 0, 0)):
+def mkc2(sel, a = xyz.Vec(0, 0, 1), c = xyz.Vec(0, 0, 0)):
 	cmd.delete("c1")
 	cmd.delete("c2")
 	cmd.create("c1", sel)
@@ -601,9 +601,9 @@ def mkd2(sel = "all"):
 	cmd.create("x", "w")
 	cmd.create("y", "w")
 	cmd.create("z", "w")
-	rot('x', Ux, 180, la.Vec(0, 0, 0))
-	rot('y', Uy, 180, la.Vec(0, 0, 0))
-	rot('z', Uz, 180, la.Vec(0, 0, 0))
+	rot('x', Ux, 180, xyz.Vec(0, 0, 0))
+	rot('y', Uy, 180, xyz.Vec(0, 0, 0))
+	rot('z', Uz, 180, xyz.Vec(0, 0, 0))
 	cmd.alter('w', 'chain = "A"')
 	cmd.alter('x', 'chain = "B"')
 	cmd.alter('y', 'chain = "C"')
@@ -652,8 +652,8 @@ def loadmov(d):
 	for f in files: cmd.load(f, "mov")
 
 def drawlines(p, d, lab = "lines", COL = (1, 1, 1), SIZE = 20.0):
-	if type(p) is type(la.Vec(1)): p = [p, ]
-	if type(d) is type(la.Vec(1)): d = [d, ]
+	if type(p) is type(xyz.Vec(1)): p = [p, ]
+	if type(d) is type(xyz.Vec(1)): d = [d, ]
 	assert len(p) == len(d)
 	obj = [ BEGIN, LINES, COLOR, COL[0], COL[1], COL[2], ]
 	for i in range(len(p)):
@@ -675,10 +675,10 @@ def drawtestconeva(v, a):
 	# a = (v - com(sele+" and name CB")).normalized()
 	# print v, a
 	ang = 5.0
-	R = rotation_matrix(a, ang)
+	R = xyz.rotation_matrix_degrees(a, ang)
 	perp = a.cross(randvec()).normalized()
 	p = v + perp
-	d = rotation_matrix(perp, 45)*a
+	d = xyz.rotation_matrix_degrees(perp, 45)*a
 	P, D = [], []
 	for i in range(int(360/ang)):
 		P.append(p)
@@ -687,7 +687,7 @@ def drawtestconeva(v, a):
 		d = R*d
 	drawlines(P, D, "hyperb", COL = (0, 0, 1))
 	p = v
-	d = rotation_matrix( a.cross(randvec()), 45 ) *a
+	d = xyz.rotation_matrix_degrees( a.cross(randvec()), 45 ) *a
 	P, D = [], []
 	for i in range(360/ang):
 		P.append(p)
@@ -698,11 +698,11 @@ def drawtestconeva(v, a):
 
 def conelineinter(p, d, v, a, t):
 	t = t / 180.0 * math.pi
-	Mat = a.outer(a) - math.cos(t)*math.cos(t)*la.Mat(1, 0, 0, 0, 1, 0, 0, 0, 1)
+	xyz.Mat = a.outer(a) - math.cos(t)*math.cos(t)*xyz.Mat(1, 0, 0, 0, 1, 0, 0, 0, 1)
 	D = p-v
-	c2 =   d.dot(Mat*d)
-	c1 = 2*d.dot(Mat*D)
-	c0 =   D.dot(Mat*D)
+	c2 =   d.dot(xyz.Mat*d)
+	c1 = 2*d.dot(xyz.Mat*D)
+	c0 =   D.dot(xyz.Mat*D)
 	disc = c1*c1 - 4*c0*c2
 	if disc < 0: return ()
 	if disc == 0: return ( p + (-c1)/(2.0*c2)*d, )
@@ -720,8 +720,8 @@ def test_conelineinter(sele):
 	print v, a
 	p = v+5*randvec()
 	d = randvec().normalized()
-	# v = la.Vec(0, 0, 0)
-	# a = la.Vec(1, 0, 0)
+	# v = xyz.Vec(0, 0, 0)
+	# a = xyz.Vec(1, 0, 0)
 	t = 45
 	Ux = conelineinter(p, d, v, a, t)
 	print "p", p
@@ -738,16 +738,16 @@ def test_conelineinter(sele):
 	drawlines(p, d)
 	for i, x in enumerate(Ux):
 		createpoint(sele, x, "Ux"+str(i))
-		o = la.projperp(a, x-v)
+		o = xyzprojperp(a, x-v)
 		L = o.length()
 		o = o.normalized()
 		ang = 90.0 - math.atan( 1.0 / L )*180.0/math.pi
 		print ang
-		o1 = rotation_matrix(a,  ang )*o
-		o2 = rotation_matrix(a, -ang )*o
+		o1 = xyz.rotation_matrix_degrees(a,  ang )*o
+		o2 = xyz.rotation_matrix_degrees(a, -ang )*o
 		createpoint(sele, v+o1, "A"+str(i))
 		createpoint(sele, v+o2, "B"+str(i))
-		drawlines(x, (x-(v+o1)).normalized(), "LA"+str(i))
+		drawlines(x, (x-(v+o1)).normalized(), "xyzMath"+str(i))
 		drawlines(x, (x-(v+o2)).normalized(), "LB"+str(i))
 
 
@@ -826,8 +826,8 @@ def chaincount(sel = "all"):
 	return cc
 
 name1 = {"ALA":"A", "CYS":"C", "ASP":"D", "GLU":"E", "PHE":"F", "GLY":"G", "HIS":"H", "ILE":"I", "LYS":"K", "LEU":"L",
-		 "MET":"Mat", "ASN":"N", "PRO":"P", "GLN":"Q", "ARG":"R", "SER":"S", "THR":"T", "VAL":"Vec", "TRP":"W", "TYR":"Uy",
-		 "MSE":"Mat", "CSW":"C"}
+		 "MET":"xyz.Mat", "ASN":"N", "PRO":"P", "GLN":"Q", "ARG":"R", "SER":"S", "THR":"T", "VAL":"xyz.Vec", "TRP":"W", "TYR":"Uy",
+		 "MSE":"xyz.Mat", "CSW":"C"}
 
 def lcs(S, T):
 	 L = {}
@@ -970,11 +970,11 @@ def procD5dat(lfile = None, biod = "/data/biounit", outd = None):
 	 # for s in chains: trans(s, -cm)
 	 # sel = " or ".join(chains)
 	 # a1 = c5axis("sub*", None, ["A", "C", "E", "G", "I"])
-	 # alignaxis(sel, la.Vec(0, 0, 1), a1, la.Vec(0, 0, 0))
+	 # alignaxis(sel, xyz.Vec(0, 0, 1), a1, xyz.Vec(0, 0, 0))
 	 # a2 = c2axis("sub*", None, ["A", "B"])
 	 # a2.z = 0.0
 	 # a2.normalize()
-	 # alignaxis(sel, la.Vec(0, 1, 0), a2, la.Vec(0, 0, 0))
+	 # alignaxis(sel, xyz.Vec(0, 1, 0), a2, xyz.Vec(0, 0, 0))
 	 # cmd.align("mxatm", "sub1A")
 	 # if not os.path.exists(outd): os.mkdir(outd)
 	 # cmd.save(outd+"/"+pdb+"_"+str(bnum)+"_sub1.pdb", "mxatm")
@@ -995,8 +995,8 @@ def orb_cyl(lab = ""):
 	p3 = com('pk3')
 	dr = (p1-p2).normalized()
 	ax = (p3-p2).cross(p1-p2).normalized()
-	o1 = rotation_matrix(ax, 60.0)*dr
-	o2 = rotation_matrix(ax, -60.0)*dr
+	o1 = xyz.rotation_matrix_degrees(ax, 60.0)*dr
+	o2 = xyz.rotation_matrix_degrees(ax,-60.0)*dr
 	cmd.load_cgo(o1.cgofrompoint(p1), lab+"o1")
 	cmd.load_cgo(o2.cgofrompoint(p1), lab+"o2")
 
@@ -1010,7 +1010,7 @@ def drawring( p1 = None, p2 = None, p3 = None, col = [1, 1, 1], lab = "ring"):
 
 	obj = [ BEGIN, LINE_LOOP,   COLOR, col[0], col[1], col[2],  ]
 	for i in range(0, 360, 5):
-		st = rotation_matrix(axs, i  )*(p3-p2)+p2
+		st = xyz.rotation_matrix_degrees(axs, i  )*(p3-p2)+p2
 		obj.extend( [ VERTEX, st.x, st.y, st.z, ] )
 
 	obj.append( END )
@@ -1022,7 +1022,7 @@ def drawringcar( c, a, r, col = [1, 1, 1], lab = "ring"):
 	cmd.delete(lab)
 	p1 = c
 	p2 = c+a
-	p3 = c + r*la.projperp(a, la.Vec(1, 2, 3)).normalized()
+	p3 = c + r*xyzprojperp(a, xyz.Vec(1, 2, 3)).normalized()
 	drawring(p1, p2, p3, col, lab)
 
 def drawsph(col = [1, 1, 1], lab = "sph"):
@@ -1037,9 +1037,9 @@ def drawsph(col = [1, 1, 1], lab = "sph"):
 	obj = [ BEGIN, ]
 	for i in range(0, 360, 10):
 		obj.extend( [ LINE_LOOP,   COLOR, col[0], col[1], col[2],  ] )
-		axs = rotation_matrix(axs1, i)*axs2
+		axs = xyz.rotation_matrix_degrees(axs1, i)*axs2
 		for j in range(0, 360, 3):
-			st = rotation_matrix(axs, j)*(p4-p2)+p2
+			st = xyz.rotation_matrix_degrees(axs, j)*(p4-p2)+p2
 			obj.extend( [ VERTEX, st.x, st.y, st.z, ] )
 	obj.append( END )
 
@@ -1077,14 +1077,14 @@ def mkpntx(s1, s2):
 		print "DIE!", x
 		return
 	z = x.z
-	c = la.Vec(0, z/2/math.tan(36.0*math.pi/180), z/2)
+	c = xyz.Vec(0, z/2/math.tan(36.0*math.pi/180), z/2)
 	cmd.delete('p1');   cmd.delete('p2');   cmd.delete('p3');   cmd.delete('p4');   cmd.delete('p5'   )
 	cmd.create('p1', s1);cmd.create('p2', s1);cmd.create('p3', s1);cmd.create('p4', s1);cmd.create('p5', s1)
-	rot('p1', la.Vec(1, 0, 0), 0*72, c)
-	rot('p2', la.Vec(1, 0, 0), 1*72, c)
-	rot('p3', la.Vec(1, 0, 0), 2*72, c)
-	rot('p4', la.Vec(1, 0, 0), 3*72, c)
-	rot('p5', la.Vec(1, 0, 0), 4*72, c)
+	rot('p1', xyz.Vec(1, 0, 0), 0*72, c)
+	rot('p2', xyz.Vec(1, 0, 0), 1*72, c)
+	rot('p3', xyz.Vec(1, 0, 0), 2*72, c)
+	rot('p4', xyz.Vec(1, 0, 0), 3*72, c)
+	rot('p5', xyz.Vec(1, 0, 0), 4*72, c)
 	cmd.color('green'  , 'p1 and elem C')
 	cmd.color('cyan'   , 'p2 and elem C')
 	cmd.color('yellow' , 'p3 and elem C')
@@ -1149,10 +1149,10 @@ def redopent(sel):
 	cmd.create("pntC", sel)
 	cmd.create("pntD", sel)
 	cmd.create("pntE", sel)
-	rot("pntB", la.Vec(1, 0, 0), 72)
-	rot("pntC", la.Vec(1, 0, 0), 144)
-	rot("pntD", la.Vec(1, 0, 0), 216)
-	rot("pntE", la.Vec(1, 0, 0), 288)
+	rot("pntB", xyz.Vec(1, 0, 0), 72)
+	rot("pntC", xyz.Vec(1, 0, 0), 144)
+	rot("pntD", xyz.Vec(1, 0, 0), 216)
+	rot("pntE", xyz.Vec(1, 0, 0), 288)
 	cmd.color("green"   , sel+" and elem C")
 	cmd.color("cyan"   , "pntB and elem C")
 	cmd.color("magenta", "pntC and elem C")
@@ -1226,7 +1226,7 @@ def makecxauto():
 
 
 def floats2vecs(i):
-	while 1: yield la.Vec(i.next(), i.next(), i.next())
+	while 1: yield xyz.Vec(i.next(), i.next(), i.next())
 
 def nnb(v, s, r):
 	nnb = 0
@@ -1252,7 +1252,7 @@ def testhsphere(rratio = 2.0):
 			l, p, x, y, z = l.split()
 			lvl.append(int(l))
 			pnt.append(int(p))
-			crd.append( la.Vec(float(x), float(y), float(z)) * vmult[int(l)] )
+			crd.append( xyz.Vec(float(x), float(y), float(z)) * vmult[int(l)] )
 			cld.append([int(x) for x in m.split() if x != "65535"])
 			nbr.append([int(x) for x in n.split() if x != "65535"])
 			# print lvl
@@ -1337,7 +1337,7 @@ def testsphere():
 	# cmd.load_cgo(obj, "snew")
 
 	# for s in sph:
-	#   print len(s), angle(s[0], la.Vec(0, 0, 0), s[1])
+	#   print len(s), angle_degrees(s[0],s[1])
 	# test = list()
 	# for i in range(len(sph[-2])):
 	#   mn = 9e9; mni = -1
@@ -1361,7 +1361,7 @@ def testsphere():
 
 def stubalign(s = 'all', s1 = 'pk1', s2 = 'pk2', s3 = 'pk3'):
 	trans(s, -com(s1))
-	if -0.99999 < (com(s1)-com(s2)).dot(la.Vec(1, 0, 0)) < 0.99999: alignaxis(s, la.Vec(1, 0, 0), com(s1)-com(s2))
+	if -0.99999 < (com(s1)-com(s2)).dot(xyz.Vec(1, 0, 0)) < 0.99999: alignaxis(s, xyz.Vec(1, 0, 0), com(s1)-com(s2))
 	else: print "alignaxis FUBAR!"
 	y = com(s3).y
 	z = com(s3).z
@@ -1374,9 +1374,9 @@ def stubalign(s = 'all', s1 = 'pk1', s2 = 'pk2', s3 = 'pk3'):
 
 def tmpdoit():
 	axs = {
-		"TET":(la.Vec(0, 0, 1)+la.Vec( 0.942809043336065, 0                , -0.333333328372267)).normalized(),
-		"OCT":(la.Vec(0, 0, 1)+la.Vec( 0.666666666666667, 0.666666666666667, 0.333333333333333)).normalized(),
-		"ICS":(la.Vec(0, 0, 1)+la.Vec(-0.333333320519719, 0.57735021589134,  0.745356039515023)).normalized(),
+		"TET":(xyz.Vec(0, 0, 1)+xyz.Vec( 0.942809043336065, 0                , -0.333333328372267)).normalized(),
+		"OCT":(xyz.Vec(0, 0, 1)+xyz.Vec( 0.666666666666667, 0.666666666666667, 0.333333333333333)).normalized(),
+		"ICS":(xyz.Vec(0, 0, 1)+xyz.Vec(-0.333333320519719, 0.57735021589134,  0.745356039515023)).normalized(),
 	}
 	for fn in glob.glob("/Users/sheffler/project/111108_BPY_TOI/picksdone/*.pse"):
 		print fn
@@ -1390,7 +1390,7 @@ def tmpdoit():
 				sym = o[:3]
 		if sym == "TET":
 			cmd.remove("not vis")
-			v = la.Vec(0.816496579408716, 0, 1.57735027133783)/2.0
+			v = xyz.Vec(0.816496579408716, 0, 1.57735027133783)/2.0
 			rot("all", v, 180.0)
 			cmd.save(fn.replace(".pse", "_A.pdb").replace("picksdone", "for_neil"))
 
@@ -1405,13 +1405,13 @@ def symmetrizec2(sel1, sel2):
 	cmd.alter("sA", "chain = 'A'")
 	cmd.alter("sB", "chain = 'B'")
 	a = c2axis("(sA or sB)")
-	alignaxis("(sA or sB)", la.Vec(0, 0, 1), a, la.Vec(0, 0, 0))
-	trans("sA", la.Vec(0, 0, -com("sA").z))
-	trans("sB", la.Vec(0, 0, -com("sB").z))
+	alignaxis("(sA or sB)", xyz.Vec(0, 0, 1), a, xyz.Vec(0, 0, 0))
+	trans("sA", xyz.Vec(0, 0, -com("sA").z))
+	trans("sB", xyz.Vec(0, 0, -com("sB").z))
 	cmd.delete("sB")
 	cmd.create("sB", "sA")
 	cmd.alter("sB", "chain = 'B'")
-	rot("sB", la.Vec(0, 0, 1), 180.0)
+	rot("sB", xyz.Vec(0, 0, 1), 180.0)
 	cmd.set_view(v)
 
 
@@ -1428,7 +1428,7 @@ def corresponding_atom_names(sel1,sel2,file):
 		mn = 9e9
 		mi = None
 		for a2 in m2:
-			d = la.Vec(a1.coord).distance(la.Vec(a2.coord))
+			d = xyz.Vec(a1.coord).distance(xyz.Vec(a2.coord))
 			if d < mn:
 				mi = a2
 				mn = d

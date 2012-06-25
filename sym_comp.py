@@ -83,7 +83,7 @@ def processhomomers():
 def iscontig(sel):
 	m = cmd.get_model(sel+" and name N+CA+C").atom
 	for i in range(1,len(m)):
-		if ( la.Vec(m[i-1].coord) - la.Vec(m[i].coord) ).length() > 1.8:  return False
+		if ( xyz.Vec(m[i-1].coord) - xyz.Vec(m[i].coord) ).length() > 1.8:  return False
 		return True
 
 def procCdat(N=3,lfile=None,biod="/data/biounit",outd=None):
@@ -157,15 +157,15 @@ def procCdat(N=3,lfile=None,biod="/data/biounit",outd=None):
 				for i in range(1,N+1):
 					trans("sub%i"%i,-cm)
 				a = [cmd.get_model("sub%i and name CA"%i).atom for i in range(1,N+1)]
-				axis = la.Vec(0,0,0)
+				axis = xyz.Vec(0,0,0)
 				for i in range(len(a[0])):
-					axis1 = la.Vec(0,0,0)
-					for j in range(N): axis1 += la.Vec(a[j][i].coord)
+					axis1 = xyz.Vec(0,0,0)
+					for j in range(N): axis1 += xyz.Vec(a[j][i].coord)
 					if axis1.length() > 0.0001 and axis.dot(axis1) < 0: axis1 *= -1
 					axis += axis1
 				axis.normalize()
 				for i in range(1,N+1):
-					alignaxis("sub%i"%i,la.Vec(0,0,1),axis,la.Vec(0,0,0))
+					alignaxis("sub%i"%i,xyz.Vec(0,0,1),axis,xyz.Vec(0,0,0))
 				#cmd.create("final1","mxatm")
 				#cmd.create("final2","mxatm")
 				#cmd.create("final3","mxatm")
@@ -233,16 +233,16 @@ def procD2dat(lfile=None,biod="/data/biounit",outd=None):
 			if len(cc) < N:
 				sym = cmd.get_symmetry("m")
 				if   sym[6] == "I 2 2 2":
-					trans('m',la.Vec(0,-sym[1],0))
+					trans('m',xyz.Vec(0,-sym[1],0))
 					print pdb
 				#elif sym[6] == "P 21 21 2" and len(cc)==2:
-				#   trans('m',la.Vec(-sym[0]/2.0,-sym[1]/2.0,0))
+				#   trans('m',xyz.Vec(-sym[0]/2.0,-sym[1]/2.0,0))
 				#   cmd.create("sub1","m and chain %s and not (HET and not resn MSE+CSW)"%(cc[0][1]),1,1)
 				#   cmd.create("sub2","m and chain %s and not (HET and not resn MSE+CSW)"%(cc[1][1]),1,1)
 				#   cmd.create("sub3","m and chain %s and not (HET and not resn MSE+CSW)"%(cc[0][1]),1,1)
 				#   cmd.create("sub4","m and chain %s and not (HET and not resn MSE+CSW)"%(cc[1][1]),1,1)
-				#   rot("sub3",la.Vec(0,0,1),180,la.Vec(0,0,0))
-				#   rot("sub4",la.Vec(0,0,1),180,la.Vec(0,0,0))
+				#   rot("sub3",xyz.Vec(0,0,1),180,xyz.Vec(0,0,0))
+				#   rot("sub4",xyz.Vec(0,0,1),180,xyz.Vec(0,0,0))
 				elif sym[6] in ('C 1 2 1','P 21 21 21','P 62 2 2','P 64 2 2','P 65 2 2','P 63 2 2','P 61 2 2','C 2 2 21'):
 					Nnsym += 1
 					#if pid != "1y2k_2": return
@@ -286,30 +286,30 @@ def procD2dat(lfile=None,biod="/data/biounit",outd=None):
 		for i in range(1,N+1):
 			trans("sub%i"%i,-cm)
 		a = [cmd.get_model("sub%i and name CA"%i).atom for i in range(1,N+1)]
-		a1 = la.Vec(0,0,0)
+		a1 = xyz.Vec(0,0,0)
 		for i in range(len(a[0])):
-			axis1 = la.Vec(a[0][i].coord) + la.Vec(a[1][i].coord)
+			axis1 = xyz.Vec(a[0][i].coord) + xyz.Vec(a[1][i].coord)
 			if axis1.length() > 0.0001 and a1.dot(axis1) < 0: axis1 *= -1
 			a1 += axis1
 		a1.normalize()
 		for i in range(1,N+1):
-			alignaxis("sub%i"%i,la.Vec(1,0,0),a1,la.Vec(0,0,0))
+			alignaxis("sub%i"%i,xyz.Vec(1,0,0),a1,xyz.Vec(0,0,0))
 		a = [cmd.get_model("sub%i and name CA"%i).atom for i in range(1,N+1)]
-		a1 = la.Vec(0,0,0)
+		a1 = xyz.Vec(0,0,0)
 		for i in range(len(a[0])):
-			axis1 = la.Vec(a[0][i].coord) + la.Vec(a[2][i].coord)
+			axis1 = xyz.Vec(a[0][i].coord) + xyz.Vec(a[2][i].coord)
 			if axis1.length() > 0.0001 and a1.dot(axis1) < 0: axis1 *= -1
 			a1 += axis1
 		a1.normalize()
 		for i in range(1,N+1):
-			alignaxis("sub%i"%i,la.Vec(0,1,0),a1,la.Vec(0,0,0))
+			alignaxis("sub%i"%i,xyz.Vec(0,1,0),a1,xyz.Vec(0,0,0))
 		cmd.align("mxatm","sub1")
 		cmd.create("final2","mxatm")
 		cmd.create("final3","mxatm")
 		cmd.create("final4","mxatm")
-		rot('final2',la.Vec(1,0,0),180,la.Vec(0,0,0))
-		rot('final3',la.Vec(0,1,0),180,la.Vec(0,0,0))
-		rot('final4',la.Vec(0,0,1),180,la.Vec(0,0,0))
+		rot('final2',xyz.Vec(1,0,0),180,xyz.Vec(0,0,0))
+		rot('final3',xyz.Vec(0,1,0),180,xyz.Vec(0,0,0))
+		rot('final4',xyz.Vec(0,0,1),180,xyz.Vec(0,0,0))
 		n1 = cmd.select('mxatm within 4 of final2')
 		n2 = cmd.select('mxatm within 4 of final3')
 		n3 = cmd.select('mxatm within 4 of final4')
@@ -358,7 +358,7 @@ def prepare_c2_nmr(pattern,outdir=None):
 				if cmd.select(s1) < 0.8*min(n1,n2):
 					print "ERROR",obj,n1,n2,cmd.select(s1)
 					raise Exception()
-				if not 0 == alignc2(obj,tgtaxis=Vec(0.816496579408716,0,0.57735027133783)):
+				if not 0 == alignc2(obj,tgtaxis=xyz.Vec(0.816496579408716,0,0.57735027133783)):
 					print "ERROR"
 					raise Exception()
 				if not os.path.exists(outdir+"/"+obj[:-5]): os.mkdir(outdir+"/"+obj[:-5])
@@ -370,6 +370,7 @@ def prepare_c2_nmr(pattern,outdir=None):
 
 
 def makecryst1_i213(fn):
+	print "makecryst1_i213",fn
 	cmd.load(fn,'work_prot')
 	sele = 'work_prot'
 	fn = os.path.basename(fn)
@@ -380,31 +381,35 @@ def makecryst1_i213(fn):
 	Dsel = sele+' and chain A+D'
 	Tsel = sele+' and chain A+B+C'
 	
-	Xaln = la.alignvectors( c2axis(Dsel,chains=('A','D')),
+	Xaln = xyz.alignvectors( 
 	                        c3axis(Tsel),
-	                        Vec(0,0,1),
-	                        Vec(1,1,1))
-	xform(sele,Xaln+com(Tsel))
-	c2 = com(sele+' and chain A+D')
+	                        c2axis(Dsel,chains=('A','D')),
+	                        xyz.Vec(1,1,1),
+	                        xyz.Vec(0,0,1)   )
+	xform(sele,Xaln-com(Tsel))
+	c2 = com(Dsel)
+	c3 = com(Tsel)
 	a2 = c2axis(Dsel,chains=('A','D'))
-	c3 = com(sele+' and chain A+B+C')
 	a3 = c3axis(Tsel)
-	assert c3.distance(         U0            ) < 0.00001
-	assert a3.distance(Vec(1,1,1).normalized()) < 0.00001
-	assert a2.distance(         Uz            ) < 0.00001
+	print a2.lineangle(xyz.Vec(0,0,1))
+	print a3.lineangle(xyz.Vec(1,1,1))
+	assert c3.lineangle(xyz.Vec(1,1,1)) < xyz.SQRTEPS
+	assert a3.lineangle(xyz.Vec(1,1,1)) < xyz.SQRTEPS
+	assert a2.lineangle(xyz.Vec(0,0,1)) < xyz.SQRTEPS
 
-	trans(sele,Vec(-c2.x))
-	cellsize = abs((c2.y-c2.x))*4.0
-	cmd.save(".tmp.pdb",sele+" and chain A")
-	with open(fn,'w') as out:
-		out.write("CRYST1  %7.3f  %7.3f  %7.3f  90.00  90.00  90.00 I 21 3\n"%((cellsize,)*3))
-	os.system("cat .tmp.pdb >> %s"%fn)
-	os.system("rm .tmp.pdb")
+	# trans(sele,xyz.Vec(-c2.x))
+	# cellsize = abs((c2.y-c2.x))*4.0
+	# print "\nCELL SIZE",cellsize,'\n'
+	# cmd.save(".tmp.pdb",sele+" and chain A")
+	# with open(fn,'w') as out:
+	# 	out.write("CRYST1  %7.3f  %7.3f  %7.3f  90.00  90.00  90.00 I 21 3\n"%((cellsize,)*3))
+	# os.system("cat .tmp.pdb >> %s"%fn)
+	# os.system("rm .tmp.pdb")
 
-	# x1 = rotation_around(a2,180,c2)
-	# x2 = rotation_around(a3,120,c3)	
-	# x3 = rotation_around(a3,240,c3)	
-	# for i,X in enumerate( la.expand_xforms((x1,x2),8) ):
+	# x1 = xyz.rotation_around(a2,180,c2)
+	# x2 = xyz.rotation_around(a3,120,c3)	
+	# x3 = xyz.rotation_around(a3,240,c3)	
+	# for i,X in enumerate( xyzexpand_xforms((x1,x2),8) ):
 	# 	cmd.create("sub%i"%i,sele+" and chain A and not sub*")
 	#  	xform("sub%i"%i,X)
 
@@ -412,16 +417,16 @@ def makecryst1_i213(fn):
 	# d = abs((c2.y-c2.x)*4.0)
 
 	# cmd.hide('ev','not chain A')
-	# for i,X in enumerate( la.find_identities((x1,x2,x3),9) ):
+	# for i,X in enumerate( xyzfind_identities((x1,x2,x3),9) ):
 	# 	cmd.create("sub%ii"%i,sele+" and chain A and not sub*")
 	# 	xform("sub%ii"%i,X)
 	# 	cmd.show('spheres',"sub%ii"%i)
 
 	# (0.374996,0.500000,0.250000)
 
-def process_xtal_dir(d):
-	for fn in glob.glob(d+"/*_I213_*.pdb"):
-		makecryst1_i213(fn)
+# def process_xtal_dir(d):
+# 	for fn in glob.glob(d+"/*_I213_*.pdb"):
+# 		makecryst1_i213(fn)
 
 
 

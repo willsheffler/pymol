@@ -6,9 +6,6 @@ import string,re,gzip,itertools
 from pymol_util import *
 from pymol import cmd
 
-#### HACK!!!!!!!!!!!
-from LA import *
-
 def c2axis(sele,alignsele=None,chains=["A","B"]):
 	if alignsele is None: alignsele = sele
         #cmd.create('tmp98367598',sele)
@@ -21,9 +18,9 @@ def c2axis(sele,alignsele=None,chains=["A","B"]):
 	if len(a) != len(b) or len(a) == 0:
 		print "ERROR on %s: subunits are not the same size!"%alignsele
 		return False
-	axis = la.Vec(0,0,0)
+	axis = xyz.Vec(0,0,0)
 	for i in range(len(a)):
-		axis1 = ( la.Vec(a[i].coord)+la.Vec(b[i].coord)-2*cen ).normalized()
+		axis1 = ( xyz.Vec(a[i].coord)+xyz.Vec(b[i].coord)-2*cen ).normalized()
 		if axis.length() > 0.0001 and axis.dot(axis1) < 0:
 			axis1 *= -1
 		axis += axis1
@@ -32,12 +29,12 @@ def c2axis(sele,alignsele=None,chains=["A","B"]):
         #cmd.delete('tmp98367598')
 	return axis
 
-def alignc2(sele,alignsele=None,tgtaxis=la.Vec(0,0,1),chains=["A","B"]):
+def alignc2(sele,alignsele=None,tgtaxis=xyz.Vec(0,0,1),chains=["A","B"]):
 	if alignsele is None: alignsele = sele
 	axis = c2axis(sele,alignsele,chains)
 	if not axis: return -1
 	# print "axis of rotation:",axis
-	alignaxis(sele,tgtaxis,axis,la.Vec(0,0,0))	
+	alignaxis(sele,tgtaxis,axis,xyz.Vec(0,0,0))	
 	# seleA = "("+alignsele+") and chain %s"%chains[0]
 	# seleB = "("+alignsele+") and chain %s"%chains[1]
 	# print seleA
@@ -60,9 +57,9 @@ def c3axis(sele,alignsele=None,chains=["A","B","C"]):
 	if len(a) != len(b) or len(a) != len(c) or len(a) == 0:
 		print "ERROR on %s: subunits are not the same size!"%alignsele
 		return False
-	axis = la.Vec(0,0,0)
+	axis = xyz.Vec(0,0,0)
 	for i in range(len(a)):
-		axis1 = ( la.Vec(a[i].coord)+la.Vec(b[i].coord)+la.Vec(c[i].coord) - 3*cen ).normalized()
+		axis1 = ( xyz.Vec(a[i].coord)+xyz.Vec(b[i].coord)+xyz.Vec(c[i].coord) - 3*cen ).normalized()
 		if axis.length() > 0.0001 and axis.dot(axis1) < 0:
 			axis1 *= -1
 		axis += axis1
@@ -71,12 +68,12 @@ def c3axis(sele,alignsele=None,chains=["A","B","C"]):
         #cmd.delete('tmp98367598')
 	return axis
 
-def alignc3(sele,alignsele=None,tgtaxis=la.Vec(0,0,1),chains=["A","B","C"]):
+def alignc3(sele,alignsele=None,tgtaxis=xyz.Vec(0,0,1),chains=["A","B","C"]):
 	if alignsele is None: alignsele = sele
 	cmd.remove(sele+" and resn HOH")
 	axis = c3axis(sele,alignsele,chains)
 	# print "axis of rotation:",axis
-	alignaxis(sele,tgtaxis,axis,la.Vec(0,0,0))
+	alignaxis(sele,tgtaxis,axis,xyz.Vec(0,0,0))
 	return True
 
 def c4axis(sele,alignsele=None,chains=["A","B","C","D"]):
@@ -91,9 +88,9 @@ def c4axis(sele,alignsele=None,chains=["A","B","C","D"]):
 	if len(a) != len(b) or len(a) != len(c) or len(a) == 0 or len(d) != len(a):
 		print "ERROR on %s: subunits are not the same size!"%alignsele
 		return False
-	axis = la.Vec(0,0,0)
+	axis = xyz.Vec(0,0,0)
 	for i in range(len(a)):
-		axis1 = ( la.Vec(a[i].coord)+la.Vec(b[i].coord)+la.Vec(c[i].coord)+la.Vec(d[i].coord) ).normalized()
+		axis1 = ( xyz.Vec(a[i].coord)+xyz.Vec(b[i].coord)+xyz.Vec(c[i].coord)+xyz.Vec(d[i].coord) ).normalized()
 		if axis.length() > 0.0001 and axis.dot(axis1) < 0:
 			axis1 *= -1
 		axis += axis1
@@ -101,12 +98,12 @@ def c4axis(sele,alignsele=None,chains=["A","B","C","D"]):
 	axis.normalize()
 	return axis
 
-def alignc4(sele,alignsele=None,tgtaxis=la.Vec(0,0,1),chains=["A","B","C","D"]):
+def alignc4(sele,alignsele=None,tgtaxis=xyz.Vec(0,0,1),chains=["A","B","C","D"]):
 	if alignsele is None: alignsele = sele
 	cmd.remove(sele+" and resn HOH")
 	axis = c3axis(sele,alignsele,chains)
 	# print "axis of rotation:",axis
-	alignaxis(sele,tgtaxis,axis,la.Vec(0,0,0))
+	alignaxis(sele,tgtaxis,axis,xyz.Vec(0,0,0))
 	return True
 
 def c5axis(sele,alignsele=None,chains=["A","B","C","D","E"]):
@@ -122,9 +119,9 @@ def c5axis(sele,alignsele=None,chains=["A","B","C","D","E"]):
 	if len(a) != len(b) or len(a) != len(c) or len(a) == 0:
 		print "ERROR on %s: subunits are not the same size!"%alignsele
 		return False
-	axis = la.Vec(0,0,0)
+	axis = xyz.Vec(0,0,0)
 	for i in range(len(a)):
-		axis1 = ( la.Vec(a[i].coord)+la.Vec(b[i].coord)+la.Vec(c[i].coord)+la.Vec(d[i].coord)+la.Vec(e[i].coord) ).normalized()
+		axis1 = ( xyz.Vec(a[i].coord)+xyz.Vec(b[i].coord)+xyz.Vec(c[i].coord)+xyz.Vec(d[i].coord)+xyz.Vec(e[i].coord) ).normalized()
 		if axis.length() > 0.0001 and axis.dot(axis1) < 0:
 			axis1 *= -1
 		axis += axis1
@@ -132,12 +129,12 @@ def c5axis(sele,alignsele=None,chains=["A","B","C","D","E"]):
 	axis.normalize()
 	return axis
 
-def alignc5(sele,alignsele=None,tgtaxis=la.Vec(0,0,1),chains=["A","B","C","D","E"]):
+def alignc5(sele,alignsele=None,tgtaxis=xyz.Vec(0,0,1),chains=["A","B","C","D","E"]):
 	if alignsele is None: alignsele = sele
 	cmd.remove(sele+" and resn HOH")
 	axis = c5axis(sele=sele,alignsele=alignsele,chains=chains)
 	print "axis of rotation:",axis,"to",tgtaxis
-	alignaxis(sele,tgtaxis,axis,la.Vec(0,0,0))
+	alignaxis(sele,tgtaxis,axis,xyz.Vec(0,0,0))
 	return True
 
 def myint(s):
@@ -152,15 +149,15 @@ def mki213(N, sel = 'all'):
 	cmd.delete('base80345769083457')
 	cmd.delete('tmp80345769083457')
 	c2 = com(sel)
-	c3 = la.Vec(0, 0, 0)
+	c3 = xyz.Vec(0, 0, 0)
 	cmd.create( 'tmp80345769083457', sel)
 	a2 = c2axis('tmp80345769083457')
 	cmd.delete( 'tmp80345769083457')
-	a3 = la.Vec(0, 0, 1)
+	a3 = xyz.Vec(0, 0, 1)
 	cmd.create('base80345769083457', sel+" and chain A and visible")
 	seenit = []
-	R2 = [rotation_matrix(a2, 0), rotation_matrix(a2, 180), ]
-	R3 = [rotation_matrix(a3, 0), rotation_matrix(a3, 120), rotation_matrix(a3, 240), ]
+	R2 = [rotation_matrix_degrees(a2, 0), rotation_matrix_degrees(a2, 180), ]
+	R3 = [rotation_matrix_degrees(a3, 0), rotation_matrix_degrees(a3, 120), rotation_matrix_degrees(a3, 240), ]
 	C = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	print a2, c2, a3, c3
 	for i21 in range(2):
@@ -172,7 +169,7 @@ def mki213(N, sel = 'all'):
 							for i24 in range(2 if N > 6 else 1):
 								for i35 in range(3 if N > 7 else 1):
 									for i25 in range(2 if N > 8 else 1):
-										test = la.Vec(0, 0, 0)
+										test = xyz.Vec(0, 0, 0)
 										test = R2[i21]*(test-c2)+c2
 										test = R3[i32]*(test-c3)+c3
 										test = R2[i22]*(test-c2)+c2
@@ -227,21 +224,21 @@ def mkp23(N, R=43.5, i=0, sel = 'all'):
 	cmd.delete("p23_*")
 	cmd.delete('base80345769083457')
 	cmd.delete('tmp80345769083457')
-	c2 = la.Vec(0, 0, 0)
-	c3 = la.Vec(R,R,-R)
+	c2 = xyz.Vec(0, 0, 0)
+	c3 = xyz.Vec(R,R,-R)
 	cmd.create( 'tmp80345769083457', sel)
 	cmd.delete( 'tmp80345769083457')
-	a3 = [la.Vec(0,0,0),la.Vec(1,1,1),la.Vec(-1,-1,-1)]
-	a2 = [la.Vec(0,0,0),la.Vec(1,0,0),la.Vec(0,1,0),la.Vec(0,0,1)]
+	a3 = [xyz.Vec(0,0,0),xyz.Vec(1,1,1),xyz.Vec(-1,-1,-1)]
+	a2 = [xyz.Vec(0,0,0),xyz.Vec(1,0,0),xyz.Vec(0,1,0),xyz.Vec(0,0,1)]
 	cmd.create('base80345769083457', sel+" and visible")
 	seenit = []
-	R2 = [rotation_matrix(a2[1],  0), # hack
-	      rotation_matrix(a2[1],180),
-	      rotation_matrix(a2[2],180),
-	      rotation_matrix(a2[3],180) ]
-	R3 = [rotation_matrix(a3[1],  0), # hack!
-	      rotation_matrix(a3[1],120),
-	      rotation_matrix(a3[2],120), ]
+	R2 = [rotation_matrix_degrees(a2[1],  0), # hack
+	      rotation_matrix_degrees(a2[1],180),
+	      rotation_matrix_degrees(a2[2],180),
+	      rotation_matrix_degrees(a2[3],180) ]
+	R3 = [rotation_matrix_degrees(a3[1],  0), # hack!
+	      rotation_matrix_degrees(a3[1],120),
+	      rotation_matrix_degrees(a3[2],120), ]
 	C = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	print a2, c2, a3, c3
 	for i21 in range(4):
@@ -253,7 +250,7 @@ def mkp23(N, R=43.5, i=0, sel = 'all'):
 							for i24 in range(4 if N > 6 else 1):
 								for i35 in range(3 if N > 7 else 1):
 									for i25 in range(4 if N > 8 else 1):
-										test = la.Vec(1, 1, 1)
+										test = xyz.Vec(1, 1, 1)
 										test = R2[i21]*(test-c2)+c2
 										test = R3[i32]*(test-c3)+c3
 										test = R2[i22]*(test-c2)+c2
@@ -291,10 +288,10 @@ def selbycomp(trn=0):
 	cmd.select("TRI2","TRI and chain D+E+F")
 	cmd.select("TRI3","TRI and chain G+H+I")
 	cmd.select("TRI4","TRI and chain J+K+L")
-	cmd.select("TRI5","TRI and chain Mat+N+O")
+	cmd.select("TRI5","TRI and chain xyz.Mat+N+O")
 	cmd.select("TRI6","TRI and chain P+Q+R")
 	cmd.select("TRI7","TRI and chain S+T+U")
-	cmd.select("TRI8","TRI and chain Vec+W+Ux")
+	cmd.select("TRI8","TRI and chain xyz.Vec+W+Ux")
 	cmd.select("DIM1","DIM and chain A+D")
 	cmd.select("DIM2","DIM and chain B+G")
 	cmd.select("DIM3","DIM and chain C+J")
@@ -304,7 +301,7 @@ def selbycomp(trn=0):
 	cmd.select("DIM7","DIM and chain I+O")
 	cmd.select("DIM8","DIM and chain K+Q")
 	cmd.select("DIM9","DIM and chain L+N")
-	cmd.select("DIM10","DIM and chain Mat+Vec")
+	cmd.select("DIM10","DIM and chain xyz.Mat+xyz.Vec")
 	cmd.select("DIM11","DIM and chain P+W")
 	cmd.select("DIM12","DIM and chain Ux+S")
 	cmd.delete("LINE*")
@@ -346,13 +343,13 @@ def selbycomp(trn=0):
 
 def getframe(obj):
 	m = cmd.get_model(obj)
-	x = la.Vec(m.atom[       0     ].coord)
-	y = la.Vec(m.atom[len(m.atom)/2].coord)
-	z = la.Vec(m.atom[      -1     ].coord)
-	return la.Xform(a=x,b=y,c=z)
+	x = xyz.Vec(m.atom[       0     ].coord)
+	y = xyz.Vec(m.atom[len(m.atom)/2].coord)
+	z = xyz.Vec(m.atom[      -1     ].coord)
+	return xyz.Xform(a=x,b=y,c=z)
 
 def getrelframe(newobj,refobj,Forigin=None):
-	if Forigin is None: Forigin = la.Xform(R=la.Identity,t=la.Vec(0,0,0))g
+	if Forigin is None: Forigin = xyz.Xform(xyzR(),xyz.Vec(0,0,0))
 	Fref = getframe(refobj)
 	Fnew = getframe(newobj)
 	Fdelta = Fnew * ~Fref
