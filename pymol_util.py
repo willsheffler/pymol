@@ -4,6 +4,7 @@ newpath = os.path.dirname(inspect.getfile(inspect.currentframe())) # script dire
 if not newpath in sys.path:
 		sys.path.append(newpath)
 import string
+import math
 import re
 import gzip
 import itertools
@@ -14,7 +15,7 @@ from pymol.cgo import *
 from random import randrange
 from math import sqrt
 import LA as la
-from LA import X,Y,Z,Identity
+from LA import Ux,Uy,Uz,Identity
 from functools import partial
 
 numcom = 0
@@ -65,16 +66,16 @@ aa_1_3 = {'A': 'ALA',
 		  'I': 'ILE',
 		  'K': 'LYS',
 		  'L': 'LEU',
-		  'M': 'MET',
+		  'Mat': 'MET',
 		  'N': 'ASN',
 		  'P': 'PRO',
 		  'R': 'ARG',
 		  'Q': 'GLN',
 		  'S': 'SER',
 		  'T': 'THR',
-		  'V': 'VAL',
+		  'Vec': 'VAL',
 		  'W': 'TRP',
-		  'Y': 'TYR',
+		  'Uy': 'TYR',
 }
 aa_3_1 = {'ALA': 'A',
 		  'ASP': 'D',
@@ -86,16 +87,16 @@ aa_3_1 = {'ALA': 'A',
 		  'ILE': 'I',
 		  'LYS': 'K',
 		  'LEU': 'L',
-		  'MET': 'M',
+		  'MET': 'Mat',
 		  'ASN': 'N',
 		  'PRO': 'P',
 		  'GLN': 'Q',
 		  'ARG': 'R',
 		  'SER': 'S',
 		  'THR': 'T',
-		  'VAL': 'V',
+		  'VAL': 'Vec',
 		  'TRP': 'W',
-		  'TYR': 'Y',
+		  'TYR': 'Uy',
 }
 aa_types = {
   'A': 'hydrophobic',
@@ -108,19 +109,38 @@ aa_types = {
   'I': 'hydrophobic',
   'K': 'positive',
   'L': 'hydrophobic',
-  'M': 'hydrophobic',
+  'Mat': 'hydrophobic',
   'N': 'polar',
   'P': 'proline',
   'Q': 'polar',
   'R': 'positive',
   'S': 'polar',
   'T': 'polar',
-  'V': 'phydrophobic',
+  'Vec': 'phydrophobic',
   'W': 'aromatic',
-  'Y': 'aromatic',
+  'Uy': 'aromatic',
 }
 
 def showaxes():
+    v = cmd.get_view()
+    obj = [
+        BEGIN, LINES,
+        COLOR, 1.0, 0.0, 0.0, 
+        VERTEX,   0.0, 0.0, 0.0,
+        VERTEX,  20.0, 0.0, 0.0,
+        COLOR, 0.0, 1.0, 0.0, 
+        VERTEX, 0.0,   0.0, 0.0,
+        VERTEX, 0.0,  20.0, 0.0, 
+        COLOR, 0.0, 0.0, 1.0, 
+        VERTEX, 0.0, 0.0,   0.0,
+        VERTEX, 00, 0.0,   20.0,
+        END
+        ]                                                                                            
+    cmd.load_cgo(obj,'axes')
+    cmd.set_view(v)
+
+def showaxes2():
+    v = cmd.get_view()
     obj = [
         BEGIN, LINES,
         COLOR, 1.0, 0.0, 0.0, 
@@ -135,6 +155,7 @@ def showaxes():
         END
         ]                                                                                            
     cmd.load_cgo(obj,'axes')
+    cmd.set_view(v)
 
 def getchain(sele):
 	try:
@@ -157,7 +178,7 @@ def getres(sele):
 def com(sel="all", state=1):
 	## assumes equal weights (best called with "and name ca" suffix)
 	model = cmd.get_model(sel, state)
-	c = la.la.Vec(0)
+	c = la.Vec(0)
 	for a in model.atom:
 		c += la.Vec(a.coord)
 	c = c / len(model.atom)
@@ -201,14 +222,14 @@ class ResBB(object):
 		elif type(n) is type(""):
 			assert len(getres(n)) is 1
 			m = cmd.get_model(n)
-			self.n  = la.la.Vec( m.atom[0].coord )
-			self.ca = la.la.Vec( m.atom[1].coord )
-			self.c  = la.la.Vec( m.atom[2].coord )
+			self.n  = la.Vec( m.atom[0].coord )
+			self.ca = la.Vec( m.atom[1].coord )
+			self.c  = la.Vec( m.atom[2].coord )
 			self.ss = m.atom[1].ss
 			return
-		assert type(n) is la.la.Vec
-		assert type(ca) is la.la.Vec
-		assert type(c) is la.la.Vec
+		assert type(n) is la.Vec
+		assert type(ca) is la.Vec
+		assert type(c) is la.Vec
 		self.n  = n
 		self.ca = ca
 		self.c  = c
@@ -225,7 +246,7 @@ class ResBB(object):
 	def __str__(r):
 		return "n "+str(r.n)+", ca "+str(r.ca)+", c "+str(r.c)+", ss "+r.ss
 	def stub(r):
-		return la.RT.from_four_points(la.RT(None, None), r.ca, r.n, r.ca, r.c)
+		return la.Xform.from_four_points(la.Xform(None, None), r.ca, r.n, r.ca, r.c)
 
 
 class DisulfLib(object):
@@ -236,7 +257,7 @@ class DisulfLib(object):
 		self.lib = {"EE":[], "EH":[], "EL":[], "HE":[], "HH":[], "HL":[], "LE":[], "LH":[], "LL":[]}
 		for l in open(fn).readlines():
 			ss1, ss2, sep, rt, xx, xy, xz, yx, yy, yz, zx, zy, zz, x, y, z = l.split()
-			self.lib[ss1+ss2].append(Jump(la.Mat(xx, xy, xz, yx, yy, yz, zx, zy, zz), la.la.Vec(x, y, z)))
+			self.lib[ss1+ss2].append(Jump(la.Mat(xx, xy, xz, yx, yy, yz, zx, zy, zz), la.Vec(x, y, z)))
 
 	def disulf_rms(self, r1, r2):
 		assert type(r1) is ResBB
@@ -249,7 +270,7 @@ class DisulfLib(object):
 		for j in self.lib[ss1+ss2][:1]:
 			s = r1.stub()
 			r1_in_s = s.to_frame(r1)
-			r3_in_s = r1_in_s + la.la.Vec(1, 1, 1) #( j.rot * r1_in_s ) + j.trans
+			r3_in_s = r1_in_s + la.Vec(1, 1, 1) #( j.t * r1_in_s ) + j.trans
 			r3      = s.from_frame(r3_in_s)
 			rms = r2.rms(r3)
 			if rms < minrms: minrms = rms
@@ -269,9 +290,9 @@ def dimeraxis1(m1, m2):
 		return
 	i = j = randrange(len(m1.atom))
 	while j == i: j = randrange(len(m1.atom))
-	a1, a2 = la.la.Vec(m1.atom[i].coord), la.la.Vec(m2.atom[i].coord)
+	a1, a2 = la.Vec(m1.atom[i].coord), la.Vec(m2.atom[i].coord)
 	u = (a1+a2)/3
-	a1, a2 = la.la.Vec(m1.atom[j].coord), la.la.Vec(m2.atom[j].coord)
+	a1, a2 = la.Vec(m1.atom[j].coord), la.Vec(m2.atom[j].coord)
 	v = (a1+a2)/3
 	if v.x-u.x < 0:
 		u, v = v, u
@@ -281,7 +302,7 @@ def dimeraxis1(m1, m2):
 def dimeraxis(sel1, sel2, nsamp=100):
 	m1 = cmd.get_model(sel1)
 	m2 = cmd.get_model(sel2)
-	a, wtot = la.la.Vec(0), 0
+	a, wtot = la.Vec(0), 0
 	for i in range(int(nsamp)):
 		u = dimeraxis1(m1, m2)
 		# print u
@@ -296,7 +317,7 @@ def axisofrot1(m1, m2, m3):
 		print "selections must contain the same number of atoms!"
 		return
 	i = randrange(len(m1.atom))
-	a1, a2, a3 = la.la.Vec(m1.atom[i].coord), la.la.Vec(m2.atom[i].coord), la.Vec(m3.atom[i].coord)
+	a1, a2, a3 = la.Vec(m1.atom[i].coord), la.Vec(m2.atom[i].coord), la.Vec(m3.atom[i].coord)
 	u = (a1+a2+a3)/3
 	i = randrange(len(m1.atom))
 	a1, a2, a3 = la.Vec(m1.atom[i].coord), la.Vec(m2.atom[i].coord), la.Vec(m3.atom[i].coord)
@@ -370,9 +391,9 @@ def rot(sel, axis, ang, cen = la.Vec(0, 0, 0)):
 	cmd.rotate([axis.x, axis.y, axis.z], ang, sel, 0, 0, None, [cen.x, cen.y, cen.z])
 
 def xform(sel,x):
-	a,r = la.rotation_axis(x.rot)
+	a,r = la.rotation_axis(x.R)
 	rot(sel,a,math.degrees(r))
-	trans(sel,x.cen)
+	trans(sel,x.t)
 
 def rot_by_matrix(sel, R, cen = la.Vec(0, 0, 0)):
   m = cmd.get_model(sel)
@@ -427,7 +448,7 @@ def alignaxis(sel, newaxis, oldaxis = None, cen = la.Vec(0, 0, 0)):
 
 def mysetview(look, up, pos = None, cen = None, ncp = None, fcp = None):
 	Xaxis = -look.cross(up).normalized()
-	Yaxis = projperp(look, up).normalized()
+	Yaxis = la.projperp(look, up).normalized()
 	Zaxis = -look.normalized()
 	oldv = cmd.get_view()
 	v = list(oldv)
@@ -580,9 +601,9 @@ def mkd2(sel = "all"):
 	cmd.create("x", "w")
 	cmd.create("y", "w")
 	cmd.create("z", "w")
-	rot('x', X, 180, la.Vec(0, 0, 0))
-	rot('y', Y, 180, la.Vec(0, 0, 0))
-	rot('z', Z, 180, la.Vec(0, 0, 0))
+	rot('x', Ux, 180, la.Vec(0, 0, 0))
+	rot('y', Uy, 180, la.Vec(0, 0, 0))
+	rot('z', Uz, 180, la.Vec(0, 0, 0))
 	cmd.alter('w', 'chain = "A"')
 	cmd.alter('x', 'chain = "B"')
 	cmd.alter('y', 'chain = "C"')
@@ -677,11 +698,11 @@ def drawtestconeva(v, a):
 
 def conelineinter(p, d, v, a, t):
 	t = t / 180.0 * math.pi
-	M = a.outer(a) - math.cos(t)*math.cos(t)*la.Mat(1, 0, 0, 0, 1, 0, 0, 0, 1)
+	Mat = a.outer(a) - math.cos(t)*math.cos(t)*la.Mat(1, 0, 0, 0, 1, 0, 0, 0, 1)
 	D = p-v
-	c2 =   d.dot(M*d)
-	c1 = 2*d.dot(M*D)
-	c0 =   D.dot(M*D)
+	c2 =   d.dot(Mat*d)
+	c1 = 2*d.dot(Mat*D)
+	c0 =   D.dot(Mat*D)
 	disc = c1*c1 - 4*c0*c2
 	if disc < 0: return ()
 	if disc == 0: return ( p + (-c1)/(2.0*c2)*d, )
@@ -702,22 +723,22 @@ def test_conelineinter(sele):
 	# v = la.Vec(0, 0, 0)
 	# a = la.Vec(1, 0, 0)
 	t = 45
-	X = conelineinter(p, d, v, a, t)
+	Ux = conelineinter(p, d, v, a, t)
 	print "p", p
 	print "d", d
 	print "v", v
 	print "a", a
 	print "t", t
-	print "X", X
+	print "Ux", Ux
 	cmd.delete("lines")
-	cmd.delete("X*")
+	cmd.delete("Ux*")
 	cmd.delete("L*")
 	cmd.delete("A*")
 	cmd.delete("B*")
 	drawlines(p, d)
-	for i, x in enumerate(X):
-		createpoint(sele, x, "X"+str(i))
-		o = projperp(a, x-v)
+	for i, x in enumerate(Ux):
+		createpoint(sele, x, "Ux"+str(i))
+		o = la.projperp(a, x-v)
 		L = o.length()
 		o = o.normalized()
 		ang = 90.0 - math.atan( 1.0 / L )*180.0/math.pi
@@ -805,8 +826,8 @@ def chaincount(sel = "all"):
 	return cc
 
 name1 = {"ALA":"A", "CYS":"C", "ASP":"D", "GLU":"E", "PHE":"F", "GLY":"G", "HIS":"H", "ILE":"I", "LYS":"K", "LEU":"L",
-		 "MET":"M", "ASN":"N", "PRO":"P", "GLN":"Q", "ARG":"R", "SER":"S", "THR":"T", "VAL":"V", "TRP":"W", "TYR":"Y",
-		 "MSE":"M", "CSW":"C"}
+		 "MET":"Mat", "ASN":"N", "PRO":"P", "GLN":"Q", "ARG":"R", "SER":"S", "THR":"T", "VAL":"Vec", "TRP":"W", "TYR":"Uy",
+		 "MSE":"Mat", "CSW":"C"}
 
 def lcs(S, T):
 	 L = {}
@@ -1001,7 +1022,7 @@ def drawringcar( c, a, r, col = [1, 1, 1], lab = "ring"):
 	cmd.delete(lab)
 	p1 = c
 	p2 = c+a
-	p3 = c + r*projperp(a, la.Vec(1, 2, 3)).normalized()
+	p3 = c + r*la.projperp(a, la.Vec(1, 2, 3)).normalized()
 	drawring(p1, p2, p3, col, lab)
 
 def drawsph(col = [1, 1, 1], lab = "sph"):
@@ -1192,7 +1213,7 @@ def makecx(sel = 'all', n = 5):
 	cmd.delete("C%i_*"%n)
 	chains = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	for i in range(n): cmd.create("C%i_%i"%(n, i), sel+" and (not C%i_*)"%n)
-	for i in range(n): rot("C%i_%i"%(n, i), Z, 360.0*float(i)/float(n))
+	for i in range(n): rot("C%i_%i"%(n, i), Uz, 360.0*float(i)/float(n))
 	for i in range(n): cmd.alter("C%i_%i"%(n, i), "chain = '%s'"%chains[i])
 
 for i in range(2,21):
@@ -1347,7 +1368,7 @@ def stubalign(s = 'all', s1 = 'pk1', s2 = 'pk2', s3 = 'pk3'):
 	if   abs(z) < 0.00001: ax =   0.0 if y > 0 else 180.0
 	elif abs(y) < 0.00001: ax = 270.0 if z > 0 else  90.0
 	else:   ax = -math.atan(z/y)*180.0/math.pi
-	rot(s, X, ax)
+	rot(s, Ux, ax)
 
 
 

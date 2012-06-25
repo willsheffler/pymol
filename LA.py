@@ -2,8 +2,15 @@
 Easy 3D Linear Algebra, like xyz\* in rosetta
 """
 import math,random
+from itertools import chain,product
 
-TOLERANCE = 0.000000001
+TOLERANCE = 0.0000001
+
+def isnum(x):
+   return (type(x) in (int,float))
+
+def isiter(x):
+   return hasattr(x,"__iter__")
 
 class Vec(object):
    """a Vector like xyzVector<Real> in rosetta
@@ -17,18 +24,23 @@ class Vec(object):
    14.0
    >>> assert Vec(1,0,-0) == Vec(1,-0,0)
    """
-   def __init__(self,x,y=None,z=None):
-      if type(x) is type(self):
-         self.x,self.y,self.z = x.x,x.y,x.z
-      elif type(x) in (type([]),type((1,))):
-         self.x,self.y,self.z = x[0],x[1],x[2]
-      elif y is None:
-         if type(x) in (type(0),type(0.0)):
-            self.x,self.y,self.z = x,x,x
-         elif type(x) is type(Vec):
+   def __init__(self,x=0.0,y=None,z=None):
+      if y is None:
+         if isnum(x):
+            self.x,self.y,self.z = (float(x),)*3
+         elif type(x) is Vec:
             self.x,self.y,self.z = x.x,x.y,x.z
-      else:
+         elif isiter(x): 
+            i = iter(x)
+            self.x,self.y,self.z = i.next(),i.next(),i.next()
+         else: raise NotImplementedError
+      elif z is not None:
+         assert isnum(x) and isnum(y) and isnum(z)
          self.x,self.y,self.z = float(x),float(y),float(z)
+      else: raise NotImplementedError
+      assert type(self.x) is float
+      assert type(self.y) is float
+      assert type(self.z) is float
    def dot(u,v):
       return u.x*v.x+u.y*v.y+u.z*v.z
    def length(u):
@@ -42,23 +54,20 @@ class Vec(object):
    def cross(u,v):
       return Vec(u.y*v.z-u.z*v.y,u.z*v.x-u.x*v.z,u.x*v.y-u.y*v.x)
    def __mul__(u,a):
-      if type(a) is type(0) or type(a) is type(0.0):
+      if isnum(a):
          return Vec(u.x*a,u.y*a,u.z*a)
       elif type(a) is Vec: 
          return u.dot(a)
       else:
-         # print type(a)
-         assert False
+         a.__rmul__(u)
    def __rmul__(u,a):
       return u*a
    def __add__(u,v):
-      return Vec(u.x+v.x,u.y+v.y,u.z+v.z)
-   def __radd__(u,v):
-      return u+v
+      if type(v) is Vec: return Vec(u.x+v.x,u.y+v.y,u.z+v.z)
+      return v.__radd__(u)
    def __sub__(u,v):
-      return Vec(u.x-v.x,u.y-v.y,u.z-v.z)
-   def __rsub__(u,v):
-      return u+(-v)
+      if type(v) is Vec: return Vec(u.x-v.x,u.y-v.y,u.z-v.z)
+      return v.__rsub__(u)
    def __neg__(u):
       return Vec(-u.x,-u.y,-u.z)
    def __div__(u,a):
@@ -74,8 +83,8 @@ class Vec(object):
       u.z /= l
    def normalized(u):
       v = Vec(u)
-      u.normalize()
-      return u
+      v.normalize()
+      return v
    def outer(u,v):
       return Mat( u.x*v.x, u.x*v.y, u.x*v.z,
                   u.y*v.x, u.y*v.y, u.y*v.z,
@@ -84,14 +93,24 @@ class Vec(object):
       return ( abs(self.x-other.x) < TOLERANCE and 
                abs(self.y-other.y) < TOLERANCE and
                abs(self.z-other.z) < TOLERANCE )
-
+   def rounded(self,sd):
+      return Vec(round(self.x,sd), round(self.y,sd), round(self.z,sd) )
       
-X = Vec(1,0,0)
-Y = Vec(0,1,0)
-Z = Vec(0,0,1)
+Ux = Vec(1,0,0)
+Uy = Vec(0,1,0)
+Uz = Vec(0,0,1)
+U0 = Vec(0,0,0)
 
-def randvec():
-   return Vec(random.gauss(0,1),random.gauss(0,1),random.gauss(0,1))
+def randvec(n=1):
+   if n is 1: return Vec(random.gauss(0,1),random.gauss(0,1),random.gauss(0,1))
+   return [Vec(random.gauss(0,1),random.gauss(0,1),random.gauss(0,1)) for i in range(n)]
+
+def randnorm(n=1):
+   """
+   >>> assert abs(randnorm().length()-1.0) < 0.0000001
+   """
+   if n is 1: return randvec().normalized()
+   return (randvec().normalized() for i in range(n))
 
 class Mat(object):
    """docstring for Mat
@@ -112,46 +131,34 @@ class Mat(object):
    def __init__(self, xx=None, xy=None, xz=None, yx=None, yy=None, yz=None, zx=None, zy=None, zz=None):
       super(Mat, self).__init__()
       if xx is None: # identity default
-         self.xx = 1.0
-         self.xy = 0.0
-         self.xz = 0.0         
-         self.yx = 0.0         
-         self.yy = 1.0
-         self.yz = 0.0
-         self.zx = 0.0
-         self.zy = 0.0
-         self.zz = 1.0
-      if type(xx) in (type(0),type(0.0)):
-         self.xx = float(xx)
-         self.xy = float(xy)
-         self.xz = float(xz)
-         self.yx = float(yx)
-         self.yy = float(yy)
-         self.yz = float(yz)
-         self.zx = float(zx)
-         self.zy = float(zy)
-         self.zz = float(zz)
-      elif type(xx) is type(Vec(0)) and type(xy) is type(Vec(0)) and type(xz) is type(Vec(0)):
-         self.xx = xx.x
-         self.xy = xy.x
-         self.xz = xz.x
-         self.yx = xx.y
-         self.yy = xy.y
-         self.yz = xz.y
-         self.zx = xx.z
-         self.zy = xy.z
-         self.zz = xz.z
+         self.xx, self.xy, self.xz = 1.0,0.0,0.0
+         self.yx, self.yy, self.yz = 0.0,1.0,0.0
+         self.zx, self.zy, self.zz = 0.0,0.0,1.0
+      elif xy is None and type(xx) is Mat:
+         self.xx, self.xy, self.xz = xx.xx, xx.xy, xx.xz
+         self.yx, self.yy, self.yz = xx.yx, xx.yy, xx.yz
+         self.zx, self.zy, self.zz = xx.zx, xx.zy, xx.zz
+      elif yx is None and type(xx) is Vec and type(xy) is Vec and type(xz) is Vec:
+         self.xx, self.xy, self.xz = xx.x, xy.x, xz.x
+         self.yx, self.yy, self.yz = xx.y, xy.y, xz.y
+         self.zx, self.zy, self.zz = xx.z, xy.z, xz.z
+      elif type(xx) in (int,float):
+         self.xx, self.xy, self.xz = float(xx), float(xy), float(xz)
+         self.yx, self.yy, self.yz = float(yx), float(yy), float(yz)
+         self.zx, self.zy, self.zz = float(zx), float(zy), float(zz)
       else:
-         print "can't make Mat"
-         assert False
+         raise NotImplementedError
+      assert type(self.xx) is float and type(self.xy) is float and type(self.xz) is float
+      assert type(self.yx) is float and type(self.yy) is float and type(self.yz) is float
+      assert type(self.zx) is float and type(self.zy) is float and type(self.zz) is float
    def row(m,i):
-      assert type(i) is type(1)
+      assert type(i) is int
       if   i is 0: return Vec(m.xx,m.xy,m.xz)
       elif i is 1: return Vec(m.yx,m.yy,m.yz)
       elif i is 2: return Vec(m.zx,m.zy,m.zz)
       else: assert 0 <= i and i <= 2
    def col(m,i):
-      assert type(i) is type(1)
+      assert type(i) is int
       if   i is 0: return Vec(m.xx,m.yx,m.zx)
       elif i is 1: return Vec(m.xy,m.yy,m.zy)
       elif i is 2: return Vec(m.xz,m.yz,m.zz)
@@ -167,7 +174,7 @@ class Mat(object):
                   -(m.zz*m.yx-m.zx*m.yz) ,   m.zz*m.xx-m.zx*m.xz  , -(m.yz*m.xx-m.yx*m.xz) ,
                     m.zy*m.yx-m.zx*m.yy  , -(m.zy*m.xx-m.zx*m.xy) ,   m.yy*m.xx-m.yx*m.xy  ) / m.det()
    def __mul__(m,v):
-      if type(v) in(type(0),type(0.0)):
+      if type(v) in(int,float):
          return Mat( v*m.xx, v*m.xy, v*m.xz, v*m.yx, v*m.yy, v*m.yz, v*m.zx, v*m.zy, v*m.zz )
       elif type(v) is Vec:
          return Vec( m.rowx()*v, m.rowy()*v, m.rowz()*v )
@@ -182,7 +189,7 @@ class Mat(object):
             print type(v)
             raise NotImplementedError
    def __rmul__(m,v):
-      if type(v) in(type(0),type(0.0)):
+      if type(v) in(int,float):
          return Mat( v*m.xx, v*m.xy, v*m.xz, v*m.yx, v*m.yy, v*m.yz, v*m.zx, v*m.zy, v*m.zz )
       elif type(v) is Vec:
          return Vec( m.colx()*v, m.coly()*v, m.colz()*v )
@@ -195,7 +202,7 @@ class Mat(object):
    def __div__(m,v):
       return m*(1/v)
    def __add__(m,v):
-      if type(v) in(type(0),type(0.0)):
+      if type(v) in(int,float):
          return Mat( v+m.xx, v+m.xy, v+m.xz, v+m.yx, v+m.yy, v+m.yz, v+m.zx, v+m.zy, v+m.zz )
       elif type(v) is Mat:
          return Mat( v.xx+m.xx, v.xy+m.xy, v.xz+m.xz, v.yx+m.yx, v.yy+m.yy, v.yz+m.yz, v.zx+m.zx, v.zy+m.zy, v.zz+m.zz )
@@ -222,6 +229,9 @@ class Mat(object):
       return m.xx+m.yy+m.zz
    def add_diagonal(m,v):
       return Mat( v.x+m.xx, m.xy, m.xz, m.yx, v.y+m.yy, m.yz, m.zx, m.zy, v.z+m.zz )
+   def is_rotation(m):
+      return (m.colx().isnormal() and m.coly().isnormal() and m.colz().isnormal() and
+              m.rowx().isnormal() and m.rowy().isnormal() and m.rowz().isnormal()   )
    def __eq__(self,other):
       return ( abs(self.xx-other.xx) < TOLERANCE and 
                abs(self.xy-other.xy) < TOLERANCE and
@@ -236,105 +246,6 @@ class Mat(object):
 
 Identity = Mat(1,0,0,0,1,0,0,0,1)
 
-class RT(object):
-   """Coordinate frame like rosetta RT, behaves also as a rosetta Stub
-
-   >>> x = RT(rot=Identity,cen=Z)
-   >>> print x
-   RT( Mat[ (1.000000,0.000000,0.000000), (0.000000,1.000000,0.000000), (0.000000,0.000000,1.000000) ], (0.000000,0.000000,1.000000) )
-   >>> assert (x*x) == RT(rot=Identity,cen=2*Z)
-   >>> x = RT(rot=rotation_matrix(Vec(1,0,0),90.0),cen=Vec(0,0,0))
-   >>> print x
-   RT( Mat[ (1.000000,0.000000,0.000000), (0.000000,0.000000,-1.000000), (0.000000,1.000000,0.000000) ], (0.000000,0.000000,0.000000) )
-   >>> assert x*x*x*x == RTI
-   >>> x.cen = X
-   >>> assert x*x*x*x == RT(rot=Identity,cen=4*X)
-   >>> x.cen = Z
-   >>> print x
-   RT( Mat[ (1.000000,0.000000,0.000000), (0.000000,0.000000,-1.000000), (0.000000,1.000000,0.000000) ], (0.000000,0.000000,1.000000) )
-   >>> assert x               == RT(rot=rotation_matrix(X, 90.0),cen=Vec(0, 0,1))
-   >>> assert x*x             == RT(rot=rotation_matrix(X,180.0),cen=Vec(0,-1,1))
-   >>> assert x*x*x           == RT(rot=rotation_matrix(X,270.0),cen=Vec(0,-1,0))
-   >>> assert x*x*x*x         == RT(rot=rotation_matrix(X,  0.0),cen=Vec(0, 0,0))
-   >>> assert x*x*x*x*x       == RT(rot=rotation_matrix(X, 90.0),cen=Vec(0, 0,1))
-   >>> assert x*x*x*x*x*x     == RT(rot=rotation_matrix(X,180.0),cen=Vec(0,-1,1))
-   >>> assert x*x*x*x*x*x*x   == RT(rot=rotation_matrix(X,270.0),cen=Vec(0,-1,0))
-   >>> assert x*x*x*x*x*x*x*x == RT(rot=rotation_matrix(X,  0.0),cen=Vec(0, 0,0))
-   >>> x = RT(rotation_matrix(Vec(1,2,3),123),Vec(5,7,9))
-   >>> assert ~x *  x == RTI
-   >>> assert  x * ~x == RTI
-
-   Frames / RTs are interchangable:
-
-   >>> fr = RT(rotation_matrix(Vec(1,2,3), 65.64),cen=Vec(3,2,1))
-   >>> to = RT(rotation_matrix(Vec(7,5,3),105.44),cen=Vec(10,9,8))
-   >>> x = RT(frm=fr,to=to)
-   >>> assert RT(frm=RTI,to=to) ==  to
-   >>> assert RT(frm=fr,to=RTI) == ~fr
-   >>> assert (to * ~fr) * fr == to
-   >>> assert x * fr == to
-   """
-   def __init__(self, rot=None, cen=None, a=None, b=None, c=None, frm=None, to=None):
-      super(RT, self).__init__()
-      if rot is not None:
-         self.rot = rot
-         self.cen = cen
-      elif frm is not None and to is not None:
-         tmp = to * ~frm
-         self.rot = tmp.rot
-         self.cen = tmp.cen
-      elif a is not None and b is not None and c is not None:
-         if cen is None: cen = a
-         self.from_four_points(cen,a,b,c)
-      else:
-         assert False
-   def from_four_points(s,cen,a,b,c):
-      s.cen = cen
-      e1 = Vec(a-b).normalized()
-      e3 = Vec(e1.cross(c-b)).normalized()
-      e2 = Vec(e1.cross(e3)).normalized()
-      s.rot = Mat(e1.x,e2.x,e3.x,e1.y,e2.y,e3.y,e1.z,e2.z,e3.z)
-      return s
-   def to_frame(s,x):
-      return s.rot * (x - s.cen)
-   def from_frame(s,x):
-      return (s.rot.transpose() * x) + s.cen
-   def __invert__(self):
-      rot = ~self.rot
-      cen = rot * -self.cen
-      return RT(rot,cen)
-   def __mul__(self,other):
-      rot = self.rot*other.rot
-      cen = self.rot*(other.cen) + self.cen
-      return RT(rot=rot,cen=cen)
-   def __eq__(self,other):
-      return self.rot==other.rot and self.cen==other.cen
-   def __str__(self):
-      return "RT( %s, %s )" % (str(self.rot),str(self.cen))
-
-RTI = RT(rot=Identity,cen=Vec(0,0,0))
-
-class Jump(object):
-   """docstring for Jump"""
-   def __init__(self, rot, trans):
-      super(Jump, self).__init__()
-      assert type(rot) is Mat and type(trans) is Vec
-      self.rot = rot
-      self.trans = trans
-def proj(u,v):
-   """
-   >>> u = Vec(1,0,0); v = Vec(1,1,1)
-   >>> proj(u,v)
-   Vec( 1.000000, 0.000000, 0.000000 )
-   """
-   return projection_matrix(u)*v
-def projperp(u,v):
-   """
-   >>> u = Vec(1,0,0); v = Vec(1,1,1)
-   >>> projperp(u,v)
-   Vec( 0.000000, 1.000000, 1.000000 )
-   """
-   return v - proj(u,v)
 def projection_matrix(v):
    m = Mat( v.x * v.x, v.x * v.y, v.x * v.z, v.y * v.x, v.y * v.y, v.y * v.z, v.z * v.x, v.z * v.y, v.z * v.z )
    return m / v.dot(v)
@@ -362,8 +273,212 @@ def rotation_matrix(axis,angle):
    >>> assert r*r*r*r == rx180
    >>> assert r*r*r*r*r*r*r*r == Identity
    >>> assert ~r == r.transposed()
+
+   >>> ang = random.random()*360.0-180.0
+   >>> v = randvec()
+   >>> axs = randnorm()
+   >>> while(abs(v.dot(axs))>0.9): axs = randnorm()
+   >>> u = rotation_matrix(projperp(v,axs),ang)*v
+   >>> assert abs( angle(v,U0,u) - abs(ang) ) < 0.01
+   >>> test_rotation_mat()
+   test_rotation_mat PASS
    """
    return rotation_matrix_radians(axis,angle*math.pi/180.0)
+def test_rotation_mat():
+   import random
+   for i in range(100):
+      a0 = randnorm()
+      t0 = random.uniform(0,math.pi)
+      a,t = rotation_axis(rotation_matrix_radians(a0,t0))
+      if t0 < 0.01: continue
+      if abs(t-math.pi) < 0.00001:
+         if (abs(a.x-a0.x) < 0.001 and abs(a.y-a0.y) < 0.001 and abs(a.z-a0.z) < 0.001) or \
+            (abs(a.x+a0.x) < 0.001 and abs(a.y+a0.y) < 0.001 and abs(a.z+a0.z) < 0.001):
+            continue
+         else:
+            print a0
+            print a
+            return False
+      if not abs(t-t0) < 0.0001 or not (a.normalized()-a0.normalized()).length() < 0.0001:
+         print a0.normalized(), t0
+         print a.normalized() , t
+         print "FAIL"
+         return
+   print "test_rotation_mat PASS"
+
+
+def randrot(n=1):
+   if n is 1: return rotation_matrix(randvec(),random.random()*360)
+   return (rotation_matrix(randvec(),random.random()*360) for i in range(n))
+
+class Xform(object):
+   """Coordinate frame like rosetta Xform, behaves also as a rosetta Stub
+
+   >>> x = Xform(R=Identity,t=Uz)
+   >>> print x
+   Xform( Mat[ (1.000000,0.000000,0.000000), (0.000000,1.000000,0.000000), (0.000000,0.000000,1.000000) ], (0.000000,0.000000,1.000000) )
+   >>> assert (x*x) == Xform(R=Identity,t=2*Uz)
+   >>> x = Xform(R=rotation_matrix(Vec(1,0,0),90.0),t=Vec(0,0,0))
+   >>> print x
+   Xform( Mat[ (1.000000,0.000000,0.000000), (0.000000,0.000000,-1.000000), (0.000000,1.000000,0.000000) ], (0.000000,0.000000,0.000000) )
+   >>> assert x*x*x*x == RTI
+   >>> x.t = Ux
+   >>> assert x*x*x*x == Xform(R=Identity,t=4*Ux)
+   >>> x.t = Uz
+   >>> print x
+   Xform( Mat[ (1.000000,0.000000,0.000000), (0.000000,0.000000,-1.000000), (0.000000,1.000000,0.000000) ], (0.000000,0.000000,1.000000) )
+   >>> assert x               == Xform(R=rotation_matrix(Ux, 90.0),t=Vec(0, 0,1))
+   >>> assert x*x             == Xform(R=rotation_matrix(Ux,180.0),t=Vec(0,-1,1))
+   >>> assert x*x*x           == Xform(R=rotation_matrix(Ux,270.0),t=Vec(0,-1,0))
+   >>> assert x*x*x*x         == Xform(R=rotation_matrix(Ux,  0.0),t=Vec(0, 0,0))
+   >>> assert x*x*x*x*x       == Xform(R=rotation_matrix(Ux, 90.0),t=Vec(0, 0,1))
+   >>> assert x*x*x*x*x*x     == Xform(R=rotation_matrix(Ux,180.0),t=Vec(0,-1,1))
+   >>> assert x*x*x*x*x*x*x   == Xform(R=rotation_matrix(Ux,270.0),t=Vec(0,-1,0))
+   >>> assert x*x*x*x*x*x*x*x == Xform(R=rotation_matrix(Ux,  0.0),t=Vec(0, 0,0))
+   >>> x = Xform(rotation_matrix(Vec(1,2,3),123),Vec(5,7,9))
+   >>> assert ~x *  x == RTI
+   >>> assert  x * ~x == RTI
+
+   Frames / RTs are interchangable:
+
+   >>> fr = Xform(rotation_matrix(Vec(1,2,3), 65.64),t=Vec(3,2,1))
+   >>> to = Xform(rotation_matrix(Vec(7,5,3),105.44),t=Vec(10,9,8))
+   >>> x = to/fr
+   >>> assert to/RTI ==  to
+   >>> assert RTI/fr == ~fr
+   >>> assert (to * ~fr) * fr == to
+   >>> assert x * fr == to
+
+   >>> a1 = randnorm()
+   >>> b1 = randnorm()
+   >>> ang = random.random()*360.0-180.0
+   >>> a2 = rotation_matrix(a1.cross(randnorm()),ang) * a1
+   >>> b2 = rotation_matrix(b1.cross(randnorm()),ang) * b1
+   >>> assert abs(angle(a1,a2) - angle(b1,b2)) < 0.0001
+   >>> xa = Xform().from_two_vecs(a1,a2)
+   >>> xb = Xform().from_two_vecs(b1,b2)
+   >>> assert xa.tolocal(a1).distance(xb.tolocal(b1)) < 0.000001
+   >>> assert xa.tolocal(a2).distance(xb.tolocal(b2)) < 0.000001
+   >>> assert (~xa*a1).distance(~xb*b1) < 0.000001
+   >>> assert (~xa*a2).distance(~xb*b2) < 0.000001   
+   >>> assert b1.distance((xb/xa)*a1) < 0.00001
+   >>> assert b2.distance((xb/xa)*a2) < 0.00001
+   >>> x = randxform()
+   >>> u,v = randvec(2)
+   >>> assert ((x*v)+u).distance((u+x)*v) < 0.00001
+   >>> assert (x*(v+u)).distance((x+u)*v) < 0.00001
+   >>> assert (Xform(u)*x*v).distance((u+x)*v) < 0.00001
+   >>> assert (x*Xform(u)*v).distance((x+u)*v) < 0.00001
+   >>> assert ((x*v)-u).distance((u-x)*v) < 0.00001
+   >>> assert (x*(v-u)).distance((x-u)*v) < 0.00001
+   >>> R = randrot()
+   >>> assert ((R*x)*u).distance(R*(x*u)) < 0.00001
+   >>> assert ((x*R)*u).distance(x*(R*u)) < 0.00001
+   >>> assert ((Xform(R)*x)*u).distance(Xform(R,U0)*(x*u)) < 0.00001
+   >>> assert ((x*Xform(R))*u).distance(x*(Xform(R,U0)*u)) < 0.00001
+   >>> assert ((x/x)*v).distance(v) < 0.00001
+   >>> y = randxform()
+   >>> assert ((x/y)*v).distance(x*~y*v) < 0.00001
+   """
+   def __init__(self, R=None, t=None):
+      super(Xform, self).__init__()
+      if type(R) is Vec and t is None: R,t = Identity,R
+      self.R = R if R else Identity
+      self.t = t if t else U0
+      assert type(self.R) is Mat
+      assert type(self.t) is Vec
+   def from_four_points(s,cen,a,b,c):
+      s.t = cen
+      e1 = (a-b).normalized()
+      e3 = e1.cross(c-b).normalized()
+      e2 = e1.cross(e3).normalized()
+      # print "from_four_points"
+      # print e1
+      # print e2
+      # print e3            
+      s.R = Mat(e1.x,e2.x,e3.x,e1.y,e2.y,e3.y,e1.z,e2.z,e3.z)
+      return s
+   def from_two_vecs(s,a,b):
+      e1 = a.normalized()
+      e2 = projperp(a,b).normalized()
+      e3 = e1.cross(e2)
+      return Xform( Mat(e1.x,e2.x,e3.x,e1.y,e2.y,e3.y,e1.z,e2.z,e3.z),U0)
+   def tolocal(s,x):
+      return s.R.transposed() * (x - s.t)
+   def toglobal(s,x):
+      return (s.R * x) + s.t
+   def __invert__(self):
+      R = ~self.R
+      t = R * -self.t
+      return Xform(R,t)
+   def __mul__(X,o):
+      if(type(o) is Vec):
+         return X.R * o + X.t
+      elif type(o) is Xform:
+         return Xform(X.R*o.R,X.R*(o.t) + X.t)
+      elif type(o) is Mat:
+         return Xform(X.R*o,X.t)
+      else:
+         return o.__rmul__(X)
+   def __rmul__(X,o):
+      if type(o) is Mat:
+         return Xform(o*X.R,o*X.t)
+      raise NotImplementedError      
+   def __div__(X,o):
+      if type(o) is Xform: return X*~o
+      return o.__rdiv__(X)
+   def __add__(X,v):
+      if type(v) is Vec: return Xform( X.R, X.t + X.R*v )
+      return v.__radd__(X)
+   def __radd__(X,v):
+      if type(v) is Vec: return Xform( X.R, X.t + v )
+      raise NotImplementedError
+   def __sub__(X,v):
+      if type(v) is Vec: return Xform( X.R, X.t - X.R*v )
+      return v.__rsub__(X)
+   def __rsub__(X,v):
+      if type(v) is Vec: return Xform( X.R, X.t - v )
+      raise NotImplementedError
+   def __eq__(self,other):
+      return self.R==other.R and self.t==other.t
+   def __repr__(self):
+      return "Xform( %s, %s )" % (str(self.R),str(self.t))
+   def pretty(self):
+      a,r = rotation_axis(self.R)
+      if self.t.length() > 0.00001:
+         return "Xform( axis=%s, ang=%f, dir=%s, dis=%f )"%(str(a),math.degrees(r),str(self.t.normalized()),self.t.length())
+      else:
+         return "Xform( axis=%s, ang=%f, dir=%s, dis=%f )"%(str(a),math.degrees(r),str(U0),0)         
+
+RTI = Xform(R=Identity,t=Vec(0,0,0))
+def stub(cen=None, a=None, b=None, c=None):
+   return Xform().from_four_points(cen,a,b,c)
+
+def randxform(n=1):
+   if n is 1: return Xform(randrot(),randvec())
+   return (Xform(randrot(),randvec()) for i in range(n))
+
+def proj(u,v):
+   """
+   >>> u = Vec(1,0,0); v = Vec(1,1,1)
+   >>> proj(u,v)
+   Vec( 1.000000, 0.000000, 0.000000 )
+   """
+   return projection_matrix(u)*v
+def projperp(u,v):
+   """
+   >>> u = Vec(1,0,0); v = Vec(1,1,1)
+   >>> projperp(u,v)
+   Vec( 0.000000, 1.000000, 1.000000 )
+   """
+   return v - proj(u,v)
+
+def rotation_around(axs,ang,cen):
+   R = rotation_matrix(axs,ang)
+   return Xform(R,R*-cen+cen)
+
+def test():
+   test_rotation_mat()
 
 
 def dihedral(p1,p2,p3,p4):
@@ -410,47 +525,157 @@ def rotation_axis(R):
          y = nnT.yx / x
          z = nnT.zx / x
       elif nnT.yy > TOLERANCE:
-         x = ZERO
+         x = 0
          y = math.sqrt(nnT.yy)
          z = nnT.zy / y
       else:
          assert( nnT.zz > TOLERANCE );
-         x = ZERO
-         y = ZERO
-         z = sqrt( nnT.zz )
+         x = 0
+         y = 0
+         z = math.sqrt( nnT.zz )
       assert abs( x*x + y*y + z*z - 1.0 ) <= 0.01
       return Vec( x, y, z ),math.pi
 
-def test_rotation_mat():
-   import random
-   for i in range(10000):
-      a0 = Vec(random.gauss(0.0,1.0),random.gauss(0.0,1.0),random.gauss(0.0,1.0)).normalized()
-      t0 = random.uniform(0,math.pi)
-      a,t = rotation_axis(rotation_matrix_radians(a0,t0))
-      if t == 0.0 and t0 < 0.001:
-         continue
-      if abs(t-math.pi) < 0.00001:
-         if (abs(a.x-a0.x) < 0.001 and abs(a.y-a0.y) < 0.001 and abs(a.z-a0.z) < 0.001) or \
-            (abs(a.x+a0.x) < 0.001 and abs(a.y+a0.y) < 0.001 and abs(a.z+a0.z) < 0.001):
-            continue
-         else:
-            print a0
-            print a
-            continue
-      if not abs(t-t0) < 0.0001 or not (a.normalized()-a0.normalized()).length() < 0.0001:
-         print a0.normalized(), t0
-         print a.normalized() , t
-         print "FAIL"
-         return
-   print "test_rotation_mat PASS"
+def point_line_distance(p,a,c):
+   """
+   >>> point_line_distance(U0,Uy,U0)
+   0.0
+   >>> round(point_line_distance(U0,Uy,Ux+Uz),8)
+   1.41421356
+   >>> round(point_line_distance(Ux,Ux,Vec(3,2,1)) , 8)
+   2.23606798
+   """
+   return projperp(a,p-c).length()
+
+def line_line_distance(a1,c1,a2,c2):
+   """
+   >>> line_line_distance(Ux,U0,Uy,U0)
+   0.0
+   >>> round(line_line_distance(Ux,Vec(0,1,2),Ux,Vec(3,2,1)) , 8)
+   1.41421356
+   >>> line_line_distance(Ux,10*Uy,Uz,99.0*Ux)
+   10.0
+   >>> X = randxform()
+   >>> round(line_line_distance(X.R*Ux,X*Vec(0,1,2),X.R*Ux,X*Vec(3,2,1)) , 8)
+   1.41421356
+   """
+   a1 = a1.normalized()
+   a2 = a2.normalized()   
+   if abs(a1.dot(a2)) > 0.9999:
+      return projperp(a1,c2-c1).length()
+   a = a1
+   b = a2
+   c = c2-c1
+   n = abs(c.dot(a.cross(b)))
+   d = a.cross(b).length()
+   if abs(d) < 0.000001: return 0
+   return n/d
+
+def alignvectors(aa,ab,ba,bb):
+   """
+   >>> ang = random.random()*360.0-180.0
+   >>> a1 = randvec()
+   >>> b1 = randnorm()*a1.length()
+   >>> l2 = random.gauss(0,1)
+   >>> a2 = rotation_matrix(a1.cross(randnorm()),ang) * a1 * l2
+   >>> b2 = rotation_matrix(b1.cross(randnorm()),ang) * b1 * l2
+   >>> assert abs(angle(a1,a2) - angle(b1,b2)) < 0.0001
+   >>> Xa2b = alignvectors(a1,a2,b1,b2)
+   >>> assert Xa2b.t.length() < 0.00001
+   >>> assert (Xa2b*a1).distance(b1) < 0.000001
+   >>> assert (Xa2b*a2).distance(b2) < 0.000001
+   """
+   xa = Xform().from_two_vecs(ab,aa)
+   xb = Xform().from_two_vecs(bb,ba)
+   return xb/xa
+
+def get_test_generators1():
+   x1 = rotation_around(Vec(0,0,1),180,Vec(0,0,0))
+   x2 = rotation_around(Vec(1,1,1),120,Vec(1,0,0))
+   return x1,x2
+
+def expand_xforms(G,N=3,c=Vec(1,3,10)):
+   """
+   >>> G = get_test_generators1()
+   >>> for x in expand_xforms(G): print x*Ux
+   (-1.000000,0.000000,0.000000)
+   (1.000000,0.000000,0.000000)
+   (1.000000,-0.000000,0.000000)
+   (-1.000000,0.000000,0.000000)
+   (1.000000,-2.000000,0.000000)
+   (1.000000,0.000000,0.000000)
+   (-1.000000,2.000000,0.000000)
+   (-1.000000,0.000000,0.000000)
+   (1.000000,-2.000000,0.000000)
+   (1.000000,-0.000000,-2.000000)
+   """
+   seenit = set()
+   for Xs in chain(G,*(product(G,repeat=n) for n in range(2,N+1))):
+      X = Xs if isinstance(Xs,Xform) else reduce(Xform.__mul__,Xs)
+      v = X*c
+      key = (round(v.x,3),round(v.y,3),round(v.z,3))
+      if key not in seenit:
+         seenit.add(key)
+         yield X
+
+def find_identities(G,n=6,c=Vec(1,3,10)):
+   """
+   >>> G = get_test_generators1()
+   >>> for I in find_identities(G): print I.t
+   (0.000000,0.000000,0.000000)
+   (-2.000000,2.000000,2.000000)
+   (2.000000,-2.000000,2.000000)
+   """
+   for x in expand_xforms(G,n,c):
+      if (abs(x.R.xx-1.0) < 0.0000001 and
+          abs(x.R.yy-1.0) < 0.0000001 and
+          abs(x.R.zz-1.0) < 0.0000001 ):
+         yield x
+
+def get_cell_bounds_orthogonal_only(G,n=6,c=Vec(1,3,10)):
+   """
+   very slow... need to speed up
+   # >>> G = get_test_generators1()
+   # >>> get_cell_bounds_orthogonal_only(G[:2],12)
+   # (4.0, 4.0, 4.0)
+   """
+   mnx,mny,mnz = 9e9,9e9,9e9
+   for i in (I.t for I in find_identities(G,n)):
+      if abs(i.x) > 0.0001 and abs(i.y) < 0.0001 and abs(i.z) < 0.0001: mnx = min(mnx,abs(i.x))
+      if abs(i.x) < 0.0001 and abs(i.y) > 0.0001 and abs(i.z) < 0.0001: mny = min(mny,abs(i.y))
+      if abs(i.x) < 0.0001 and abs(i.y) < 0.0001 and abs(i.z) > 0.0001: mnz = min(mnz,abs(i.z))
+   return round(mnx,3),round(mny,3),round(mnz,3)
 
 
 
-def test():
-   test_rotation_mat()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
-   test()
    import doctest
-   print doctest.testmod()
-
+   for i in range(10):
+      r = doctest.testmod()
+      print r
+      if r[0] is not 0: break

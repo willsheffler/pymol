@@ -4,9 +4,7 @@ newpath = os.path.dirname(inspect.getfile(inspect.currentframe())) # script dire
 if not newpath in sys.path: sys.path.append(newpath)
 import string,re,gzip,itertools
 from pymol import cmd
-import LA as la
 from sym_util import *
-from pymol_util import *
 
 def homogenizechains(sel1,sel2):
    cmd.remove("hydro")
@@ -338,3 +336,105 @@ if __name__ == '__main__':
 	pymol.finish_launching()
 	cmd = pymol.cmd
 	for i in range(2,9): procCdat(i)
+
+def prepare_c2_nmr(pattern,outdir=None):
+	if None is outdir: outdir = os.path.dirname(pattern)
+	if not os.path.exists(outdir): os.mkdir(outdir)	
+	for i in glob.glob(pattern):
+		try:
+			name = os.path.basename(i).split(".")[0]
+			cmd.delete('all')
+			cmd.load(i)
+			cmd.remove("hydro")
+			cmd.remove("resn hoh")
+			cmd.remove("not chain A+B")
+			Nres = cmd.select(name+" and chain A and name CA")
+			cmd.split_states(name)
+			cmd.delete(name)
+			for obj in cmd.get_object_list("all"):
+				s1,s2 = ("{0} and chain {1}".format(obj,c) for c in "AB")
+				n1,n2 = (cmd.select(x) for x in (s1,s2))
+				#homogenizechains(s1,s2)
+				if cmd.select(s1) < 0.8*min(n1,n2):
+					print "ERROR",obj,n1,n2,cmd.select(s1)
+					raise Exception()
+				if not 0 == alignc2(obj,tgtaxis=Vec(0.816496579408716,0,0.57735027133783)):
+					print "ERROR"
+					raise Exception()
+				if not os.path.exists(outdir+"/"+obj[:-5]): os.mkdir(outdir+"/"+obj[:-5])
+				cmd.save(outdir+"/"+obj[:-5]+"/"+obj+"A.pdb",s1)
+				cmd.save(outdir+"/"+obj[:-5]+"/"+obj+"B.pdb",s2)
+			print "success",i,Nres
+		except:
+			print "caught exception"
+
+
+def makecryst1_i213(fn):
+	cmd.load(fn,'work_prot')
+	sele = 'work_prot'
+	fn = os.path.basename(fn)
+	if fn.endswith(".gz" ): fn = fn[:-3]
+	if fn.endswith(".pdb"): fn = fn[:-4]
+	fn += "_cryst1.pdb"
+
+	Dsel = sele+' and chain A+D'
+	Tsel = sele+' and chain A+B+C'
+	
+	Xaln = la.alignvectors( c2axis(Dsel,chains=('A','D')),
+	                        c3axis(Tsel),
+	                        Vec(0,0,1),
+	                        Vec(1,1,1))
+	xform(sele,Xaln+com(Tsel))
+	c2 = com(sele+' and chain A+D')
+	a2 = c2axis(Dsel,chains=('A','D'))
+	c3 = com(sele+' and chain A+B+C')
+	a3 = c3axis(Tsel)
+	assert c3.distance(         U0            ) < 0.00001
+	assert a3.distance(Vec(1,1,1).normalized()) < 0.00001
+	assert a2.distance(         Uz            ) < 0.00001
+
+	trans(sele,Vec(-c2.x))
+	cellsize = abs((c2.y-c2.x))*4.0
+	cmd.save(".tmp.pdb",sele+" and chain A")
+	with open(fn,'w') as out:
+		out.write("CRYST1  %7.3f  %7.3f  %7.3f  90.00  90.00  90.00 I 21 3\n"%((cellsize,)*3))
+	os.system("cat .tmp.pdb >> %s"%fn)
+	os.system("rm .tmp.pdb")
+
+	# x1 = rotation_around(a2,180,c2)
+	# x2 = rotation_around(a3,120,c3)	
+	# x3 = rotation_around(a3,240,c3)	
+	# for i,X in enumerate( la.expand_xforms((x1,x2),8) ):
+	# 	cmd.create("sub%i"%i,sele+" and chain A and not sub*")
+	#  	xform("sub%i"%i,X)
+
+	# cx,cy,cz = get_cell_bounds_orthogonal_only((x1,x2),12,com(sele+' and chain A'))
+	# d = abs((c2.y-c2.x)*4.0)
+
+	# cmd.hide('ev','not chain A')
+	# for i,X in enumerate( la.find_identities((x1,x2,x3),9) ):
+	# 	cmd.create("sub%ii"%i,sele+" and chain A and not sub*")
+	# 	xform("sub%ii"%i,X)
+	# 	cmd.show('spheres',"sub%ii"%i)
+
+	# (0.374996,0.500000,0.250000)
+
+def process_xtal_dir(d):
+	for fn in glob.glob(d+"/*_I213_*.pdb"):
+		makecryst1_i213(fn)
+
+
+
+
+
+
+
+
+
+if __name__ == '__main__':
+   import doctest
+   for i in range(10):
+      r = doctest.testmod()
+      print r
+      if r[0] is not 0: break
+

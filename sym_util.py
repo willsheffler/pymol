@@ -3,28 +3,30 @@ import sys,os,inspect
 newpath = os.path.dirname(inspect.getfile(inspect.currentframe())) # script directory
 if not newpath in sys.path: sys.path.append(newpath)
 import string,re,gzip,itertools
-import LA as la
 from pymol_util import *
 from pymol import cmd
 
+#### HACK!!!!!!!!!!!
+from LA import *
+
 def c2axis(sele,alignsele=None,chains=["A","B"]):
 	if alignsele is None: alignsele = sele
-        #cmd.create('tmp98367598',sele)        
+        #cmd.create('tmp98367598',sele)
         #sele = 'tmp98367598'
 	cmd.remove(sele+" and resn HOH")
-	trans(sele,-com(alignsele))
+	cen = com(alignsele)
 	a = cmd.get_model(alignsele+" and chain "+chains[0]+" and name CA").atom
 	b = cmd.get_model(alignsele+" and chain "+chains[1]+" and name CA").atom
-	print len(a),len(b)
+	# print len(a),len(b)
 	if len(a) != len(b) or len(a) == 0:
 		print "ERROR on %s: subunits are not the same size!"%alignsele
 		return False
 	axis = la.Vec(0,0,0)
 	for i in range(len(a)):
-		axis1 = ( la.Vec(a[i].coord)+la.Vec(b[i].coord) ).normalized()
+		axis1 = ( la.Vec(a[i].coord)+la.Vec(b[i].coord)-2*cen ).normalized()
 		if axis.length() > 0.0001 and axis.dot(axis1) < 0:
 			axis1 *= -1
-		axis += axis1		
+		axis += axis1
 		# print axis1
 	axis.normalize()
         #cmd.delete('tmp98367598')
@@ -33,13 +35,21 @@ def c2axis(sele,alignsele=None,chains=["A","B"]):
 def alignc2(sele,alignsele=None,tgtaxis=la.Vec(0,0,1),chains=["A","B"]):
 	if alignsele is None: alignsele = sele
 	axis = c2axis(sele,alignsele,chains)
+	if not axis: return -1
 	# print "axis of rotation:",axis
-	alignaxis(sele,tgtaxis,axis,la.Vec(0,0,0))
-	return True
+	alignaxis(sele,tgtaxis,axis,la.Vec(0,0,0))	
+	# seleA = "("+alignsele+") and chain %s"%chains[0]
+	# seleB = "("+alignsele+") and chain %s"%chains[1]
+	# print seleA
+	# print seleB
+	# rot(seleA,tgtaxis,180.0)
+	# r = cmd.rms_cur(seleA,seleB)
+	# rot(seleA,tgtaxis,180.0)	
+	return 0
 
 def c3axis(sele,alignsele=None,chains=["A","B","C"]):
 	if alignsele is None: alignsele = sele
-        #cmd.create('tmp98367598',sele)        
+        #cmd.create('tmp98367598',sele)
         #sele = 'tmp98367598'
 	cmd.remove(sele+" and resn HOH")
 	cen = com(alignsele)
@@ -55,7 +65,7 @@ def c3axis(sele,alignsele=None,chains=["A","B","C"]):
 		axis1 = ( la.Vec(a[i].coord)+la.Vec(b[i].coord)+la.Vec(c[i].coord) - 3*cen ).normalized()
 		if axis.length() > 0.0001 and axis.dot(axis1) < 0:
 			axis1 *= -1
-		axis += axis1		
+		axis += axis1
 		# print axis1
 	axis.normalize()
         #cmd.delete('tmp98367598')
@@ -86,7 +96,7 @@ def c4axis(sele,alignsele=None,chains=["A","B","C","D"]):
 		axis1 = ( la.Vec(a[i].coord)+la.Vec(b[i].coord)+la.Vec(c[i].coord)+la.Vec(d[i].coord) ).normalized()
 		if axis.length() > 0.0001 and axis.dot(axis1) < 0:
 			axis1 *= -1
-		axis += axis1		
+		axis += axis1
 		# print axis1
 	axis.normalize()
 	return axis
@@ -117,7 +127,7 @@ def c5axis(sele,alignsele=None,chains=["A","B","C","D","E"]):
 		axis1 = ( la.Vec(a[i].coord)+la.Vec(b[i].coord)+la.Vec(c[i].coord)+la.Vec(d[i].coord)+la.Vec(e[i].coord) ).normalized()
 		if axis.length() > 0.0001 and axis.dot(axis1) < 0:
 			axis1 *= -1
-		axis += axis1		
+		axis += axis1
 		# print axis1
 	axis.normalize()
 	return axis
@@ -181,7 +191,7 @@ def mki213(N, sel = 'all'):
 										if seen: continue
 										else: seenit.append(test)
 										n = "i213_%i%i%i%i%i%i%i%i%i"%(i25, i35, i24, i34, i23, i33, i22, i32, i21)
-										cmd.create(n, 'base80345769083457 and name n+ca+c')
+										cmd.create(n, 'base80345769083457')
 										rot(n, a2, i21*180.0, c2)
 										rot(n, a3, i32*120.0, c3)
 										rot(n, a2, i22*180.0, c2)
@@ -281,10 +291,10 @@ def selbycomp(trn=0):
 	cmd.select("TRI2","TRI and chain D+E+F")
 	cmd.select("TRI3","TRI and chain G+H+I")
 	cmd.select("TRI4","TRI and chain J+K+L")
-	cmd.select("TRI5","TRI and chain M+N+O")
+	cmd.select("TRI5","TRI and chain Mat+N+O")
 	cmd.select("TRI6","TRI and chain P+Q+R")
 	cmd.select("TRI7","TRI and chain S+T+U")
-	cmd.select("TRI8","TRI and chain V+W+X")
+	cmd.select("TRI8","TRI and chain Vec+W+Ux")
 	cmd.select("DIM1","DIM and chain A+D")
 	cmd.select("DIM2","DIM and chain B+G")
 	cmd.select("DIM3","DIM and chain C+J")
@@ -294,9 +304,9 @@ def selbycomp(trn=0):
 	cmd.select("DIM7","DIM and chain I+O")
 	cmd.select("DIM8","DIM and chain K+Q")
 	cmd.select("DIM9","DIM and chain L+N")
-	cmd.select("DIM10","DIM and chain M+V")
+	cmd.select("DIM10","DIM and chain Mat+Vec")
 	cmd.select("DIM11","DIM and chain P+W")
-	cmd.select("DIM12","DIM and chain X+S")
+	cmd.select("DIM12","DIM and chain Ux+S")
 	cmd.delete("LINE*")
 	cmd.delete("serf*")
 
@@ -307,61 +317,55 @@ def selbycomp(trn=0):
 	isosurface surf%s, map%s"""
 
 
-	for i in range(1, 9): 
+	for i in range(1, 9):
 		cmd.do(ISO%(("TRI%i"%i,)*4))
 		cmd.color(COLORS[i-1],"surfTRI%i"%i)
 		c = com("TRI%i"%i)
 		# trans("TRI%i"%i,trn*c.normalized())
 		obj = [
-			CYLINDER, 
+			CYLINDER,
 		   	0.0, 0.0, 0.0,
 		   	1.6*c.x, 1.6*c.y, 1.6*c.z,
 			1.5,
 			0.1,0.1,0.1,0.1,0.1,0.1,
-		]                                                                                            
+		]
 		cmd.load_cgo(obj,'LINETRI%i'%i)
-	for i in range(1,13): 
+	for i in range(1,13):
 		cmd.do(ISO%(("DIM%i"%i,)*4))
 		cmd.color(COLORS[i+7],"surfDIM%i"%i)
 		c = com("DIM%i"%i)
 		# trans("DIM%i"%i,trn*com("DIM%i"%i).normalized())
 		obj = [
-			CYLINDER, 
+			CYLINDER,
 		   	0.0, 0.0, 0.0,
 		   	1.3*c.x, 1.3*c.y, 1.3*c.z,
 			1.0,
 			0,0,1,0,0,1
-		]                                                                                            
+		]
 		cmd.load_cgo(obj,'LINEDIM%i'%i)
-
-
 
 def getframe(obj):
 	m = cmd.get_model(obj)
-	x = la.Vec(m.atom[0].coord)
-	y = la.Vec(m.atom[1].coord)
-	z = la.Vec(m.atom[2].coord)
-	return la.RT(x,y,z)
+	x = la.Vec(m.atom[       0     ].coord)
+	y = la.Vec(m.atom[len(m.atom)/2].coord)
+	z = la.Vec(m.atom[      -1     ].coord)
+	return la.Xform(a=x,b=y,c=z)
 
-def getrelframe(newobj,refobj,refR=None,refT=None):
-	if refR is None: refR = la.Identity
-	if refT is None: refT = la.Vec(0,0,0)
-	sref = getframe(refobj)
-	print sref
-
-
-
-
+def getrelframe(newobj,refobj,Forigin=None):
+	if Forigin is None: Forigin = la.Xform(R=la.Identity,t=la.Vec(0,0,0))g
+	Fref = getframe(refobj)
+	Fnew = getframe(newobj)
+	Fdelta = Fnew * ~Fref
+	print (Fdelta * Forigin).pretty()
+	return Fdelta * Forigin
 
 
 
-
-
-
-
-
-
-
-
+def rechain(sel,nres):
+	chains = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz"
+	ntot = len(getres(sel))
+	assert ntot % nres == 0
+	for i in range(ntot/nres):
+		cmd.alter("resi %i-%i"%( nres*i+1,nres*(i+1)),"chain='%s'"%chains[i])
 
 
