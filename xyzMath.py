@@ -46,15 +46,18 @@ class Vec(object):
    def normdot(u,v):
       return u.dot(v)/u.length()/v.length()
    def angle(u,v):
-      return math.acos( u.normdot(v) )
+      d = u.normdot(v)
+      if d > 1.0-EPS: return 0.0;
+      if d < EPS-1.0: return math.pi
+      return math.acos(d)
    def angle_degrees(u,v):
-      return degrees(math.acos( u.normdot(v) ))
+      return degrees(u.angle(v))
    def lineangle(u,v):
       if u.length() < SQRTEPS or v.length < SQRTEPS: return 0.0
-      return abs(math.acos( u.normdot(v) ))
+      ang = abs(math.acos( u.normdot(v) ))
+      return ang if ang < math.pi/2.0 else math.pi-ang
    def lineangle_degrees(u,v):
-      if u.length() < SQRTEPS or v.length < SQRTEPS: return 0.0
-      return degrees(abs(math.acos( u.normdot(v) )))
+      return degrees(u.lineangle(v))
    def length(u):
       return math.sqrt(u.dot(u))
    def distance(u,v):
@@ -121,6 +124,15 @@ def randnorm(n=1):
    """
    if n is 1: return randvec().normalized()
    return (randvec().normalized() for i in range(n))
+
+def coplanar(x1,x2,x3,x4):
+   """
+   >>> u,v,w = randvec(3)
+   >>> a,b,c = (random.gauss(0,10) for i in range(3))
+   >>> assert     coplanar(u, v, w, u + a*(u-v) + b*(v-w) + c*(w-u) )
+   >>> assert not coplanar(u, v, w, u + a*(u-v) + b*(v-w) + c*(w-u) + randvec().cross(u-v) )   
+   """
+   return abs((x3-x1).dot((x2-x1).cross(x4-x3))) < SQRTEPS
 
 class Mat(object):
    """docstring for Mat
@@ -486,21 +498,32 @@ def projperp(u,v):
    return v - proj(u,v)
 
 def rotation_around(axs,ang,cen):
-   R = rotation_matrix_degrees(axs,ang)
+   R = rotation_matrix(axs,ang)
    return Xform(R,R*-cen+cen)
+
+def rotation_around_degrees(axs,ang,cen):
+   return rotation_around(axs,radians(ang),cen)
 
 def test():
    test_rotation_mat()
 
 
 def dihedral(p1,p2,p3,p4):
+   """
+   >>> dihedral_degrees(Ux,Uy,U0,Uz)
+   90.0
+   >>> dihedral_degrees(Ux,U0,Uy,Uz)
+   -90.0
+   """
    a = ( p2 - p1 ).normalized()
    b = ( p3 - p2 ).normalized()
    c = ( p4 - p3 ).normalized()
    x = -a.dot(c) + a.dot(b) * b.dot(c)
    y =  a.dot( b.cross(c) );
-   return abs(math.atan2(y,x))
+   return math.atan2(y,x)
 
+def dihedral_degrees(p1,p2,p3,p4):
+   return degrees(dihedral(p1,p2,p3,p4))
 
 def angle(p1,p2,p3=None):
    if p3 is None:
@@ -584,29 +607,58 @@ def line_line_distance(a1,c1,a2,c2):
    return n/d
 
 def alignvector(a,b):
-   return rotation_around(a.cross(b),-a.angle(b))
+   """
+   >>> u = randvec()
+   >>> v = randvec()
+   >>> assert v.angle(alignvector(u,v)*u) < EPS
+   """
+   return rotation_around(a.normalized()+b.normalized(),math.pi,U0)
+
+def alignaroundaxis(axis,u,v):
+   """
+   >>> axis = randnorm()
+   >>> u = randvec()
+   >>> angle = (random.random()-0.5)*2*math.pi
+   >>> v = rotation_matrix(axis,angle)*u
+   >>> uprime = alignaroundaxis(axis,u,v)*u
+   >>> assert v.angle(uprime) < EPS
+   >>> v = randvec()
+   >>> uprime = alignaroundaxis(axis,u,v)*u
+   >>> assert coplanar(U0,axis,v,uprime)
+   """
+   return rotation_around(axis, dihedral(u,U0,axis,v), U0 )
 
 def alignvectors(aa,ab,ba,bb):
    """
-   >>> ang = random.random()*360.0-180.0
-   >>> a1 = randvec()
-   >>> b1 = randnorm()*a1.length()
-   >>> l2 = random.gauss(0,1)
-   >>> a2 = rotation_matrix_degrees(a1.cross(randnorm()),ang) * a1 * l2
-   >>> b2 = rotation_matrix_degrees(b1.cross(randnorm()),ang) * b1 * l2
-   >>> assert abs(angle(a1,a2) - angle(b1,b2)) < EPS
-   >>> Xa2b = alignvectors(a1,a2,b1,b2)
-   >>> assert Xa2b.t.length() < EPS
-   >>> assert (Xa2b*a1).distance(b1) < EPS
-   >>> assert (Xa2b*a2).distance(b2) < EPS
+   # >>> ang = random.random()*360.0-180.0
+   # >>> a1 = randvec()
+   # >>> b1 = randnorm()*a1.length()
+   # >>> l2 = random.gauss(0,1)
+   # >>> a2 = rotation_matrix_degrees(a1.cross(randnorm()),ang) * a1 * l2
+   # >>> b2 = rotation_matrix_degrees(b1.cross(randnorm()),ang) * b1 * l2
+   # >>> assert abs(angle(a1,a2) - angle(b1,b2)) < EPS
+   # >>> Xa2b = alignvectors(a1,a2,b1,b2)
+   # >>> assert Xa2b.t.length() < EPS
+
+   # >>> assert (Xa2b*a1).distance(b1) < EPS
+
+   #>>> assert (Xa2b*a2).distance(b2) < EPS
    """
+   Xc = alignvector(aa+ab,ba+bb)
+   print ba
+   print bb
+   print Xc*aa
+   print Xc*ab
+   print dihedral(ba,U0,ba+bb,Xc*aa)
+   Rc = rotation_matrix( ba+bb, -dihedral(ba,U0,ba+bb,Xc*aa) )
+   return Rc*Xc
    xa = Xform().from_two_vecs(ab,aa)
    xb = Xform().from_two_vecs(bb,ba)
    return xb/xa
 
 def get_test_generators1():
-   x1 = rotation_around(Vec(0,0,1),180,Vec(0,0,0))
-   x2 = rotation_around(Vec(1,1,1),120,Vec(1,0,0))
+   x1 = rotation_around_degrees(Vec(0,0,1),180,Vec(0,0,0))
+   x2 = rotation_around_degrees(Vec(1,1,1),120,Vec(1,0,0))
    return x1,x2
 
 def expand_xforms(G,N=3,c=Vec(1,3,10)):

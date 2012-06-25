@@ -386,18 +386,18 @@ def makecryst1_i213(fn):
 	                        c2axis(Dsel,chains=('A','D')),
 	                        xyz.Vec(1,1,1),
 	                        xyz.Vec(0,0,1)   )
-	xform(sele,Xaln-com(Tsel))
+	xform(sele,xyz.Vec((Xaln*-com(Dsel)).x)+Xaln-com(Tsel))
 	c2 = com(Dsel)
 	c3 = com(Tsel)
 	a2 = c2axis(Dsel,chains=('A','D'))
 	a3 = c3axis(Tsel)
+	# trans(sele,xyz.Vec(-c2.x))
 	print a2.lineangle(xyz.Vec(0,0,1))
 	print a3.lineangle(xyz.Vec(1,1,1))
 	assert c3.lineangle(xyz.Vec(1,1,1)) < xyz.SQRTEPS
 	assert a3.lineangle(xyz.Vec(1,1,1)) < xyz.SQRTEPS
 	assert a2.lineangle(xyz.Vec(0,0,1)) < xyz.SQRTEPS
 
-	# trans(sele,xyz.Vec(-c2.x))
 	# cellsize = abs((c2.y-c2.x))*4.0
 	# print "\nCELL SIZE",cellsize,'\n'
 	# cmd.save(".tmp.pdb",sele+" and chain A")
@@ -406,9 +406,9 @@ def makecryst1_i213(fn):
 	# os.system("cat .tmp.pdb >> %s"%fn)
 	# os.system("rm .tmp.pdb")
 
-	# x1 = xyz.rotation_around(a2,180,c2)
-	# x2 = xyz.rotation_around(a3,120,c3)	
-	# x3 = xyz.rotation_around(a3,240,c3)	
+	# x1 = xyz.rotation_around_degrees(a2,180,c2)
+	# x2 = xyz.rotation_around_degrees(a3,120,c3)	
+	# x3 = xyz.rotation_around_degrees(a3,240,c3)	
 	# for i,X in enumerate( xyzexpand_xforms((x1,x2),8) ):
 	# 	cmd.create("sub%i"%i,sele+" and chain A and not sub*")
 	#  	xform("sub%i"%i,X)

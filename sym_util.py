@@ -156,8 +156,8 @@ def mki213(N, sel = 'all'):
 	a3 = xyz.Vec(0, 0, 1)
 	cmd.create('base80345769083457', sel+" and chain A and visible")
 	seenit = []
-	R2 = [rotation_matrix_degrees(a2, 0), rotation_matrix_degrees(a2, 180), ]
-	R3 = [rotation_matrix_degrees(a3, 0), rotation_matrix_degrees(a3, 120), rotation_matrix_degrees(a3, 240), ]
+	R2 = [xyz.rotation_matrix_degrees(a2, 0), xyz.rotation_matrix_degrees(a2, 180), ]
+	R3 = [xyz.rotation_matrix_degrees(a3, 0), xyz.rotation_matrix_degrees(a3, 120), xyz.rotation_matrix_degrees(a3, 240), ]
 	C = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	print a2, c2, a3, c3
 	for i21 in range(2):
@@ -232,13 +232,13 @@ def mkp23(N, R=43.5, i=0, sel = 'all'):
 	a2 = [xyz.Vec(0,0,0),xyz.Vec(1,0,0),xyz.Vec(0,1,0),xyz.Vec(0,0,1)]
 	cmd.create('base80345769083457', sel+" and visible")
 	seenit = []
-	R2 = [rotation_matrix_degrees(a2[1],  0), # hack
-	      rotation_matrix_degrees(a2[1],180),
-	      rotation_matrix_degrees(a2[2],180),
-	      rotation_matrix_degrees(a2[3],180) ]
-	R3 = [rotation_matrix_degrees(a3[1],  0), # hack!
-	      rotation_matrix_degrees(a3[1],120),
-	      rotation_matrix_degrees(a3[2],120), ]
+	R2 = [xyz.rotation_matrix_degrees(a2[1],  0), # hack
+	      xyz.rotation_matrix_degrees(a2[1],180),
+	      xyz.rotation_matrix_degrees(a2[2],180),
+	      xyz.rotation_matrix_degrees(a2[3],180) ]
+	R3 = [xyz.rotation_matrix_degrees(a3[1],  0), # hack!
+	      xyz.rotation_matrix_degrees(a3[1],120),
+	      xyz.rotation_matrix_degrees(a3[2],120), ]
 	C = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	print a2, c2, a3, c3
 	for i21 in range(4):
