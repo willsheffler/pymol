@@ -194,11 +194,13 @@ def showcom(sel="all"):
 	numcom += 1
 
 
-def showvec(c):
-	global numvec
+def showvec(c,lab=None):
+	if lab is None:
+		global numvec
+		lab = "vec%i"%numvec
+		numvec += 1
 	cgo = [COLOR, 1.0, 1.0, 1.0, SPHERE, c.x, c.y, c.z, 1.0] ## white sphere with 3A radius
-	cmd.load_cgo(cgo, "vec%i"%numvec)
-	numvec += 1
+	cmd.load_cgo(cgo,lab)
 
 
 def showvecfrompoint(a, c, lbl):

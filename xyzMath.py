@@ -44,7 +44,7 @@ class Vec(object):
    def dot(u,v):
       return u.x*v.x+u.y*v.y+u.z*v.z
    def normdot(u,v):
-      return u.dot(v)/u.length()/v.length()
+      return min(1.0,max(-1.0,u.dot(v)/u.length()/v.length()))
    def angle(u,v):
       d = u.normdot(v)
       if d > 1.0-EPS: return 0.0;
@@ -626,35 +626,79 @@ def alignaroundaxis(axis,u,v):
    >>> uprime = alignaroundaxis(axis,u,v)*u
    >>> assert coplanar(U0,axis,v,uprime)
    """
-   return rotation_around(axis, dihedral(u,U0,axis,v), U0 )
+   return rotation_around(axis, -dihedral(u,axis,U0,v), U0 )
 
-def alignvectors(aa,ab,ba,bb):
+def alignvectors_minangle(a1,a2,b1,b2):
    """
-   # >>> ang = random.random()*360.0-180.0
-   # >>> a1 = randvec()
-   # >>> b1 = randnorm()*a1.length()
-   # >>> l2 = random.gauss(0,1)
-   # >>> a2 = rotation_matrix_degrees(a1.cross(randnorm()),ang) * a1 * l2
-   # >>> b2 = rotation_matrix_degrees(b1.cross(randnorm()),ang) * b1 * l2
-   # >>> assert abs(angle(a1,a2) - angle(b1,b2)) < EPS
-   # >>> Xa2b = alignvectors(a1,a2,b1,b2)
-   # >>> assert Xa2b.t.length() < EPS
+   exact alignment:
+   >>> ang = random.random()*360.0-180.0
+   >>> a1 = randvec()
+   >>> b1 = randnorm()*a1.length()
+   >>> l2 = random.gauss(0,1)
+   >>> a2 = rotation_matrix_degrees(a1.cross(randnorm()),ang) * a1 * l2
+   >>> b2 = rotation_matrix_degrees(b1.cross(randnorm()),ang) * b1 * l2
+   >>> assert abs(angle(a1,a2) - angle(b1,b2)) < EPS
+   >>> Xa2b = alignvectors_minangle(a1,a2,b1,b2)
+   >>> assert Xa2b.t.length() < EPS
+   >>> assert (Xa2b*a1).distance(b1) < EPS
+   >>> assert (Xa2b*a2).distance(b2) < EPS
 
-   # >>> assert (Xa2b*a1).distance(b1) < EPS
-
-   #>>> assert (Xa2b*a2).distance(b2) < EPS
+   if angle(a1,a2) != angle(b1,2b), minimize deviation
+   >>> a1,a2,b1,b2 = randvec(4)
+   >>> Xa2b = alignvectors_minangle(a1,a2,b1,b2)
+   >>> assert coplanar(b1,b2,Xa2b*a1,Xa2b*a2)
+   >>> assert (b1.angle(a1)+b2.angle(a2)) > (b1.angle(Xa2b*a1)+b2.angle(Xa2b*a2))
    """
-   Xc = alignvector(aa+ab,ba+bb)
-   print ba
-   print bb
-   print Xc*aa
-   print Xc*ab
-   print dihedral(ba,U0,ba+bb,Xc*aa)
-   Rc = rotation_matrix( ba+bb, -dihedral(ba,U0,ba+bb,Xc*aa) )
-   return Rc*Xc
-   xa = Xform().from_two_vecs(ab,aa)
-   xb = Xform().from_two_vecs(bb,ba)
-   return xb/xa
+   aaxis = (a1.normalized()+a2.normalized())/2.0
+   baxis = (b1.normalized()+b2.normalized())/2.0
+   Xmiddle = alignvector(aaxis,baxis)
+   assert (baxis).angle(Xmiddle*(aaxis)) < SQRTEPS
+   Xaround = alignaroundaxis(baxis, Xmiddle*a1, b1 )# 
+   return Xaround * Xmiddle
+   # not so good if angles don't match:
+   # xa = Xform().from_two_vecs(a2,a1)
+   # xb = Xform().from_two_vecs(b2,b1)
+   # return xb/xa
+
+def alignvectors(a1,a2,b1,b2):
+   return alignvectors_minangle(a1,a2,b1,b2)
+
+# def alignvectors_kindamindis(a1,a2,b1,b2):
+#    """
+#    >>> ang = random.random()*360.0-180.0
+#    >>> a1 = randvec()
+#    >>> b1 = randnorm()*a1.length()
+#    >>> l2 = random.gauss(0,1)
+#    >>> a2 = rotation_matrix_degrees(a1.cross(randnorm()),ang) * a1 * l2
+#    >>> b2 = rotation_matrix_degrees(b1.cross(randnorm()),ang) * b1 * l2
+#    >>> assert abs(angle(a1,a2) - angle(b1,b2)) < EPS
+#    >>> Xa2b = alignvectors(a1,a2,b1,b2)
+#    >>> assert Xa2b.t.length() < EPS
+#    >>> assert (Xa2b*a1).distance(b1) < EPS
+#    >>> assert (Xa2b*a2).distance(b2) < EPS
+
+#    >>> a1 = randvec()
+#    >>> b1 = randvec()
+#    >>> a2 = randvec()
+#    >>> b2 = randvec()
+#    >>> Xa2b = alignvectors(a1,a2,b1,b2)
+#    >>> assert coplanar(b1,b2,Xa2b*a1,Xa2b*a2)
+#    >>> if not (b1.distance(a1)+b2.distance(a2)) > (b1.distance(Xa2b*a1)+b2.distance(Xa2b*a2)):
+#    ...   print b1
+#    ...   print b2
+#    ...   print a1
+#    ...   print a2
+#    ...   print Xa2b*a1
+#    ...   print Xa2b*a2               
+#    """
+#    Xmiddle = alignvector(a1+a2,b1+b2)
+#    assert (b1+b2).angle(Xmiddle*(a1+a2)) < SQRTEPS
+#    assert (b1+b2).angle(Xmiddle*a1+Xmiddle*a2) < SQRTEPS   
+#    Xaround = alignaroundaxis(b1+b2, Xmiddle*a1, b1 )# 
+#    return Xaround * Xmiddle
+#    # xa = Xform().from_two_vecs(a2,a1)
+#    # xb = Xform().from_two_vecs(b2,b1)
+#    return xb/xa
 
 def get_test_generators1():
    x1 = rotation_around_degrees(Vec(0,0,1),180,Vec(0,0,0))

@@ -380,36 +380,39 @@ def makecryst1_i213(fn):
 
 	Dsel = sele+' and chain A+D'
 	Tsel = sele+' and chain A+B+C'
-	
-	Xaln = xyz.alignvectors( 
-	                        c3axis(Tsel),
-	                        c2axis(Dsel,chains=('A','D')),
-	                        xyz.Vec(1,1,1),
-	                        xyz.Vec(0,0,1)   )
-	xform(sele,xyz.Vec((Xaln*-com(Dsel)).x)+Xaln-com(Tsel))
-	c2 = com(Dsel)
-	c3 = com(Tsel)
-	a2 = c2axis(Dsel,chains=('A','D'))
-	a3 = c3axis(Tsel)
-	# trans(sele,xyz.Vec(-c2.x))
-	print a2.lineangle(xyz.Vec(0,0,1))
-	print a3.lineangle(xyz.Vec(1,1,1))
-	assert c3.lineangle(xyz.Vec(1,1,1)) < xyz.SQRTEPS
-	assert a3.lineangle(xyz.Vec(1,1,1)) < xyz.SQRTEPS
-	assert a2.lineangle(xyz.Vec(0,0,1)) < xyz.SQRTEPS
+	oldc2 = com(Dsel)
+	oldc3 = com(Tsel)
+	olda2 = c2axis(Dsel,chains=('A','D'))
+	olda3 = c3axis(Tsel)	
+	Xaln = xyz.alignvectors(olda2,olda3,Uz,Ux+Uy+Uz)
 
-	# cellsize = abs((c2.y-c2.x))*4.0
-	# print "\nCELL SIZE",cellsize,'\n'
-	# cmd.save(".tmp.pdb",sele+" and chain A")
-	# with open(fn,'w') as out:
-	# 	out.write("CRYST1  %7.3f  %7.3f  %7.3f  90.00  90.00  90.00 I 21 3\n"%((cellsize,)*3))
-	# os.system("cat .tmp.pdb >> %s"%fn)
-	# os.system("rm .tmp.pdb")
+	Xaln = Xaln - oldc3 # center trimer, then align axes, then move so a2 intersects x==0
+	xform(sele, Xaln )
+	newc2 = com(Dsel)
+	trans(sele,xyz.Vec(-newc2.x))
+	print com(Dsel)
+	assert abs(com(Dsel).x) < xyz.SQRTEPS
 
-	# x1 = xyz.rotation_around_degrees(a2,180,c2)
-	# x2 = xyz.rotation_around_degrees(a3,120,c3)	
-	# x3 = xyz.rotation_around_degrees(a3,240,c3)	
-	# for i,X in enumerate( xyzexpand_xforms((x1,x2),8) ):
+	newa2 = c2axis(Dsel,chains=('A','D'))
+	newa3 = c3axis(Tsel)
+	newc3 = com(Tsel)
+	assert xyz.Vec(1,1,1).lineangle(newc3) < 0.0001
+	assert xyz.Vec(1,1,1).lineangle(newa3) < 0.0001
+	assert xyz.Vec(0,0,1).lineangle(newa2) < 0.0001
+
+	cellsize = abs((newc2.y-newc2.x))*4.0
+	print "\nAXIS ERROR is:", newa2.lineangle(xyz.Vec(0,0,1)) + newa3.lineangle(xyz.Vec(1,1,1))
+	print "CELL SIZE",cellsize,'\n'
+	cmd.save(".tmp.pdb",sele+" and chain A")
+	with open(fn,'w') as out:
+		out.write("CRYST1  %7.3f  %7.3f  %7.3f  90.00  90.00  90.00 I 21 3\n"%((cellsize,)*3))
+	os.system("cat .tmp.pdb >> %s"%fn)
+	os.system("rm .tmp.pdb")
+
+	# x1 = xyz.rotation_around_degrees(newa2,180,newc2)
+	# x2 = xyz.rotation_around_degrees(newa3,120,newc3)	
+	# x3 = xyz.rotation_around_degrees(newa3,240,newc3)	
+	# for i,X in enumerate( xyz.expand_xforms((x1,x2,x3),6) ):
 	# 	cmd.create("sub%i"%i,sele+" and chain A and not sub*")
 	#  	xform("sub%i"%i,X)
 
