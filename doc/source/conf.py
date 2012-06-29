@@ -11,10 +11,13 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
-sys.path.append("/Users/sheffler/pymol/")
-sys.path.append("/Applications/MacPyMOL.app/pymol/modules/")
-import LA
+import sys, os, inspect
+newpath = os.path.dirname(inspect.getfile(inspect.currentframe()))
+assert newpath.endswith("/doc/source")
+newpath = newpath[:-11]
+assert os.path.exists(newpath)
+if not newpath in sys.path: sys.path.append(newpath)
+import xyzMath
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -28,7 +31,13 @@ import LA
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.doctest',
+              'sphinx.ext.todo',
+              'sphinx.ext.coverage',
+              'sphinx.ext.pngmath',
+              'sphinx.ext.viewcode',
+             ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

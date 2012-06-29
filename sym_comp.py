@@ -3,7 +3,6 @@ import os,sys,inspect
 newpath = os.path.dirname(inspect.getfile(inspect.currentframe())) # script directory
 if not newpath in sys.path: sys.path.append(newpath)
 import string,re,gzip,itertools
-from pymol import cmd
 from sym_util import *
 
 def homogenizechains(sel1,sel2):
@@ -182,7 +181,7 @@ def procCdat(N=3,lfile=None,biod="/data/biounit",outd=None):
 			print "EXCEPTION!!!!!!",e
 			print fname
 			pass
-  print "DONE"
+	print "DONE"
 	print Nok, Nbig, Nnsym, Nnobio, Nnomxatm, Nhomogen
 
 def procD2dat(lfile=None,biod="/data/biounit",outd=None):
@@ -324,18 +323,6 @@ def procD2dat(lfile=None,biod="/data/biounit",outd=None):
 					 print "exception!"
 	print Nok, Nbig, Nnsym, Ncontact, Nnobio, Nnomxatm, Nhomogen
 
-
-
-if __name__ == '__main__':
-	# pymol environment
-	moddir='/home/sheffler/pymol/modules'
-	sys.path.insert(0, moddir)
-	os.environ['PYMOL_PATH'] = "/home/sheffler/pymol"
- 	import pymol
-	pymol.pymol_argv = ['pymol','-qc'] + sys.argv[1:]
-	pymol.finish_launching()
-	cmd = pymol.cmd
-	for i in range(2,9): procCdat(i)
 
 def prepare_c2_nmr(pattern,outdir=None):
 	if None is outdir: outdir = os.path.dirname(pattern)
@@ -617,12 +604,20 @@ def make_cryst1_23(fn,a2in,i2,a3in,i3):
 
 
 
+def nulltest():
+	"""
+	>>> print "foo"
+	foo
+	"""
+
+def load_tests(loader, tests, ignore):
+    tests.addTests(doctest.DocTestSuite())
+    return tests
+
 
 
 if __name__ == '__main__':
    import doctest
-   for i in range(10):
-      r = doctest.testmod()
-      print r
-      if r[0] is not 0: break
+   r = doctest.testmod()
+   print r
 

@@ -1,0 +1,213 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Symmetric Modeling Utilities &mdash; Will&#39;s PyMOL Scripts 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Will&#39;s PyMOL Scripts 0.2 documentation" href="index.html" />
+    <link rel="next" title="Symmetric Component Generation Utilities" href="sym_comp.html" />
+    <link rel="prev" title="General Pymol Utilities" href="pymol_util.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sym_comp.html" title="Symmetric Component Generation Utilities"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pymol_util.html" title="General Pymol Utilities"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Will&#39;s PyMOL Scripts 0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="symmetric-modeling-utilities">
+<h1>Symmetric Modeling Utilities<a class="headerlink" href="#symmetric-modeling-utilities" title="Permalink to this headline">¶</a></h1>
+<p>get axes and align at stuff</p>
+<span class="target" id="module-sym_util"></span><dl class="function">
+<dt id="sym_util.c2axis">
+<tt class="descclassname">sym_util.</tt><tt class="descname">c2axis</tt><big>(</big><em>sele, alignsele=None, chains=['A', 'B']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#c2axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.c2axis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.alignc2">
+<tt class="descclassname">sym_util.</tt><tt class="descname">alignc2</tt><big>(</big><em>sele, alignsele=None, tgtaxis=Vec( 0.000000, 0.000000, 1.000000 ), chains=['A', 'B']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#alignc2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.alignc2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.c3axis">
+<tt class="descclassname">sym_util.</tt><tt class="descname">c3axis</tt><big>(</big><em>sele, alignsele=None, chains=['A', 'B', 'C']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#c3axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.c3axis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.alignc3">
+<tt class="descclassname">sym_util.</tt><tt class="descname">alignc3</tt><big>(</big><em>sele, alignsele=None, tgtaxis=Vec( 0.000000, 0.000000, 1.000000 ), chains=['A', 'B', 'C']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#alignc3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.alignc3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.c4axis">
+<tt class="descclassname">sym_util.</tt><tt class="descname">c4axis</tt><big>(</big><em>sele, alignsele=None, chains=['A', 'B', 'C', 'D']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#c4axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.c4axis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.alignc4">
+<tt class="descclassname">sym_util.</tt><tt class="descname">alignc4</tt><big>(</big><em>sele, alignsele=None, tgtaxis=Vec( 0.000000, 0.000000, 1.000000 ), chains=['A', 'B', 'C', 'D']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#alignc4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.alignc4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.c5axis">
+<tt class="descclassname">sym_util.</tt><tt class="descname">c5axis</tt><big>(</big><em>sele, alignsele=None, chains=['A', 'B', 'C', 'D', 'E']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#c5axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.c5axis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.alignc5">
+<tt class="descclassname">sym_util.</tt><tt class="descname">alignc5</tt><big>(</big><em>sele, alignsele=None, tgtaxis=Vec( 0.000000, 0.000000, 1.000000 ), chains=['A', 'B', 'C', 'D', 'E']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#alignc5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.alignc5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.myint">
+<tt class="descclassname">sym_util.</tt><tt class="descname">myint</tt><big>(</big><em>s</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#myint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.myint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.mki213">
+<tt class="descclassname">sym_util.</tt><tt class="descname">mki213</tt><big>(</big><em>N</em>, <em>sel='all'</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#mki213"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.mki213" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.viewi213">
+<tt class="descclassname">sym_util.</tt><tt class="descname">viewi213</tt><big>(</big><em>sel='all'</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#viewi213"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.viewi213" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.mkp23">
+<tt class="descclassname">sym_util.</tt><tt class="descname">mkp23</tt><big>(</big><em>N</em>, <em>R=43.5</em>, <em>i=0</em>, <em>sel='all'</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#mkp23"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.mkp23" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.selbycomp">
+<tt class="descclassname">sym_util.</tt><tt class="descname">selbycomp</tt><big>(</big><em>trn=0</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#selbycomp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.selbycomp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.getframe">
+<tt class="descclassname">sym_util.</tt><tt class="descname">getframe</tt><big>(</big><em>obj</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#getframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.getframe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.getrelframe">
+<tt class="descclassname">sym_util.</tt><tt class="descname">getrelframe</tt><big>(</big><em>newobj</em>, <em>refobj</em>, <em>Forigin=None</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#getrelframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.getrelframe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.rechain">
+<tt class="descclassname">sym_util.</tt><tt class="descname">rechain</tt><big>(</big><em>sel</em>, <em>nres</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#rechain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.rechain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.nulltest">
+<tt class="descclassname">sym_util.</tt><tt class="descname">nulltest</tt><big>(</big><big>)</big><a class="headerlink" href="#sym_util.nulltest" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;foo&quot;</span>
+<span class="go">foo</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sym_util.load_tests">
+<tt class="descclassname">sym_util.</tt><tt class="descname">load_tests</tt><big>(</big><em>loader</em>, <em>tests</em>, <em>ignore</em><big>)</big><a class="headerlink" href="#sym_util.load_tests" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pymol_util.html"
+                        title="previous chapter">General Pymol Utilities</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sym_comp.html"
+                        title="next chapter">Symmetric Component Generation Utilities</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/sym_util.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sym_comp.html" title="Symmetric Component Generation Utilities"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pymol_util.html" title="General Pymol Utilities"
+             >previous</a> |</li>
+        <li><a href="index.html">Will&#39;s PyMOL Scripts 0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Will Sheffler.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

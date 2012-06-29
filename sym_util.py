@@ -4,7 +4,6 @@ newpath = os.path.dirname(inspect.getfile(inspect.currentframe())) # script dire
 if not newpath in sys.path: sys.path.append(newpath)
 import string,re,gzip,itertools
 from pymol_util import *
-from pymol import cmd
 
 def c2axis(sele,alignsele=None,chains=["A","B"]):
 	if alignsele is None: alignsele = sele
@@ -366,3 +365,18 @@ def rechain(sel,nres):
 		cmd.alter("resi %i-%i"%( nres*i+1,nres*(i+1)),"chain='%s'"%chains[i])
 
 
+
+def nulltest():
+	"""
+	>>> print "foo"
+	foo
+	"""
+
+def load_tests(loader, tests, ignore):
+    tests.addTests(doctest.DocTestSuite())
+    return tests
+
+if __name__ == '__main__':
+   import doctest
+   r = doctest.testmod()
+   print r

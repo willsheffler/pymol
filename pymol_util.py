@@ -1,22 +1,25 @@
 # -*- mode:python;tab-width:2;indent-tabs-mode:t;show-trailing-whitespace:t;rm-trailing-spaces:t -*-
+
 import sys,os,inspect
 newpath = os.path.dirname(inspect.getfile(inspect.currentframe())) # script directory
 if not newpath in sys.path:
 		sys.path.append(newpath)
-import string
-import math
-import re
-import gzip
-import itertools
-import glob
-import sets
-from pymol import cmd
-from pymol.cgo import *
+import string, math, re, gzip, itertools, glob, sets
 from random import randrange
 from math import sqrt
 import xyzMath as xyz
 from xyzMath import Ux,Uy,Uz,Imat
 from functools import partial
+
+try:
+	from pymol import cmd
+	from pymol import cgo 
+except ImportError as e:
+	print "can't load pymol, Mocking it for testing/doc"
+	from minimock import Mock
+	cmd = Mock("cmd")
+	cgo = Mock("cgo")
+	cmd.extend = (lambda x,y: x)
 
 numcom = 0
 numvec = 0
@@ -1496,3 +1499,9 @@ cmd.extend("axes",showaxes)
 cmd.extend('useRosettaRadii', useRosettaRadii)
 cmd.extend('expandRadii',expandRadii)
 cmd.extend('contractRadii',contractRadii)
+
+
+if __name__ == '__main__':
+   import doctest
+   r = doctest.testmod()
+   print r

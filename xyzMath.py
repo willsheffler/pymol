@@ -432,6 +432,7 @@ class Xform(object):
    >>> assert xb/xa*a2 == b2
 
    add/sub with Vecs:
+
    >>> X = randxform()
    >>> u,v = randvec(2)
    >>> assert isxform(u+X) and isxform(X+u) and isxform(u-X) and isxform(X-u)
@@ -443,6 +444,7 @@ class Xform(object):
    >>> assert X*(v-u) == (X-u)*v
    
    mul,div with Mats:
+   
    >>> R = randrot()
    >>> assert isxform(R*X) and isxform(X*R)
    >>> assert R*X*u == (R*X)*u == R*(X*u)
@@ -452,17 +454,20 @@ class Xform(object):
    >>> assert X/X*v == v
 
    mul/div Xforms:
+   
    >>> Y = randxform()
    >>> assert isxform(X/Y) and isxform(X*Y)
    >>> assert X/Y*v == X*~Y*v
 
-   # >>> axis,ang,cen = randnorm(),uniform(-pi,pi),randvec()
-   # >>> X = rotation_around(axis,ang,cen)
-   # >>> axis2,ang2,cen2 = X.rotation_center()
-   # >>> assert abs( abs(ang) - abs(ang2) ) < EPS
-   # >>> assert axis == axis2 * copysign(1,ang*ang2)
-   # >>> print cen
-   # >>> print cen2
+   these don't work yet:
+
+   >>> axis,ang,cen = randnorm(),uniform(-pi,pi),randvec()      #doctest: +SKIP
+   >>> X = rotation_around(axis,ang,cen)                        #doctest: +SKIP
+   >>> axis2,ang2,cen2 = X.rotation_center()                    #doctest: +SKIP
+   >>> assert abs( abs(ang) - abs(ang2) ) < EPS                 #doctest: +SKIP
+   >>> assert axis == axis2 * copysign(1,ang*ang2)              #doctest: +SKIP
+   >>> print cen                                                #doctest: +SKIP
+   >>> print cen2                                               #doctest: +SKIP
    """
    def __init__(self, R=None, t=None):
       super(Xform, self).__init__()
@@ -674,6 +679,7 @@ def alignaroundaxis(axis,u,v):
 def alignvectors_minangle(a1,a2,b1,b2):
    """
    exact alignment:
+
    >>> angdeg = uniform(-180,180)
    >>> a1 = randvec()
    >>> b1 = randnorm()*a1.length()
@@ -687,6 +693,7 @@ def alignvectors_minangle(a1,a2,b1,b2):
    >>> assert (Xa2b*a2).distance(b2) < EPS
 
    if angle(a1,a2) != angle(b1,2b), minimize deviation
+   
    >>> a1,a2,b1,b2 = randvec(4)
    >>> Xa2b = alignvectors_minangle(a1,a2,b1,b2)
    >>> assert coplanar(b1,b2,Xa2b*a1,Xa2b*a2)
@@ -705,7 +712,9 @@ def alignvectors_minangle(a1,a2,b1,b2):
    # xb = Xform().from_two_vecs(b2,b1)
    # return xb/xa
 
-def alignvectors(a1,a2,b1,b2): return alignvectors_minangle(a1,a2,b1,b2)
+def alignvectors(a1,a2,b1,b2):
+   "same as alignvectors_minangle"
+   return alignvectors_minangle(a1,a2,b1,b2)
 
 # def alignvectors_kindamindis(a1,a2,b1,b2):
 #    """
@@ -790,9 +799,10 @@ def find_identities(G,n=6,c=Vec(1,3,10)):
 def get_cell_bounds_orthogonal_only(G,n=6,c=Vec(1,3,10)):
    """
    very slow... need to speed up
-   # >>> G = get_test_generators1()
-   # >>> get_cell_bounds_orthogonal_only(G[:2],12)
-   # (4.0, 4.0, 4.0)
+
+   >>> G = get_test_generators1()                  #doctest: +SKIP
+   >>> get_cell_bounds_orthogonal_only(G[:2],12)   #doctest: +SKIP
+   (4.0, 4.0, 4.0)
    """
    mnx,mny,mnz = 9e9,9e9,9e9
    for i in (I.t for I in find_identities(G,n)):
@@ -800,14 +810,6 @@ def get_cell_bounds_orthogonal_only(G,n=6,c=Vec(1,3,10)):
       if abs(i.x) < SQRTEPS and abs(i.y) > SQRTEPS and abs(i.z) < SQRTEPS: mny = min(mny,abs(i.y))
       if abs(i.x) < SQRTEPS and abs(i.y) < SQRTEPS and abs(i.z) > SQRTEPS: mnz = min(mnz,abs(i.z))
    return round(mnx,3),round(mny,3),round(mnz,3)
-
-
-
-
-
-
-
-
 
 
 

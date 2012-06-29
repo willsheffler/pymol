@@ -3,23 +3,26 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+Will's Pymol Libraries
+======================
 
+Basics
+------
+.. toctree::
+   intro
+   tutorial
 
 
 Module Documentation
-====================
-
-
-LA
---
-.. automodule:: LA
-	:members:
-	
-	
-
+--------------------
+.. toctree::
+   xyzMath
+   pymol_util
+   sym_util   
+   sym_comp
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
