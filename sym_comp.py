@@ -369,7 +369,84 @@ def prepare_c2_nmr(pattern,outdir=None):
 			print "caught exception"
 
 
-def makecryst1_i213(fn):
+def make_cryst1_P432(fn):
+	print "makecryst1_P432",fn
+	cmd.load(fn,'work_prot')
+	sele = 'work_prot'
+	fn = os.path.basename(fn)
+	if fn.endswith(".gz" ): fn = fn[:-3]
+	if fn.endswith(".pdb"): fn = fn[:-4]
+	fn += "_cryst1.pdb"
+
+	A2 = Vec(-1.000, 0.000, 1.000)
+	I2 = Vec( 0.750, 0.875, 0.000)
+	A3 = Vec( 1.000, 1.000,-1.000)
+	I3 = Vec( 0.000, 0.500, 1.000)
+
+	Dsel = sele+' and chain A+D'
+	Tsel = sele+' and chain A+B+C'
+	oldc2 = com(Dsel)
+	oldc3 = com(Tsel)
+	olda2 = c2axis(Dsel,chains=('A','D'))
+	olda3 = c3axis(Tsel)
+
+	print olda2.angle_degrees(olda3)
+	print A2.angle_degrees(A3)
+	assert abs(olda2.angle_degrees(olda3)-A2.angle_degrees(A3)) < 0.01
+	Xaln = xyz.alignvectors(olda2,olda3,A2,A3)
+
+	Xaln = Xaln # center trimer, then align axes, then move so a2 intersects x==0
+	xform(sele, Xaln )
+	trans(sele,-com(Tsel))
+	newc2 = com(Dsel)
+	newa2 = c2axis(Dsel,chains=('A','D'))
+	newa3 = c3axis(Tsel)
+
+	assert newa2.angle_degrees(A2) < 0.0001
+	assert newa3.angle_degrees(A3) < 0.0001
+
+	# cmd.hide('ev')
+	# x1 = xyz.rotation_around_degrees(A2,180,newc2)
+	# x2 = xyz.rotation_around_degrees(A3,120, V0  )	
+	# x3 = xyz.rotation_around_degrees(A3,240, V0  )	
+	# axes = set()
+	# cmd.create('work_minimal',sele+" and chain A and name N+CA+C+SG")
+	# for i,X in enumerate( xyz.expand_xforms((x1,x2,x3),9) ):
+	# 	cmd.create("sub%i"%i,"work_minimal")
+	#  	xform("sub%i"%i,X)
+	#  	axes.add( X.rotation_axis()[0].key() )
+	# print axes
+	# cmd.show('rib')
+	# cmd.show('sph','name SG')	
+	# return
+
+	d = slide_to_make_lines_intersect(A3,A2,com(Dsel),I2,V0)
+	trans(sele, d*A3 )
+
+	d = slide_to_make_lines_intersect(I2,A3,com(Tsel),I3,V0)
+	trans(sele, d*I2 )
+
+	newc2 = com(Dsel)
+	print "c2",newc2
+
+	newc3 = com(Tsel)
+	assert A3.lineangle(newa3) < 0.0001
+	assert A2.lineangle(newa2) < 0.0001
+	assert line_line_distance( A2, newc2, I2, Vec(0,0,0) ) < 0.0001
+	assert line_line_distance( A3, newc3, I3, Vec(0,0,0) ) < 0.0001
+
+
+	cellsize = abs(newc2.x/I2.x)
+	print "\nAXIS ERROR is:", newa2.lineangle(A2) + newa3.lineangle(A3)
+	print "CELL SIZE",cellsize,'\n'
+	cmd.save(".tmp.pdb",sele+" and chain A")
+	with open(fn,'w') as out:
+		out.write("CRYST1  %7.3f  %7.3f  %7.3f  90.00  90.00  90.00 I 21 3\n"%((cellsize,)*3))
+	os.system("cat .tmp.pdb >> %s"%fn)
+	os.system("rm .tmp.pdb")
+
+
+def make_cryst1_I213(fn):
 	print "makecryst1_i213",fn
 	cmd.load(fn,'work_prot')
 	sele = 'work_prot'
@@ -384,10 +461,11 @@ def makecryst1_i213(fn):
 	oldc3 = com(Tsel)
 	olda2 = c2axis(Dsel,chains=('A','D'))
 	olda3 = c3axis(Tsel)	
-	Xaln = xyz.alignvectors(olda2,olda3,Uz,Ux+Uy+Uz)
+	Xaln = xyz.alignvectors(olda2,olda3,Vec(0,0,1),Vec(1,1,1))
 
-	Xaln = Xaln - oldc3 # center trimer, then align axes, then move so a2 intersects x==0
+	Xaln = Xaln # center trimer, then align axes, then move so a2 intersects x==0
 	xform(sele, Xaln )
+	trans(sele,-com(Tsel))
 	newc2 = com(Dsel)
 	trans(sele,xyz.Vec(-newc2.x))
 	print com(Dsel)
@@ -433,7 +511,109 @@ def makecryst1_i213(fn):
 
 
 
+def make_cryst1_23(fn,a2in,i2,a3in,i3):
+	print "makecryst1_i213",fn
+	cmd.load(fn,'work_prot')
+	sele = 'work_prot'
+	fn = os.path.basename(fn)
+	if fn.endswith(".gz" ): fn = fn[:-3]
+	if fn.endswith(".pdb"): fn = fn[:-4]
+	fn += "_cryst1.pdb"
 
+	Dsel = sele+' and name CA and chain A+D'
+	Tsel = sele+' and name CA and chain A+B+C'
+
+	olda2 = c2axis(Dsel,chains=('A','D'))
+	olda3 = c3axis(Tsel)
+	axis_angle_error = abs( a2in.lineangle_degrees(a3in) - olda2.lineangle_degrees(olda3) )
+	if axis_angle_error > 0.01:
+		print "WARNING: axis angle error is", axis_angle_error
+		print "target axis ang",    a2in.lineangle_degrees(   a3in)
+		print "actual axis ang", olda2.lineangle_degrees(olda3)
+	else:
+		print "INFO: axis angle error is", axis_angle_error
+	
+	for a2i in (0,1,2):
+		a2 = rotation_matrix_degrees()*a2in
+		for a3 in (-a3in,a3in):
+
+			oldc2 = com(Dsel)
+			oldc3 = com(Tsel)
+			olda2 = c2axis(Dsel,chains=('A','D'))
+			olda3 = c3axis(Tsel)
+			if abs( olda2.angle(olda3) - a2.angle(a3) ) > 0.001:
+				olda2 = -olda2
+			print olda2.angle(olda3)
+			print a2.angle(a3)
+			assert abs( olda2.angle(olda3) - a2.angle(a3) ) < 0.001
+			Xaln = xyz.alignvectors(olda2,olda3,a2,a3)
+			xform(sele,Xaln)
+			trans(sele,-com(Tsel))
+			newa2 = c2axis(Dsel,chains=('A','D'))
+			newa3 = c3axis(Tsel)
+			assert a2.lineangle(newa2) < 0.001
+			assert a3.lineangle(newa3) < 0.001
+
+			# newc3 = com(Tsel)
+			# assert newc3.length() < 0.00001
+
+			# shift in unit cell
+			# replace me
+			newc2 = com(Dsel)
+			# if newc2.x > 0:
+			# 	print "skip c2.x > 0"
+			# 	continue
+
+			print "found c2.x < 0"
+
+			trans(sele,-newc2.x)
+			cellsize = abs((newc2.y-newc2.x))*4.0
+			
+			# fix me!
+			print com(Dsel)
+			print a2
+			print i2*cellsize	
+			assert point_line_distance(com(Dsel),a2,i2*cellsize) < 0.0001
+			assert point_line_distance(com(Tsel),a3,i3*cellsize) < 0.0001
+
+
+			print "\nAXIS ERROR is:", newa2.lineangle(a2) + newa3.lineangle(a3)
+			print "CELL SIZE",cellsize,'\n'
+
+			#save
+			cmd.save(".tmp.pdb",sele+" and chain A")
+			with open(fn,'w') as out:
+				out.write("CRYST1  %7.3f  %7.3f  %7.3f  90.00  90.00  90.00 I 21 3\n"%((cellsize,)*3))
+			os.system("cat .tmp.pdb >> %s"%fn)
+			os.system("rm .tmp.pdb")
+
+			return
+
+			# x1 = xyz.rotation_around_degrees(newa2,180,newc2)
+			# x2 = xyz.rotation_around_degrees(newa3,120,newc3)	
+			# x3 = xyz.rotation_around_degrees(newa3,240,newc3)	
+			# for i,X in enumerate( xyz.expand_xforms((x1,x2,x3),6) ):
+			# 	cmd.create("sub%i"%i,sele+" and chain A and not sub*")
+			#  	xform("sub%i"%i,X)
+
+			# cx,cy,cz = get_cell_bounds_orthogonal_only((x1,x2),12,com(sele+' and chain A'))
+			# d = abs((c2.y-c2.x)*4.0)
+
+			# cmd.hide('ev','not chain A')
+			# for i,X in enumerate( xyzfind_identities((x1,x2,x3),9) ):
+			# 	cmd.create("sub%ii"%i,sele+" and chain A and not sub*")
+			# 	xform("sub%ii"%i,X)
+			# 	cmd.show('spheres',"sub%ii"%i)
+
+			# (0.374996,0.500000,0.250000)
+
+		# def process_xtal_dir(d):
+		# 	for fn in glob.glob(d+"/*_I213_*.pdb"):
+		# 		makecryst1_i213(fn)
+
+
+
+# def makecryst1_i213(fn): return make_cryst1_23(fn,Uz,Uy/4,Vec(1,1,1),V0)
 
 
 

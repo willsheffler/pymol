@@ -15,7 +15,7 @@ from pymol.cgo import *
 from random import randrange
 from math import sqrt
 import xyzMath as xyz
-from xyzMath import Ux,Uy,Uz,Identity
+from xyzMath import Ux,Uy,Uz,Imat
 from functools import partial
 
 numcom = 0
@@ -374,28 +374,48 @@ def bond_zns(sel):
 					sel+" and resi %s and chain %s and name %s"%(sfa.resi, sfa.chain, sfa.name) )
 
 
-def trans(sel, v):
-	x, y, z = v.x, v.y, v.z
-	cmd.translate([x, y, z], sel, 0, 0)
-	#m = cmd.get_model(sel)
-	#for i in range(len(m.atom)):
-	#    tmp = xyz.Vec(m.atom[i].coord)
-	#    m.atom[i].coord = [tmp.x+x, tmp.y+y, tmp.z+z]
-	#cmd.load_model(m, sel, 1, discrete = 1)
-#cmd.extend("trans", trans)
+def trans(sel,v):
+	if   xyz.isvec(v): cmd.translate([v.x,v.y,v.z], sel, 0, 0)
+	elif xyz.isnum(v): cmd.translate([ v , v , v ], sel, 0, 0)
+	else: raise NotImplementedError
+def transx(sel,x):
+	if xyz.isnum(x): cmd.translate([x,0,0], sel, 0, 0)
+	else: raise NotImplementedError
+def transy(sel,y):
+	if xyz.isnum(y): cmd.translate([0,y,0], sel, 0, 0)
+	else: raise NotImplementedError
+def transz(sel,z):
+	if xyz.isnum(z): cmd.translate([0,0,z], sel, 0, 0)
+	else: raise NotImplementedError
 
-
-def rot(sel, axis, ang, cen = xyz.Vec(0, 0, 0)):
-	# if cen is None: cen = com(sel)
-	if abs(axis.x) < 0.00001: axis.x = 0.0
-	if abs(axis.y) < 0.00001: axis.y = 0.0
-	if abs(axis.z) < 0.00001: axis.z = 0.0
-	cmd.rotate([axis.x, axis.y, axis.z], ang, sel, 0, 0, None, [cen.x, cen.y, cen.z])
+def rot(sel, axis, ang, cen=xyz.V0):
+	if not xyz.isvec(axis): raise NotImplementedError
+	if not xyz.isnum(ang): raise NotImplementedError
+	if not xyz.isvec(cen): raise NotImplementedError	
+	# if abs(axis.x) < 0.00001: axis.x = 0.0
+	# if abs(axis.y) < 0.00001: axis.y = 0.0
+	# if abs(axis.z) < 0.00001: axis.z = 0.0
+	cmd.rotate([round(axis.x,6), round(axis.y,6), round(axis.z,6)], ang, sel, 0, 0, None, [cen.x, cen.y, cen.z])
+def rotx(sel, ang, cen=xyz.V0):
+	if not xyz.isnum(ang): raise NotImplementedError
+	if not xyz.isvec(cen): raise NotImplementedError	
+	cmd.rotate([1,0,0], ang, sel, 0, 0, None, [cen.x, cen.y, cen.z])
+def roty(sel, ang, cen=xyz.V0):
+	if not xyz.isnum(ang): raise NotImplementedError
+	if not xyz.isvec(cen): raise NotImplementedError	
+	cmd.rotate([0,1,0], ang, sel, 0, 0, None, [cen.x, cen.y, cen.z])
+def rotz(sel, ang, cen=xyz.V0):
+	if not xyz.isnum(ang): raise NotImplementedError
+	if not xyz.isvec(cen): raise NotImplementedError	
+	cmd.rotate([0,0,1], ang, sel, 0, 0, None, [cen.x, cen.y, cen.z])
 
 def xform(sel,x):
-	a,r = xyz.rotation_axis(x.R)
-	rot(sel,a,math.degrees(r))
+	if not xyz.isxform(x): raise NotImplementedError
+	axis,ang = x.rotation_axis()
+	rot(sel,axis,xyz.degrees(ang))
 	trans(sel,x.t)
+	# a,r,c = x.rotation_center()
+	# cmd.rotate([a.x,a.y,a.z], r, sel, 0, 0, None, [c.x, c.y, c.z])
 
 def rot_by_matrix(sel, R, cen = xyz.Vec(0, 0, 0)):
   m = cmd.get_model(sel)
@@ -450,7 +470,7 @@ def alignaxis(sel, newaxis, oldaxis = None, cen = xyz.Vec(0, 0, 0)):
 
 def mysetview(look, up, pos = None, cen = None, ncp = None, fcp = None):
 	Xaxis = -look.cross(up).normalized()
-	Yaxis = xyzprojperp(look, up).normalized()
+	Yaxis = xyz.projperp(look, up).normalized()
 	Zaxis = -look.normalized()
 	oldv = cmd.get_view()
 	v = list(oldv)
@@ -740,7 +760,7 @@ def test_conelineinter(sele):
 	drawlines(p, d)
 	for i, x in enumerate(Ux):
 		createpoint(sele, x, "Ux"+str(i))
-		o = xyzprojperp(a, x-v)
+		o = xyz.projperp(a, x-v)
 		L = o.length()
 		o = o.normalized()
 		ang = 90.0 - math.atan( 1.0 / L )*180.0/math.pi
@@ -1024,7 +1044,7 @@ def drawringcar( c, a, r, col = [1, 1, 1], lab = "ring"):
 	cmd.delete(lab)
 	p1 = c
 	p2 = c+a
-	p3 = c + r*xyzprojperp(a, xyz.Vec(1, 2, 3)).normalized()
+	p3 = c + r*xyz.projperp(a, xyz.Vec(1, 2, 3)).normalized()
 	drawring(p1, p2, p3, col, lab)
 
 def drawsph(col = [1, 1, 1], lab = "sph"):
