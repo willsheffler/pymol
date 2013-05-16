@@ -58,43 +58,23 @@
 <h1>Symmetric Modeling Utilities<a class="headerlink" href="#symmetric-modeling-utilities" title="Permalink to this headline">¶</a></h1>
 <p>get axes and align at stuff</p>
 <span class="target" id="module-sym_util"></span><dl class="function">
-<dt id="sym_util.c2axis">
-<tt class="descclassname">sym_util.</tt><tt class="descname">c2axis</tt><big>(</big><em>sele, alignsele=None, chains=['A', 'B']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#c2axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.c2axis" title="Permalink to this definition">¶</a></dt>
+<dt id="sym_util.guesscxaxis">
+<tt class="descclassname">sym_util.</tt><tt class="descname">guesscxaxis</tt><big>(</big><em>sele</em>, <em>nfold=None</em>, <em>chains=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sym_util.guesscxaxis" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="sym_util.alignc2">
-<tt class="descclassname">sym_util.</tt><tt class="descname">alignc2</tt><big>(</big><em>sele, alignsele=None, tgtaxis=Vec( 0.000000, 0.000000, 1.000000 ), chains=['A', 'B']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#alignc2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.alignc2" title="Permalink to this definition">¶</a></dt>
+<dt id="sym_util.aligncx">
+<tt class="descclassname">sym_util.</tt><tt class="descname">aligncx</tt><big>(</big><em>sele</em>, <em>nfold</em>, <em>alignsele=None</em>, <em>tgtaxis=Vec( 0.000000</em>, <em>0.000000</em>, <em>1.000000 )</em>, <em>chains=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sym_util.aligncx" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="sym_util.c3axis">
-<tt class="descclassname">sym_util.</tt><tt class="descname">c3axis</tt><big>(</big><em>sele, alignsele=None, chains=['A', 'B', 'C']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#c3axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.c3axis" title="Permalink to this definition">¶</a></dt>
+<dt id="sym_util.alignd2">
+<tt class="descclassname">sym_util.</tt><tt class="descname">alignd2</tt><big>(</big><em>sele='all'</em>, <em>chains=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sym_util.alignd2" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="sym_util.alignc3">
-<tt class="descclassname">sym_util.</tt><tt class="descname">alignc3</tt><big>(</big><em>sele, alignsele=None, tgtaxis=Vec( 0.000000, 0.000000, 1.000000 ), chains=['A', 'B', 'C']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#alignc3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.alignc3" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="sym_util.c4axis">
-<tt class="descclassname">sym_util.</tt><tt class="descname">c4axis</tt><big>(</big><em>sele, alignsele=None, chains=['A', 'B', 'C', 'D']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#c4axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.c4axis" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="sym_util.alignc4">
-<tt class="descclassname">sym_util.</tt><tt class="descname">alignc4</tt><big>(</big><em>sele, alignsele=None, tgtaxis=Vec( 0.000000, 0.000000, 1.000000 ), chains=['A', 'B', 'C', 'D']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#alignc4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.alignc4" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="sym_util.c5axis">
-<tt class="descclassname">sym_util.</tt><tt class="descname">c5axis</tt><big>(</big><em>sele, alignsele=None, chains=['A', 'B', 'C', 'D', 'E']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#c5axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.c5axis" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="sym_util.alignc5">
-<tt class="descclassname">sym_util.</tt><tt class="descname">alignc5</tt><big>(</big><em>sele, alignsele=None, tgtaxis=Vec( 0.000000, 0.000000, 1.000000 ), chains=['A', 'B', 'C', 'D', 'E']</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#alignc5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.alignc5" title="Permalink to this definition">¶</a></dt>
+<dt id="sym_util.symmetrize">
+<tt class="descclassname">sym_util.</tt><tt class="descname">symmetrize</tt><big>(</big><em>sele='not symmetrized_*'</em>, <em>alignsele=None</em>, <em>chains=</em><span class="optional">[</span><span class="optional">]</span>, <em>delete=True</em><big>)</big><a class="headerlink" href="#sym_util.symmetrize" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -135,6 +115,121 @@
 <dl class="function">
 <dt id="sym_util.rechain">
 <tt class="descclassname">sym_util.</tt><tt class="descname">rechain</tt><big>(</big><em>sel</em>, <em>nres</em><big>)</big><a class="reference internal" href="_modules/sym_util.html#rechain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sym_util.rechain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.makecx">
+<tt class="descclassname">sym_util.</tt><tt class="descname">makecx</tt><big>(</big><em>sel='all'</em>, <em>name='TMP'</em>, <em>n=5</em><big>)</big><a class="headerlink" href="#sym_util.makecx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.makedx">
+<tt class="descclassname">sym_util.</tt><tt class="descname">makedx</tt><big>(</big><em>sel='all'</em>, <em>n=5</em><big>)</big><a class="headerlink" href="#sym_util.makedx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.makecxauto">
+<tt class="descclassname">sym_util.</tt><tt class="descname">makecxauto</tt><big>(</big><big>)</big><a class="headerlink" href="#sym_util.makecxauto" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.makekinwire">
+<tt class="descclassname">sym_util.</tt><tt class="descname">makekinwire</tt><big>(</big><em>sel</em>, <em>movres</em>, <em>fixres</em><big>)</big><a class="headerlink" href="#sym_util.makekinwire" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.get_contigs">
+<tt class="descclassname">sym_util.</tt><tt class="descname">get_contigs</tt><big>(</big><em>x</em>, <em>n=7</em><big>)</big><a class="headerlink" href="#sym_util.get_contigs" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">test</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">33</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span><span class="mi">44</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">49</span><span class="p">,</span><span class="mi">50</span><span class="p">))</span><span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">test</span>
+<span class="go">[1, 2, 3, 4, 5, 6, 7, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 40, 41, 42, 43, 49, 0, 1, 2, 3, 4, 5, 6, 7]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">get_contigs</span><span class="p">(</span> <span class="n">test</span> <span class="p">)</span>
+<span class="go">[[1, 2, 3, 4, 5, 6, 7], [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32], [0, 1, 2, 3, 4, 5, 6, 7]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sym_util.get_contigs_termini">
+<tt class="descclassname">sym_util.</tt><tt class="descname">get_contigs_termini</tt><big>(</big><em>x</em>, <em>n=7</em><big>)</big><a class="headerlink" href="#sym_util.get_contigs_termini" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">test</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">33</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span><span class="mi">44</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">49</span><span class="p">,</span><span class="mi">50</span><span class="p">))</span><span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">test</span>
+<span class="go">[1, 2, 3, 4, 5, 6, 7, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 40, 41, 42, 43, 49, 0, 1, 2, 3, 4, 5, 6, 7]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">get_contigs_termini</span><span class="p">(</span> <span class="n">test</span> <span class="p">)</span>
+<span class="go">[[1, 2, 3, 4, 5, 6, 7], [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32], [0, 1, 2, 3, 4, 5, 6, 7]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sym_util.get_fixed_size_contigs">
+<tt class="descclassname">sym_util.</tt><tt class="descname">get_fixed_size_contigs</tt><big>(</big><em>x</em>, <em>n=7</em><big>)</big><a class="headerlink" href="#sym_util.get_fixed_size_contigs" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">test</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">33</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span><span class="mi">44</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">49</span><span class="p">,</span><span class="mi">50</span><span class="p">))</span><span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">test</span>
+<span class="go">[1, 2, 3, 4, 5, 6, 7, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 40, 41, 42, 43, 49, 0, 1, 2, 3, 4, 5, 6, 7]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">get_fixed_size_contigs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span><span class="mi">7</span><span class="p">):</span> <span class="k">print</span> <span class="n">f</span>
+<span class="go">[1, 2, 3, 4, 5, 6, 7]</span>
+<span class="go">[20, 21, 22, 23, 24, 25, 26]</span>
+<span class="go">[21, 22, 23, 24, 25, 26, 27]</span>
+<span class="go">[22, 23, 24, 25, 26, 27, 28]</span>
+<span class="go">[23, 24, 25, 26, 27, 28, 29]</span>
+<span class="go">[24, 25, 26, 27, 28, 29, 30]</span>
+<span class="go">[25, 26, 27, 28, 29, 30, 31]</span>
+<span class="go">[26, 27, 28, 29, 30, 31, 32]</span>
+<span class="go">[0, 1, 2, 3, 4, 5, 6]</span>
+<span class="go">[1, 2, 3, 4, 5, 6, 7]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">get_fixed_size_contigs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span><span class="mi">9</span><span class="p">):</span> <span class="k">print</span> <span class="n">f</span>
+<span class="go">[20, 21, 22, 23, 24, 25, 26, 27, 28]</span>
+<span class="go">[21, 22, 23, 24, 25, 26, 27, 28, 29]</span>
+<span class="go">[22, 23, 24, 25, 26, 27, 28, 29, 30]</span>
+<span class="go">[23, 24, 25, 26, 27, 28, 29, 30, 31]</span>
+<span class="go">[24, 25, 26, 27, 28, 29, 30, 31, 32]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_fixed_size_contigs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="go">28</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">get_fixed_size_contigs</span><span class="p">(</span><span class="n">test</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span> <span class="k">print</span> <span class="n">f</span>
+<span class="go">[1, 2, 3, 4]</span>
+<span class="go">[2, 3, 4, 5]</span>
+<span class="go">[3, 4, 5, 6]</span>
+<span class="go">[4, 5, 6, 7]</span>
+<span class="go">[20, 21, 22, 23]</span>
+<span class="go">[21, 22, 23, 24]</span>
+<span class="go">[22, 23, 24, 25]</span>
+<span class="go">[23, 24, 25, 26]</span>
+<span class="go">[24, 25, 26, 27]</span>
+<span class="go">[25, 26, 27, 28]</span>
+<span class="go">[26, 27, 28, 29]</span>
+<span class="go">[27, 28, 29, 30]</span>
+<span class="go">[28, 29, 30, 31]</span>
+<span class="go">[29, 30, 31, 32]</span>
+<span class="go">[0, 1, 2, 3]</span>
+<span class="go">[1, 2, 3, 4]</span>
+<span class="go">[2, 3, 4, 5]</span>
+<span class="go">[3, 4, 5, 6]</span>
+<span class="go">[4, 5, 6, 7]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sym_util.tmpname">
+<tt class="descclassname">sym_util.</tt><tt class="descname">tmpname</tt><big>(</big><big>)</big><a class="headerlink" href="#sym_util.tmpname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sym_util.gen_helical_alignments">
+<tt class="descclassname">sym_util.</tt><tt class="descname">gen_helical_alignments</tt><big>(</big><em>sele1</em>, <em>sele2</em>, <em>pref='HALN'</em><big>)</big><a class="headerlink" href="#sym_util.gen_helical_alignments" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">

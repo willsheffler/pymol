@@ -5,78 +5,88 @@ if not newpath in sys.path: sys.path.append(newpath)
 import string,re,gzip,itertools
 from sym_util import *
 
-def homogenizechains(sel1,sel2):
-   cmd.remove("hydro")
-   cmd.remove("resn HOH")
-#   cmd.remove("(HET and not resn MSE+CSW)")
-   a = cmd.get_model("%s and name ca"%(sel1))
-   b = cmd.get_model("%s and name ca"%(sel2))
-   sa = "".join([name1[x.resn] for x in a.atom if x.resn in name1])
-   sb = "".join([name1[x.resn] for x in b.atom if x.resn in name1])
-   if sa==sb: return True
-   ra = [myint(x.resi) for x in a.atom]
-   rb = [myint(x.resi) for x in b.atom]
-#   if max(ra) - min(ra) + 1 != len(ra): print "missing residue numbers",max(ra),min(ra),len(ra)
-#   if max(rb) - min(rb) + 1 != len(rb): print "missing residue numbers",rb
-   mla,mua,mlb,mub = lcs(sa,sb)
-   bla,bua,blb,bub = lcs(sa[  :mla],sb[  :mlb])
-   ala,aua,alb,aub = lcs(sa[mua+1:],sb[mub+1:])
-   ra = ra[mla:(mua+1)]
-   rb = rb[mlb:(mub+1)]
-   if len(ra[bla:(bua+1)]) > 10:
-      ra = ra[bla:(bua+1)] + ra[mla:(mua+1)] + ra[ala:(aua+1)]
-      rb = rb[blb:(bub+1)] + rb[mlb:(mub+1)] + rb[alb:(aub+1)]
-   if len(ra[ala:(aua+1)]) > 10:
-      ra += ra[ala:(aua+1)]
-      rb += rb[alb:(aub+1)]
-   for c,i in getres("%s"%(sel1)):
-      if not i in ra: cmd.remove("%s and resi %i"%(sel1,i))
-   for c,i in getres("%s"%(sel2)):
-      if not i in rb: cmd.remove("%s and resi %i"%(sel2,i))
-   return False
+def homogenizechains(sel='all'):
+	chains=cmd.get_chains()
+	#cmd.remove("hydro")
+	# cmd.remove("resn HOH")
+	#   cmd.remove("(HET and not resn MSE+CSW)")
+	for c1,c2 in ((x,y) for x in chains for y in chains if x < y):
+		sel1 = "(%s) and chain %s and name ca"%(sel,c1)
+		sel2 = "(%s) and chain %s and name ca"%(sel,c2)
+		#
+		a = cmd.get_model("%s"%(sel1))
+		b = cmd.get_model("%s"%(sel2))
+		sa = "".join([getname1(x.resn) for x in a.atom])
+		sb = "".join([getname1(x.resn) for x in b.atom])
+		if sa==sb: continue
+		ra = [myint(x.resi) for x in a.atom]
+		rb = [myint(x.resi) for x in b.atom]
+		#   if max(ra) - min(ra) + 1 != len(ra): print "missing residue numbers",max(ra),min(ra),len(ra)
+		#   if max(rb) - min(rb) + 1 != len(rb): print "missing residue numbers",rb
+		mla,mua,mlb,mub = lcs(sa,sb)
+		bla,bua,blb,bub = lcs(sa[  :mla],sb[  :mlb])
+		ala,aua,alb,aub = lcs(sa[mua+1:],sb[mub+1:])
+		ra = ra[mla:(mua+1)]
+		rb = rb[mlb:(mub+1)]
+		if len(ra[bla:(bua+1)]) > 10:
+			ra = ra[bla:(bua+1)] + ra[mla:(mua+1)] + ra[ala:(aua+1)]
+			rb = rb[blb:(bub+1)] + rb[mlb:(mub+1)] + rb[alb:(aub+1)]
+		if len(ra[ala:(aua+1)]) > 10:
+			ra += ra[ala:(aua+1)]
+			rb += rb[alb:(aub+1)]
+		for i in getres("%s"%(sel1),False):
+			if not i in ra:
+				print "remove resi",i,"from '"+sel1+"'"
+				cmd.remove("%s and resi %i"%(sel1,i))
+		for i in getres("%s"%(sel2),False):
+			if not i in rb:
+				print "remove resi",i,"from '"+sel2+"'"
+				cmd.remove("%s and resi %i"%(sel2,i))
+	return False
 
-def pickandfixchains(N,sel="all"):
-   # find chains
-   # homogenize all pairs until fixed
-   cc = []
-   for c in getchain(sel):
-      cc.append((-cmd.select("%s and chain %s and name CA"%(sel,c)),c))
-   cc.sort()
-   chains = [x[1] for x in cc[:N]]
-   done = False
-   count = 0
-   while not done:
-      if count > 10: break
-      count += 1
-      done = True;
-      random.shuffle(chains)
-      for i in range(1,len(chains)):
-         done = done and homogenizechains(sel,chains[0],chains[i])
-   print chains
-   if N is 2: alignc2(sel,"name ca",chains=chains)
-   if N is 3: alignc3(sel,"name ca",chains=chains)
-   if N is 4: alignc4(sel,"name ca",chains=chains)
-   if N is 5: alignc5(sel,"name ca",chains=chains)
-   chains.sort()
-   return chains[0]
+# def pickandfixchains(N=None,sel="all"):
+#    # find chains
+#    # homogenize all pairs until fixed
+#    if not N: N = cmd.getnum_chains(sel)
+#    cc = []
+#    for c in getchain(sel):
+#       cc.append((-cmd.select("%s and chain %s and name CA"%(sel,c)),c))
+#    cc.sort()
+#    chains = [x[1] for x in cc[:N]]
+#    done = False
+#    count = 0
+#    while not done:
+#       if count > 10: break
+#       count += 1
+#       done = True;
+#       random.shuffle(chains)
+#       for i in range(1,len(chains)):
+#          done = done and homogenizechains(sel,chains[0],chains[i])
+#    print chains
+#    if N is 2: alignc2(sel,"name ca",chains=chains)
+#    if N is 3: alignc3(sel,"name ca",chains=chains)
+#    if N is 4: alignc4(sel,"name ca",chains=chains)
+#    if N is 5: alignc5(sel,"name ca",chains=chains)
+#    chains.sort()
+#    return chains[0]
 
 
 def processhomomers():
-   o = open("log",'w')
-   for n in (2,3,4,5):
-      files = glob.glob("c%ipdb/*.pdb.gz"%n)
-      random.shuffle(files)
-      for f in files:
-         o.write(f+"\n")
-         o.flush()
-         cmd.delete("all")
-         try:
-            cmd.load(f)
-            c = pickandfixchains(n)
-            cmd.save("c%ia/"%n+f[3:-3],"chain %s"%c)
-         except:
-            print "fail on",f
-   o.close()
+	o = open("log",'w')
+	for n in (2,3,4,5):
+		files = glob.glob("c%ipdb/*.pdb.gz"%n)
+		random.shuffle(files)
+		for f in files:
+			o.write(f+"\n")
+			o.flush()
+			cmd.delete("all")
+			try:
+				cmd.load(f)
+				c = pickandfixchains(n)
+				cmd.save("c%ia/"%n+f[3:-3],"chain %s"%c)
+			except:
+				print "fail on",f
+	o.close()
 
 
 def iscontig(sel):
@@ -129,7 +139,7 @@ def procCdat(N=3,lfile=None,biod="/data/biounit",outd=None):
 				if cmd.select("mxatm") < 50:
 					Nnomxatm += 1
 					print "ERROR: mxatm < 50"
-				 	continue
+					continue
 				if cmd.select("name CA and mxatm") > 500:
 					Nbig += 1
 					print "ERROR:",fname," more than 500 res"
@@ -326,7 +336,7 @@ def procD2dat(lfile=None,biod="/data/biounit",outd=None):
 
 def prepare_c2_nmr(pattern,outdir=None):
 	if None is outdir: outdir = os.path.dirname(pattern)
-	if not os.path.exists(outdir): os.mkdir(outdir)	
+	if not os.path.exists(outdir): os.mkdir(outdir)
 	for i in glob.glob(pattern):
 		try:
 			name = os.path.basename(i).split(".")[0]
@@ -394,8 +404,8 @@ def make_cryst1_P432(fn):
 
 	# cmd.hide('ev')
 	# x1 = xyz.rotation_around_degrees(A2,180,newc2)
-	# x2 = xyz.rotation_around_degrees(A3,120, V0  )	
-	# x3 = xyz.rotation_around_degrees(A3,240, V0  )	
+	# x2 = xyz.rotation_around_degrees(A3,120, V0  )
+	# x3 = xyz.rotation_around_degrees(A3,240, V0  )
 	# axes = set()
 	# cmd.create('work_minimal',sele+" and chain A and name N+CA+C+SG")
 	# for i,X in enumerate( xyz.expand_xforms((x1,x2,x3),9) ):
@@ -404,7 +414,7 @@ def make_cryst1_P432(fn):
 	#  	axes.add( X.rotation_axis()[0].key() )
 	# print axes
 	# cmd.show('rib')
-	# cmd.show('sph','name SG')	
+	# cmd.show('sph','name SG')
 	# return
 
 	d = slide_to_make_lines_intersect(A3,A2,com(Dsel),I2,V0)
@@ -447,7 +457,7 @@ def make_cryst1_I213(fn):
 	oldc2 = com(Dsel)
 	oldc3 = com(Tsel)
 	olda2 = c2axis(Dsel,chains=('A','D'))
-	olda3 = c3axis(Tsel)	
+	olda3 = c3axis(Tsel)
 	Xaln = xyz.alignvectors(olda2,olda3,Vec(0,0,1),Vec(1,1,1))
 
 	Xaln = Xaln # center trimer, then align axes, then move so a2 intersects x==0
@@ -475,8 +485,8 @@ def make_cryst1_I213(fn):
 	os.system("rm .tmp.pdb")
 
 	# x1 = xyz.rotation_around_degrees(newa2,180,newc2)
-	# x2 = xyz.rotation_around_degrees(newa3,120,newc3)	
-	# x3 = xyz.rotation_around_degrees(newa3,240,newc3)	
+	# x2 = xyz.rotation_around_degrees(newa3,120,newc3)
+	# x3 = xyz.rotation_around_degrees(newa3,240,newc3)
 	# for i,X in enumerate( xyz.expand_xforms((x1,x2,x3),6) ):
 	# 	cmd.create("sub%i"%i,sele+" and chain A and not sub*")
 	#  	xform("sub%i"%i,X)
@@ -519,7 +529,7 @@ def make_cryst1_23(fn,a2in,i2,a3in,i3):
 		print "actual axis ang", olda2.lineangle_degrees(olda3)
 	else:
 		print "INFO: axis angle error is", axis_angle_error
-	
+
 	for a2i in (0,1,2):
 		a2 = rotation_matrix_degrees()*a2in
 		for a3 in (-a3in,a3in):
@@ -555,11 +565,11 @@ def make_cryst1_23(fn,a2in,i2,a3in,i3):
 
 			trans(sele,-newc2.x)
 			cellsize = abs((newc2.y-newc2.x))*4.0
-			
+
 			# fix me!
 			print com(Dsel)
 			print a2
-			print i2*cellsize	
+			print i2*cellsize
 			assert point_line_distance(com(Dsel),a2,i2*cellsize) < 0.0001
 			assert point_line_distance(com(Tsel),a3,i3*cellsize) < 0.0001
 
@@ -577,8 +587,8 @@ def make_cryst1_23(fn,a2in,i2,a3in,i3):
 			return
 
 			# x1 = xyz.rotation_around_degrees(newa2,180,newc2)
-			# x2 = xyz.rotation_around_degrees(newa3,120,newc3)	
-			# x3 = xyz.rotation_around_degrees(newa3,240,newc3)	
+			# x2 = xyz.rotation_around_degrees(newa3,120,newc3)
+			# x3 = xyz.rotation_around_degrees(newa3,240,newc3)
 			# for i,X in enumerate( xyz.expand_xforms((x1,x2,x3),6) ):
 			# 	cmd.create("sub%i"%i,sele+" and chain A and not sub*")
 			#  	xform("sub%i"%i,X)
@@ -611,13 +621,13 @@ def nulltest():
 	"""
 
 def load_tests(loader, tests, ignore):
-    tests.addTests(doctest.DocTestSuite())
-    return tests
+	 tests.addTests(doctest.DocTestSuite())
+	 return tests
 
 
 
 if __name__ == '__main__':
-   import doctest
-   r = doctest.testmod()
-   print r
+	import doctest
+	r = doctest.testmod()
+	print r
 

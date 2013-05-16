@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+import sys,os
+from optparse import OptionParser
+
+parser = OptionParser()
+parser.add_option("-o", "--pmlfile"  , dest="pmlfile"  , help="write report to FILE.pml"                   , metavar="FILE.pml", default="~/tmp/rosetta.pml")
+parser.add_option("-t", "--tag"      , dest="tag"      , help="tag to print, default all"        ,          default="")
+parser.add_option("-k", "--killpymol", dest="kill"     , help="kill pymol when run"        ,          action="store_true", default=False)
+parser.add_option("-r", "--removeold", dest="rm"     , help=""        ,        action="store_true",   default=False)
+opt,args = parser.parse_args()
+outfile = os.path.expanduser(opt.pmlfile)
+
+if len(args) is 0:
+	inputstream = sys.stdin
+	print "pymolcmd: extract lines from STDIN starting with 'PYMOL_CMD %s' and put them in file: %s"%(opt.tag,outfile)
+elif len(args) is 1:
+	infname = os.path.expanduser(args[0])
+	inputstream = open(infname)
+	print "pymolcmd: extract lines from file '%s' starting with 'PYMOL_CMD %s' and put them in file: %s"%(infname,opt.tag,outfile)
+else:
+	sys.exit("don't know what do to with extra args: "+str(args))
+
+if opt.kill:
+	print "KILLING MacPyMOL!!!!!"
+	os.system("killall MacPyMOL")
+if opt.rm:
+	print "REMOVING (if exists)",outfile
+	if os.path.exists(outfile):
+		os.remove(outfile)
+
+with open(outfile,'w') as out:
+	for l in inputstream.readlines():
+		if l.startswith("PYMOL_CMD"):
+			tmp,tag = l.split()[:2]
+			if not opt.tag or opt.tag==tag:
+				out.write(l[len(tmp)+len(tag)+2:])
+		else:
+			print l,
+
+if inputstream is not sys.stdin:
+	inputstream.close()
+

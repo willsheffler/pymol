@@ -10,19 +10,28 @@ from math import sqrt
 import xyzMath as xyz
 from xyzMath import Ux,Uy,Uz,Imat
 from functools import partial
+import cProfile
 
 try:
-	from pymol import cmd
-	from pymol import cgo 
+	from pymol import cmd,CmdException,cgo,util
+	def inpymol(): return True
 except ImportError as e:
 	print "can't load pymol, Mocking it for testing/doc"
 	from minimock import Mock
 	cmd = Mock("cmd")
 	cgo = Mock("cgo")
+	cgo = Mock("util")
 	cmd.extend = (lambda x,y: x)
+	def inpymol(): return False
+
+alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"*10
+ROSETTA_CHAINS = r"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$&.<>?]{}|-_\~=%zyxwvutsrqponmlkjihgfedcba" * 10
 
 numcom = 0
 numvec = 0
+numray = 0
+numline = 0
+numseg = 0
 
 COLORS = ('cyan', 'lightmagenta', 'yellow', 'salmon', 'hydrogen', 'slate', 'orange',
  'lime',
@@ -79,7 +88,7 @@ aa_1_3 = {'A': 'ALA',
 		  'xyz.Vec': 'VAL',
 		  'W': 'TRP',
 		  'Uy': 'TYR',
-}
+ }
 aa_3_1 = {'ALA': 'A',
 		  'ASP': 'D',
 		  'GLU': 'E',
@@ -100,7 +109,7 @@ aa_3_1 = {'ALA': 'A',
 		  'VAL': 'xyz.Vec',
 		  'TRP': 'W',
 		  'TYR': 'Uy',
-}
+ }
 aa_types = {
   'A': 'hydrophobic',
   'C': 'cysteine',
@@ -127,56 +136,51 @@ aa_types = {
 def showaxes():
     v = cmd.get_view()
     obj = [
-        BEGIN, LINES,
-        COLOR, 1.0, 0.0, 0.0, 
-        VERTEX,   0.0, 0.0, 0.0,
-        VERTEX,  20.0, 0.0, 0.0,
-        COLOR, 0.0, 1.0, 0.0, 
-        VERTEX, 0.0,   0.0, 0.0,
-        VERTEX, 0.0,  20.0, 0.0, 
-        COLOR, 0.0, 0.0, 1.0, 
-        VERTEX, 0.0, 0.0,   0.0,
-        VERTEX, 00, 0.0,   20.0,
-        END
-        ]                                                                                            
+        cgo.BEGIN, cgo.LINES,
+        cgo.COLOR, 1.0, 0.0, 0.0,
+        cgo.VERTEX,   0.0, 0.0, 0.0,
+        cgo.VERTEX,  20.0, 0.0, 0.0,
+        cgo.COLOR, 0.0, 1.0, 0.0,
+        cgo.VERTEX, 0.0,   0.0, 0.0,
+        cgo.VERTEX, 0.0,  20.0, 0.0,
+        cgo.COLOR, 0.0, 0.0, 1.0,
+        cgo.VERTEX, 0.0, 0.0,   0.0,
+        cgo.VERTEX, 00, 0.0,   20.0,
+        cgo.END
+        ]
     cmd.load_cgo(obj,'axes')
     cmd.set_view(v)
 
 def showaxes2():
     v = cmd.get_view()
     obj = [
-        BEGIN, LINES,
-        COLOR, 1.0, 0.0, 0.0, 
-        VERTEX, -20.0, 0.0, 0.0,
-        VERTEX,  20.0, 0.0, 0.0,
-        COLOR, 0.0, 1.0, 0.0, 
-        VERTEX, 0.0, -20.0, 0.0,
-        VERTEX, 0.0,  20.0, 0.0, 
-        COLOR, 0.0, 0.0, 1.0, 
-        VERTEX, 0.0, 0.0, -20.0,
-        VERTEX, 00, 0.0,   20.0,
-        END
-        ]                                                                                            
+        cgo.BEGIN, cgo.LINES,
+        cgo.COLOR, 1.0, 0.0, 0.0,
+        cgo.VERTEX, -90.0, 0.0, 0.0,
+        cgo.VERTEX,  90.0, 0.0, 0.0,
+        cgo.COLOR, 0.0, 1.0, 0.0,
+        cgo.VERTEX, 0.0, -90.0, 0.0,
+        cgo.VERTEX, 0.0,  90.0, 0.0,
+        cgo.COLOR, 0.0, 0.0, 1.0,
+        cgo.VERTEX, 0.0, 0.0, -90.0,
+        cgo.VERTEX, 00, 0.0,   90.0,
+        cgo.END
+        ]
     cmd.load_cgo(obj,'axes')
     cmd.set_view(v)
 
 def getchain(sele):
+	return cmd.get_chains(sele)
+
+
+def getres(sele,withchain=True):
 	try:
-		c = list(sets.Set([x.chain for x in cmd.get_model(sele).atom]))
-		c.sort()
-		return c
+		if not withchain:
+			return sorted(list(sets.Set([          int(x.resi)  for x in cmd.get_model(sele).atom])))
+		else:
+			return sorted(list(sets.Set([(x.chain, int(x.resi)) for x in cmd.get_model(sele).atom])))
 	except:
 		return []
-
-
-def getres(sele):
-	try:
-		r = list(sets.Set([(x.chain, int(x.resi)) for x in cmd.get_model(sele).atom]))
-		r.sort()
-		return r
-	except:
-		return []
-
 
 def com(sel="all", state=1):
 	## assumes equal weights (best called with "and name ca" suffix)
@@ -192,26 +196,95 @@ def showcom(sel="all"):
 	global numcom
 	c = com(sel)
 	print "Center of mass: ", c
-	cgo = [pymol.cgo.COLOR, 1.0, 1.0, 1.0, SPHERE, c.x, c.y, c.z, 1.0] ## white sphere with 3A radius
+	cgo = [pymol.cgo.COLOR, 1.0, 1.0, 1.0, cgo.SPHERE, c.x, c.y, c.z, 1.0] ## white sphere with 3A radius
 	cmd.load_cgo(cgo, "com%i" % numcom)
 	numcom += 1
 
 
-def showvec(c,lab=None):
-	if lab is None:
+def showsphere(c,r=1,col=(1,1,1),lbl=''):
+	v = cmd.get_view()
+	if not lbl:
 		global numvec
-		lab = "vec%i"%numvec
+		lbl = "vec%i"%numvec
 		numvec += 1
-	cgo = [COLOR, 1.0, 1.0, 1.0, SPHERE, c.x, c.y, c.z, 1.0] ## white sphere with 3A radius
-	cmd.load_cgo(cgo,lab)
+	mycgo = [cgo.COLOR, col[0], col[1], col[2], cgo.SPHERE, c.x, c.y, c.z, r] ## white sphere with 3A radius
+	cmd.load_cgo(mycgo,lbl)
+	cmd.set_view(v)
 
+def showvecfrompoint(a, c, col=(1,1,1), lbl=''):
+	if not lbl:
+		global numray
+		lbl = "ray%i"%numray
+		numray += 1
+	cmd.delete(lbl)
+	v = cmd.get_view()
+	OBJ = [
+        cgo.BEGIN, cgo.LINES,
+        cgo.COLOR, col[0], col[1],col[2],
+        cgo.VERTEX, c.x, c.y, c.z,
+        cgo.VERTEX, c.x+a.x, c.y+a.y, c.z+a.z,
+        cgo.END
+	]
+	cmd.load_cgo(OBJ,lbl)
+	# cmd.load_cgo([cgo.COLOR, col[0],col[1],col[2],
+	# 			  cgo.SPHERE,   c.x,       c.y,       c.z,    0.08,
+	# 			  cgo.CYLINDER, c.x,       c.y,       c.z,
+	# 						c.x + a.x, c.y + a.y, c.z + a.z, 0.02,
+	# 				col[0],col[1],col[2],col[0],col[1],col[2],], lbl)
+	cmd.set_view(v)
 
-def showvecfrompoint(a, c, lbl):
-	cmd.load_cgo([COLOR, 1.0, 1.0, 1.0,
-				  SPHERE,   c.x,       c.y,       c.z,    0.2,
-				  CYLINDER, c.x,       c.y,       c.z,
-							c.x + a.x, c.y + a.y, c.z + a.z, 0.1,
-					1, 1, 1, 1, 1, 1, ], lbl)
+def showsegment(c1, c2, col=(1,1,1), lbl=''):
+	if not lbl:
+		global numseg
+		lbl = "seg%i"%numseg
+		numseg += 1
+	cmd.delete(lbl)
+	v = cmd.get_view()
+	OBJ = [
+        cgo.BEGIN, cgo.LINES,
+        cgo.COLOR, col[0], col[1],col[2],
+        cgo.VERTEX, c1.x, c1.y, c1.z,
+        cgo.VERTEX, c2.x, c2.y, c2.z,
+        cgo.END
+	]
+	cmd.load_cgo(OBJ,lbl)
+	# cmd.load_cgo([cgo.COLOR, col[0],col[1],col[2],
+	# 			  cgo.CYLINDER, c1.x,     c1.y,     c1.z,
+	# 						    c2.x,     c2.y,     c2.z, 0.02,
+	# 				col[0],col[1],col[2],col[0],col[1],col[2],], lbl)
+	cmd.set_view(v)
+
+def showcyl(c1, c2, r, col=(1,1,1), col2=None, lbl=''):
+	if not col2:
+		col2 = col
+	if not lbl:
+		global numseg
+		lbl = "seg%i"%numseg
+		numseg += 1
+	cmd.delete(lbl)
+	v = cmd.get_view()
+	cmd.load_cgo([#cgo.COLOR, col[0],col[1],col[2],
+				  cgo.CYLINDER, c1.x,     c1.y,     c1.z,
+							    c2.x,     c2.y,     c2.z, r,
+					col[0],col[1],col[2],col2[0],col2[1],col2[2],], lbl)
+	cmd.set_view(v)
+
+def showline(a, c, col=(1,1,1), lbl=''):
+	if not lbl:
+		global numline
+		lbl = "line%i"%numline
+		numline += 1
+	cmd.delete(lbl)
+	v = cmd.get_view()
+	OBJ = [
+        cgo.BEGIN, cgo.LINES,
+        cgo.COLOR, col[0], col[1],col[2],
+        cgo.VERTEX, c.x-a.x, c.y-a.y, c.z-a.z,
+        cgo.VERTEX, c.x+a.x, c.y+a.y, c.z+a.z,
+        cgo.END
+	]
+	cmd.load_cgo(OBJ,lbl)
+	cmd.set_view(v)
 
 
 class ResBB(object):
@@ -289,64 +362,64 @@ def chirality(fe1, fe2, fe3, fe4):
 	return c.dot(fe4-fe1)
 
 
-def dimeraxis1(m1, m2):
-	if len(m1.atom) != len(m2.atom):
-		print "selections must contain the same number of atoms!"
-		return
-	i = j = randrange(len(m1.atom))
-	while j == i: j = randrange(len(m1.atom))
-	a1, a2 = xyz.Vec(m1.atom[i].coord), xyz.Vec(m2.atom[i].coord)
-	u = (a1+a2)/3
-	a1, a2 = xyz.Vec(m1.atom[j].coord), xyz.Vec(m2.atom[j].coord)
-	v = (a1+a2)/3
-	if v.x-u.x < 0:
-		u, v = v, u
-	return (v-u).normalized()
+# def dimeraxis1(m1, m2):
+# 	if len(m1.atom) != len(m2.atom):
+# 		print "selections must contain the same number of atoms!"
+# 		return
+# 	i = j = randrange(len(m1.atom))
+# 	while j == i: j = randrange(len(m1.atom))
+# 	a1, a2 = xyz.Vec(m1.atom[i].coord), xyz.Vec(m2.atom[i].coord)
+# 	u = (a1+a2)/3
+# 	a1, a2 = xyz.Vec(m1.atom[j].coord), xyz.Vec(m2.atom[j].coord)
+# 	v = (a1+a2)/3
+# 	if v.x-u.x < 0:
+# 		u, v = v, u
+# 	return (v-u).normalized()
 
 
-def dimeraxis(sel1, sel2, nsamp=100):
-	m1 = cmd.get_model(sel1)
-	m2 = cmd.get_model(sel2)
-	a, wtot = xyz.Vec(0), 0
-	for i in range(int(nsamp)):
-		u = dimeraxis1(m1, m2)
-		# print u
-		a  += u
-		wtot += u.length()
-	a /= wtot
-	return a
+# def dimeraxis(sel1, sel2, nsamp=100):
+# 	m1 = cmd.get_model(sel1)
+# 	m2 = cmd.get_model(sel2)
+# 	a, wtot = xyz.Vec(0), 0
+# 	for i in range(int(nsamp)):
+# 		u = dimeraxis1(m1, m2)
+# 		# print u
+# 		a  += u
+# 		wtot += u.length()
+# 	a /= wtot
+# 	return a
 
 
-def axisofrot1(m1, m2, m3):
-	if len(m1.atom) != len(m2.atom) or len(m2.atom) != len(m3.atom) or len(m3.atom) != len(m1.atom):
-		print "selections must contain the same number of atoms!"
-		return
-	i = randrange(len(m1.atom))
-	a1, a2, a3 = xyz.Vec(m1.atom[i].coord), xyz.Vec(m2.atom[i].coord), xyz.Vec(m3.atom[i].coord)
-	u = (a1+a2+a3)/3
-	i = randrange(len(m1.atom))
-	a1, a2, a3 = xyz.Vec(m1.atom[i].coord), xyz.Vec(m2.atom[i].coord), xyz.Vec(m3.atom[i].coord)
-	v = (a1+a2+a3)/3
-	if u.length() > v.length():
-		u, v = v, u
-	return v-u
+# def axisofrot1(m1, m2, m3):
+# 	if len(m1.atom) != len(m2.atom) or len(m2.atom) != len(m3.atom) or len(m3.atom) != len(m1.atom):
+# 		print "selections must contain the same number of atoms!"
+# 		return
+# 	i = randrange(len(m1.atom))
+# 	a1, a2, a3 = xyz.Vec(m1.atom[i].coord), xyz.Vec(m2.atom[i].coord), xyz.Vec(m3.atom[i].coord)
+# 	u = (a1+a2+a3)/3
+# 	i = randrange(len(m1.atom))
+# 	a1, a2, a3 = xyz.Vec(m1.atom[i].coord), xyz.Vec(m2.atom[i].coord), xyz.Vec(m3.atom[i].coord)
+# 	v = (a1+a2+a3)/3
+# 	if u.length() > v.length():
+# 		u, v = v, u
+# 	return v-u
 
 
-def axisofrot(sel1, sel2, sel3, nsamp=100):
-	m1 = cmd.get_model(sel1).atom[0]
-	m2 = cmd.get_model(sel2).atom[0]
-	m3 = cmd.get_model(sel3).atom[0]
-	m1 = xyz.Vec(m1.coord)
-	m2 = xyz.Vec(m2.coord)
-	m3 = xyz.Vec(m3.coord)
-	return ((m2-m1).cross(m2-m3)).normalized()
-	# a, wtot = xyz.Vec(0), 0
-	# for i in range(int(nsamp)):
-	#    u = axisofrot1(m1, m2, m3)
-	#    a  += u
-	#    wtot += u.length()
-	# a /= wtot
-	return a
+# def axisofrot(sel1, sel2, sel3, nsamp=100):
+# 	m1 = cmd.get_model(sel1).atom[0]
+# 	m2 = cmd.get_model(sel2).atom[0]
+# 	m3 = cmd.get_model(sel3).atom[0]
+# 	m1 = xyz.Vec(m1.coord)
+# 	m2 = xyz.Vec(m2.coord)
+# 	m3 = xyz.Vec(m3.coord)
+# 	return ((m2-m1).cross(m2-m3)).normalized()
+# 	# a, wtot = xyz.Vec(0), 0
+# 	# for i in range(int(nsamp)):
+# 	#    u = axisofrot1(m1, m2, m3)
+# 	#    a  += u
+# 	#    wtot += u.length()
+# 	# a /= wtot
+# 	return a
 
 #   0.373875069479 0.733798169028 0.567236881341 24.7756576007
 
@@ -394,25 +467,29 @@ def transz(sel,z):
 def rot(sel, axis, ang, cen=xyz.V0):
 	if not xyz.isvec(axis): raise NotImplementedError
 	if not xyz.isnum(ang): raise NotImplementedError
-	if not xyz.isvec(cen): raise NotImplementedError	
+	if not xyz.isvec(cen): raise NotImplementedError
 	# if abs(axis.x) < 0.00001: axis.x = 0.0
 	# if abs(axis.y) < 0.00001: axis.y = 0.0
-	# if abs(axis.z) < 0.00001: axis.z = 0.0
-	cmd.rotate([round(axis.x,6), round(axis.y,6), round(axis.z,6)], ang, sel, 0, 0, None, [cen.x, cen.y, cen.z])
+	# if abs(axis.z) < 0.00001: axis.z = 0.0[[]]
+	# cmd.rotate([round(axis.x,5), round(axis.y,5), round(axis.z,5)], ang, sel, 0, 0, None, [round(cen.x,5), round(cen.y,5), round(cen.z,5) ])
+	axis = "[ %9.6f, %9.6f, %9.6f ]"%(axis.x,axis.y,axis.z)
+	cen  = "[ %9.6f, %9.6f, %9.6f ]"%( cen.x, cen.y, cen.z)
+	cmd.rotate(axis, ang, sel, 0, 0, None, cen )
 def rotx(sel, ang, cen=xyz.V0):
 	if not xyz.isnum(ang): raise NotImplementedError
-	if not xyz.isvec(cen): raise NotImplementedError	
+	if not xyz.isvec(cen): raise NotImplementedError
 	cmd.rotate([1,0,0], ang, sel, 0, 0, None, [cen.x, cen.y, cen.z])
 def roty(sel, ang, cen=xyz.V0):
 	if not xyz.isnum(ang): raise NotImplementedError
-	if not xyz.isvec(cen): raise NotImplementedError	
+	if not xyz.isvec(cen): raise NotImplementedError
 	cmd.rotate([0,1,0], ang, sel, 0, 0, None, [cen.x, cen.y, cen.z])
 def rotz(sel, ang, cen=xyz.V0):
 	if not xyz.isnum(ang): raise NotImplementedError
-	if not xyz.isvec(cen): raise NotImplementedError	
+	if not xyz.isvec(cen): raise NotImplementedError
 	cmd.rotate([0,0,1], ang, sel, 0, 0, None, [cen.x, cen.y, cen.z])
 
 def xform(sel,x):
+	# print "test xform:",type(x)
 	if not xyz.isxform(x): raise NotImplementedError
 	axis,ang = x.rotation_axis()
 	rot(sel,axis,xyz.degrees(ang))
@@ -447,7 +524,7 @@ def alignaxis(sel, newaxis, oldaxis = None, cen = xyz.Vec(0, 0, 0)):
 	if cen is None: cen = com(sel)
 	newaxis.normalize()
 	oldaxis.normalize()
-	if abs(oldaxis.dot(newaxis)) > 0.99999: return
+	if abs(oldaxis.dot(newaxis)) > 0.999: return newaxis, 0
 	axis = newaxis.cross(oldaxis).normalized()
 	ang  = -math.acos(max(-1.0, min(1.0, newaxis.dot(oldaxis))))*180/math.pi
 	# print "rot around", axis, "by", ang
@@ -461,11 +538,11 @@ def alignaxis(sel, newaxis, oldaxis = None, cen = xyz.Vec(0, 0, 0)):
 #    a1 = c + v*l/2
 #    a2 = c - v*l/2
 #    obj = [
-#          BEGIN, LINES,
-#          COLOR, 1.0, 1.0, 1.0,
-#          VERTEX, a1.x, a1.y, a1.z,
-#          VERTEX, a2.x, a2.y, a2.z,
-#          END
+#          cgo.BEGIN, cgo.LINES,
+#          cgo.COLOR, 1.0, 1.0, 1.0,
+#          cgo.VERTEX, a1.x, a1.y, a1.z,
+#          cgo.VERTEX, a2.x, a2.y, a2.z,
+#          cgo.END
 #    ]
 #    cmd.load_cgo(obj, 'vec')
 #
@@ -636,6 +713,18 @@ def mkd2(sel = "all"):
 
 
 
+def alignbb(sel="all",obj=None):
+	l = cmd.get_object_list()
+	if not obj: obj = l[0]
+	if obj not in l:
+		print "ERROR object", obj, "not found!!!"
+		return
+	for o in l:
+		if o == obj: continue
+		cmd.do("pair_fit "+o+" and name n+ca+c and ("+sel+"), "+obj+" and name n+ca+c and ("+sel+")")
+	return
+
+
 def alignall(sel = "all", obj = None):
 	l = cmd.get_object_list()
 	if not obj: obj = l[0]
@@ -644,7 +733,18 @@ def alignall(sel = "all", obj = None):
 		return
 	for o in l:
 		if o == obj: continue
-		cmd.do("align "+o+" and ("+sel+"), "+obj+" and ("+sel+")")
+		cmd.do("super "+o+" and ("+sel+"), "+obj+" and ("+sel+")")
+	return
+
+def fitall(sel = "all", obj = None):
+	l = cmd.get_object_list()
+	if not obj: obj = l[0]
+	if obj not in l:
+		print "ERROR object", obj, "not found!!!"
+		return
+	for o in l:
+		if o == obj: continue
+		cmd.do("pair_fit "+o+" and ("+sel+"), "+obj+" and ("+sel+")")
 	return
 
 def centerall(sel = "all"):
@@ -680,13 +780,13 @@ def drawlines(p, d, lab = "lines", COL = (1, 1, 1), SIZE = 20.0):
 	if type(p) is type(xyz.Vec(1)): p = [p, ]
 	if type(d) is type(xyz.Vec(1)): d = [d, ]
 	assert len(p) == len(d)
-	obj = [ BEGIN, LINES, COLOR, COL[0], COL[1], COL[2], ]
+	obj = [ cgo.BEGIN, cgo.LINES, cgo.COLOR, COL[0], COL[1], COL[2], ]
 	for i in range(len(p)):
 		p1 = p[i] + -SIZE*d[i]
 		p2 = p[i] +  SIZE*d[i]
 		obj.extend([
-				VERTEX, p1.x, p1.y, p1.z,
-				VERTEX, p2.x, p2.y, p2.z,
+				cgo.VERTEX, p1.x, p1.y, p1.z,
+				cgo.VERTEX, p2.x, p2.y, p2.z,
 			])
 	obj.append(END)
 	cmd.load_cgo(obj, lab)
@@ -851,8 +951,15 @@ def chaincount(sel = "all"):
 	return cc
 
 name1 = {"ALA":"A", "CYS":"C", "ASP":"D", "GLU":"E", "PHE":"F", "GLY":"G", "HIS":"H", "ILE":"I", "LYS":"K", "LEU":"L",
-		 "MET":"xyz.Mat", "ASN":"N", "PRO":"P", "GLN":"Q", "ARG":"R", "SER":"S", "THR":"T", "VAL":"xyz.Vec", "TRP":"W", "TYR":"Uy",
-		 "MSE":"xyz.Mat", "CSW":"C"}
+		 "MET":"M", "ASN":"N", "PRO":"P", "GLN":"Q", "ARG":"R", "SER":"S", "THR":"T", "VAL":"V", "TRP":"W", "TYR":"Y",
+		 "MSE":"M", "CSW":"C"}
+
+def getname1(s):
+	if s in name1:
+		return name1[s]
+	else:
+		return "Z"
+
 
 def lcs(S, T):
 	 L = {}
@@ -1033,10 +1140,10 @@ def drawring( p1 = None, p2 = None, p3 = None, col = [1, 1, 1], lab = "ring"):
 	cmd.delete(lab)
 	axs = (p2-p1).normalized()
 
-	obj = [ BEGIN, LINE_LOOP,   COLOR, col[0], col[1], col[2],  ]
+	obj = [ cgo.BEGIN, LINE_LOOP,   cgo.COLOR, col[0], col[1], col[2],  ]
 	for i in range(0, 360, 5):
 		st = xyz.rotation_matrix_degrees(axs, i  )*(p3-p2)+p2
-		obj.extend( [ VERTEX, st.x, st.y, st.z, ] )
+		obj.extend( [ cgo.VERTEX, st.x, st.y, st.z, ] )
 
 	obj.append( END )
 
@@ -1059,13 +1166,13 @@ def drawsph(col = [1, 1, 1], lab = "sph"):
 	axs1 = (p2-p1).normalized()
 	axs2 = (p3-p2).normalized()
 
-	obj = [ BEGIN, ]
+	obj = [ cgo.BEGIN, ]
 	for i in range(0, 360, 10):
-		obj.extend( [ LINE_LOOP,   COLOR, col[0], col[1], col[2],  ] )
+		obj.extend( [ LINE_LOOP,   cgo.COLOR, col[0], col[1], col[2],  ] )
 		axs = xyz.rotation_matrix_degrees(axs1, i)*axs2
 		for j in range(0, 360, 3):
 			st = xyz.rotation_matrix_degrees(axs, j)*(p4-p2)+p2
-			obj.extend( [ VERTEX, st.x, st.y, st.z, ] )
+			obj.extend( [ cgo.VERTEX, st.x, st.y, st.z, ] )
 	obj.append( END )
 
 	cmd.load_cgo(obj, lab)
@@ -1234,21 +1341,6 @@ def getnative():
 
 
 
-def makecx(sel = 'all', n = 5):
-	cmd.delete("C%i_*"%n)
-	chains = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	for i in range(n): cmd.create("C%i_%i"%(n, i), sel+" and (not C%i_*)"%n)
-	for i in range(n): rot("C%i_%i"%(n, i), Uz, 360.0*float(i)/float(n))
-	for i in range(n): cmd.alter("C%i_%i"%(n, i), "chain = '%s'"%chains[i])
-
-for i in range(2,21):
-		globals()['makec%i'%i] = partial(makecx,n=i)
-
-def makecxauto():
-	for o in cmd.get_object_list():
-		n = int(re.search("_C\d+_", o).group(0)[2:-1])
-		makecx(o, n)
-
 
 def floats2vecs(i):
 	while 1: yield xyz.Vec(i.next(), i.next(), i.next())
@@ -1288,19 +1380,19 @@ def testhsphere(rratio = 2.0):
 			# return
 
 	obj = list()
-	obj.extend( [ BEGIN, POINTS , COLOR, 1.0, 0.0, 0.0 ] )
+	obj.extend( [ cgo.BEGIN, cgo.POINTS , cgo.COLOR, 1.0, 0.0, 0.0 ] )
 	for v in crd:
 		if v.z >= 0:
-			obj.extend([VERTEX, 1.001*v.x, 1.001*v.y, 1.001*v.z ])
+			obj.extend([cgo.VERTEX, 1.001*v.x, 1.001*v.y, 1.001*v.z ])
 	obj.append(END)
-	obj.extend( [ BEGIN, LINES, COLOR, 0.2, 0.2, 0.2, ]  )
+	obj.extend( [ cgo.BEGIN, cgo.LINES, cgo.COLOR, 0.2, 0.2, 0.2, ]  )
 	for v, c, l in itertools.izip(crd, cld, lvl):
 			if l > 5: continue
 			#if v.z >= 0:
 			for vc in (crd[x-1] for x in c):
 					#if vc.z > 0:
-					obj.extend([VERTEX,  v.x,  v.y , v.z ])
-					obj.extend([VERTEX, vc.x, vc.y, vc.z ])
+					obj.extend([cgo.VERTEX,  v.x,  v.y , v.z ])
+					obj.extend([cgo.VERTEX, vc.x, vc.y, vc.z ])
 	obj.append(END)
 	cmd.load_cgo(obj, "hsphere")
 
@@ -1316,27 +1408,27 @@ def testsphere():
 		f = gzip.GzipFile("/Users/sheffler/Dropbox/project/sphere_hierarchy/att/sphere_%i.dat.gz"%n)
 		s = list(floats2vecs(float(x) for x in f))
 		f.close()
-		obj = [ BEGIN, POINTS , COLOR, 1.0, 1.0, 1.0 ]
+		obj = [ cgo.BEGIN, cgo.POINTS , cgo.COLOR, 1.0, 1.0, 1.0 ]
 		doneicos = True if icos else False
 		for v in s:
 			#if (v.x < 0 or v.y < 0 or v.z < 0): continue
 			if not doneicos and nnb(v, s, 0.5) == 6: icos.append(v)
-			#if v.x >= 0 and v.y >= 0 and v.z >= 0: obj.extend([VERTEX,  v.x,  v.y,  v.z ])
-			if v.z >= 0: obj.extend([VERTEX,  v.x,  v.y,  v.z ])
-			#obj.extend([ VERTEX, v.x*0.86, v.y*0.86, v.z*0.86 ])
+			#if v.x >= 0 and v.y >= 0 and v.z >= 0: obj.extend([cgo.VERTEX,  v.x,  v.y,  v.z ])
+			if v.z >= 0: obj.extend([cgo.VERTEX,  v.x,  v.y,  v.z ])
+			#obj.extend([ cgo.VERTEX, v.x*0.86, v.y*0.86, v.z*0.86 ])
 		obj.append(END)
 		cmd.load_cgo(obj, "s%i"%n)
 		spheres.append(s)
 		#break
 
-	obj = [ BEGIN, LINES, COLOR, 1.0, 1.0, 1.0, ]
+	obj = [ cgo.BEGIN, cgo.LINES, cgo.COLOR, 1.0, 1.0, 1.0, ]
 	for v in icos:
 		for u in icos:
 			if v.distance(u) < 1.1:
-				obj.extend([VERTEX, v.x, v.y, v.z])
-				obj.extend([VERTEX, u.x, u.y, u.z])
-				# if v.x >= 0 and v.y >= 0 and v.z >= 0: obj.extend([VERTEX, v.x, v.y, v.z])
-				# if u.x >= 0 and u.y >= 0 and u.z >= 0: obj.extend([VERTEX, u.x, u.y, u.z])
+				obj.extend([cgo.VERTEX, v.x, v.y, v.z])
+				obj.extend([cgo.VERTEX, u.x, u.y, u.z])
+				# if v.x >= 0 and v.y >= 0 and v.z >= 0: obj.extend([cgo.VERTEX, v.x, v.y, v.z])
+				# if u.x >= 0 and u.y >= 0 and u.z >= 0: obj.extend([cgo.VERTEX, u.x, u.y, u.z])
 	obj.append(END)
 	cmd.load_cgo(obj, "icos")
 
@@ -1349,14 +1441,14 @@ def testsphere():
 	#       if not snew or min(x.distance(c) for x in snew) > 0.001:
 	#           snew.append(c)
 	# snew.extend(samp)
-	# obj = [ BEGIN, POINTS, COLOR, 0.0, 0.0, 1.0, ]
+	# obj = [ cgo.BEGIN, cgo.POINTS, cgo.COLOR, 0.0, 0.0, 1.0, ]
 	# print len(snew)
 	# o = open("/Users/sheffler/Dropbox/project/sphere_hierarchy/sphere_%i.dat"%len(snew), 'w')
 	# for v in snew:
 	#   print >>o, v.x
 	#   print >>o, v.y
 	#   print >>o, v.z
-	#   if v.z > 0: obj.extend([VERTEX, v.x, v.y, v.z])
+	#   if v.z > 0: obj.extend([cgo.VERTEX, v.x, v.y, v.z])
 	# o.close()
 	# obj.append(END)
 	# cmd.load_cgo(obj, "snew")
@@ -1373,14 +1465,14 @@ def testsphere():
 	#           mni = j
 	#   test.append( sph[-1][mni] )
 	#   #sph[-1]    = sph[-1][:mni]+sph[-1][mni+1:]
-	# obj = [ BEGIN, POINTS, COLOR, 1.0, 0.0, 0.0, ]
+	# obj = [ cgo.BEGIN, cgo.POINTS, cgo.COLOR, 1.0, 0.0, 0.0, ]
 	# for v in test:
-	#   obj.extend([ VERTEX, v.x, v.y, v.z ])
+	#   obj.extend([ cgo.VERTEX, v.x, v.y, v.z ])
 	# obj.append(END)
 	# cmd.load_cgo(obj, "sphere1")
-	# obj = [ BEGIN, POINTS, COLOR, 0.0, 1.0, 0.0, ]
+	# obj = [ cgo.BEGIN, cgo.POINTS, cgo.COLOR, 0.0, 1.0, 0.0, ]
 	# for v in sph[-1]:
-	#   obj.extend([ VERTEX, v.x, v.y, v.z ])
+	#   obj.extend([ cgo.VERTEX, v.x, v.y, v.z ])
 	# obj.append(END)
 	# cmd.load_cgo(obj, "sphere2")
 
@@ -1488,10 +1580,40 @@ def bestalign(s1,s2):
 			cmd.delete(o2)
 
 
+def move_down():
+	enabled_objs = cmd.get_names("objects",enabled_only=1)
+	all_objs = cmd.get_names("objects",enabled_only=0)
+	for obj in enabled_objs:
+		cmd.disable(obj)
+		last_obj=obj
+		for i in range(0,len(all_objs)):
+			if all_objs[i] == obj:
+				if i+1 >= len(all_objs):
+					cmd.enable( all_objs[0] )
+				else:
+					cmd.enable( all_objs[i+1] )
+	cmd.orient
+def move_up():
+	enabled_objs = cmd.get_names("objects",enabled_only=1)
+	all_objs = cmd.get_names("objects",enabled_only=0)
+	for obj in enabled_objs:
+			cmd.disable(obj)
+			last_obj=obj
+			for i in range(0,len(all_objs)):
+					if all_objs[i] == obj:
+							if i-1 < 0:
+									cmd.enable( all_objs[-1] )
+							else:
+									cmd.enable( all_objs[i-1] )
+	cmd.orient
 
+def cbow():
+	for i in cmd.get_object_list():
+		util.chainbow(i)
+
+cmd.extend("cbow", cbow)
 cmd.extend("com", com)
 cmd.extend("showcom", showcom)
-cmd.extend("axisofrot", axisofrot)
 cmd.extend("bond_zns", bond_zns)
 cmd.extend("meancoords", meancoords)
 cmd.extend("swell", swell)
@@ -1500,6 +1622,199 @@ cmd.extend('useRosettaRadii', useRosettaRadii)
 cmd.extend('expandRadii',expandRadii)
 cmd.extend('contractRadii',contractRadii)
 
+cmd.set_key('pgup', move_up)
+cmd.set_key('pgdn', move_down)
+
+
+def print_chains(sele='all'):
+	for o in cmd.get_object_list(sele):
+		for c in cmd.get_chains("(({0}) and ({1}))".format(sele,o)):
+			ocsel = "(({0}) and ({2}) and (name CA and chain {1}))".format(sele,c,o)
+			nres = cmd.select(ocsel)
+			print "%s %4i  %s"%(c,nres,o)
+
+
+
+def renumber(selection='all', start=1, startsele=None, quiet=1):
+    '''
+DESCRIPTION
+
+    Set residue numbering (resi) based on connectivity.
+
+ARGUMENTS
+
+    selection = string: atom selection to renumber {default: all}
+
+    start = integer: counting start {default: 1}
+
+    startsele = string: residue to start counting from {default: first in
+    selection}
+    '''
+    start, quiet = int(start), int(quiet)
+    model = cmd.get_model(selection)
+    cmd.iterate(selection, 'atom_it.next().model = model',
+            space={'atom_it': iter(model.atom)})
+    if startsele is not None:
+        startidx = cmd.index('first (' + startsele + ')')[0]
+        for atom in model.atom:
+            if (atom.model, atom.index) == startidx:
+                startatom = atom
+                break
+        else:
+            print ' Error: startsele not in selection'
+            raise CmdException
+    else:
+        startatom = model.atom[0]
+    for atom in model.atom:
+        atom.adjacent = []
+        atom.visited = False
+    for bond in model.bond:
+        atoms = [model.atom[i] for i in bond.index]
+        atoms[0].adjacent.append(atoms[1])
+        atoms[1].adjacent.append(atoms[0])
+    minmax = [start, start]
+    def traverse(atom, resi):
+        atom.resi = resi
+        atom.visited = True
+        for other in atom.adjacent:
+            if other.visited:
+                continue
+            if (atom.name, other.name) in [('C','N'), ("O3'", 'P')]:
+                minmax[1] = resi+1
+                traverse(other, resi+1)
+            elif (atom.name, other.name) in [('N','C'), ('P', "O3'")]:
+                minmax[0] = resi-1
+                traverse(other, resi-1)
+            elif (atom.name, other.name) not in [('SG', 'SG')]:
+                traverse(other, resi)
+    traverse(startatom, start)
+    cmd.alter(selection, 'resi = atom_it.next().resi',
+            space={'atom_it': iter(model.atom)})
+    if not quiet:
+        print ' Renumber: range (%d to %d)' % tuple(minmax)
+
+cmd.extend('renumber', renumber)
+
+def color_obj(rainbow=0):
+
+        """
+
+AUTHOR
+
+        Gareth Stockwell
+
+USAGE
+
+        color_obj(rainbow=0)
+
+        This function colours each object currently in the PyMOL heirarchy
+        with a different colour.  Colours used are either the 22 named
+        colours used by PyMOL (in which case the 23rd object, if it exists,
+        gets the same colour as the first), or are the colours of the rainbow
+
+SEE ALSO
+
+        util.color_objs()
+        """
+
+        # Process arguments
+        rainbow = int(rainbow)
+
+        # Get names of all PyMOL objects
+        obj_list = cmd.get_names('objects')
+
+        if rainbow:
+
+           print "\nColouring objects as rainbow\n"
+
+           nobj = len(obj_list)
+
+           # Create colours starting at blue(240) to red(0), using intervals
+           # of 240/(nobj-1)
+           for j in range(nobj):
+              hsv = (240-j*240/(nobj-1), 1, 1)
+              # Convert to RGB
+              rgb = hsv_to_rgb(hsv)
+              # Define the new colour
+              cmd.set_color("col" + str(j), rgb)
+              print obj_list[j], rgb
+              # Colour the object
+              cmd.color("col" + str(j), obj_list[j])
+
+        else:
+
+           print "\nColouring objects using PyMOL defined colours\n"
+
+           # List of available colours
+           colours = ['red', 'green', 'blue', 'yellow', 'violet', 'cyan',    \
+           'salmon', 'lime', 'pink', 'slate', 'magenta', 'orange', 'marine', \
+           'olive', 'purple', 'teal', 'forest', 'firebrick', 'chocolate',    \
+           'wheat', 'white', 'grey' ]
+           ncolours = len(colours)
+
+           # Loop over objects
+           i = 0
+           for obj in obj_list:
+              print "  ", obj, colours[i]
+              cmd.color(colours[i], obj)
+              i = i+1
+              if(i == ncolours):
+                 i = 0
+
+
+# HSV to RGB routine taken from Robert L. Campbell's color_b.py script
+#   See http://pldserver1.biochem.queensu.ca/~rlc/work/pymol/
+# Original algorithm from: http://www.cs.rit.edu/~ncs/color/t_convert.html
+def hsv_to_rgb(hsv):
+
+        h = float(hsv[0])
+        s = float(hsv[1])
+        v = float(hsv[2])
+
+        if( s == 0 ) :
+                #achromatic (grey)
+                r = g = b = v
+
+        else:
+                # sector 0 to 5
+                h = h/60.
+                i = int(h)
+                f = h - i                       # factorial part of h
+                #print h,i,f
+                p = v * ( 1 - s )
+                q = v * ( 1 - s * f )
+                t = v * ( 1 - s * ( 1 - f ) )
+
+                if i == 0:
+                        (r,g,b) = (v,t,p)
+                elif i == 1:
+                        (r,g,b) = (q,v,p)
+                elif i == 2:
+                        (r,g,b) = (p,v,t)
+                elif i == 3:
+                        (r,g,b) = (p,q,v)
+                elif i == 4:
+                        (r,g,b) = (t,p,v)
+                elif i == 5:
+                        (r,g,b) = (v,p,q)
+                else:
+                        (r,g,b) = (v,v,v)
+                        print "error, i not equal 1-5"
+
+        return [r,g,b]
+
+
+
+# Add color_obj to the PyMOL command list
+cmd.extend("color_obj",color_obj)
+
+
+def tmpvis(s):
+	a,b,c,d,e,f = [float(x) for x in s.split()]
+	a = xyz.Vec(a,b,c)
+	c = xyz.Vec(d,e,f)
+	showvecfrompoint(100*a,c)
+	return a,c
 
 if __name__ == '__main__':
    import doctest

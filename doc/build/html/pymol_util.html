@@ -58,6 +58,11 @@
 <h1>General Pymol Utilities<a class="headerlink" href="#general-pymol-utilities" title="Permalink to this headline">¶</a></h1>
 <p>show axes, transform things, etc.</p>
 <span class="target" id="module-pymol_util"></span><dl class="function">
+<dt id="pymol_util.inpymol">
+<tt class="descclassname">pymol_util.</tt><tt class="descname">inpymol</tt><big>(</big><big>)</big><a class="headerlink" href="#pymol_util.inpymol" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="pymol_util.showaxes">
 <tt class="descclassname">pymol_util.</tt><tt class="descname">showaxes</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/pymol_util.html#showaxes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.showaxes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -74,7 +79,7 @@
 
 <dl class="function">
 <dt id="pymol_util.getres">
-<tt class="descclassname">pymol_util.</tt><tt class="descname">getres</tt><big>(</big><em>sele</em><big>)</big><a class="reference internal" href="_modules/pymol_util.html#getres"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.getres" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pymol_util.</tt><tt class="descname">getres</tt><big>(</big><em>sele</em>, <em>withchain=True</em><big>)</big><a class="reference internal" href="_modules/pymol_util.html#getres"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.getres" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -88,13 +93,28 @@
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="pymol_util.showvec">
-<tt class="descclassname">pymol_util.</tt><tt class="descname">showvec</tt><big>(</big><em>c</em>, <em>lab=None</em><big>)</big><a class="reference internal" href="_modules/pymol_util.html#showvec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.showvec" title="Permalink to this definition">¶</a></dt>
+<dt id="pymol_util.showsphere">
+<tt class="descclassname">pymol_util.</tt><tt class="descname">showsphere</tt><big>(</big><em>c</em>, <em>r=1</em>, <em>col=(1</em>, <em>1</em>, <em>1)</em>, <em>lbl=''</em><big>)</big><a class="headerlink" href="#pymol_util.showsphere" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="pymol_util.showvecfrompoint">
-<tt class="descclassname">pymol_util.</tt><tt class="descname">showvecfrompoint</tt><big>(</big><em>a</em>, <em>c</em>, <em>lbl</em><big>)</big><a class="reference internal" href="_modules/pymol_util.html#showvecfrompoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.showvecfrompoint" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">pymol_util.</tt><tt class="descname">showvecfrompoint</tt><big>(</big><em>a</em>, <em>c</em>, <em>col=(1</em>, <em>1</em>, <em>1)</em>, <em>lbl=''</em><big>)</big><a class="reference internal" href="_modules/pymol_util.html#showvecfrompoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.showvecfrompoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pymol_util.showsegment">
+<tt class="descclassname">pymol_util.</tt><tt class="descname">showsegment</tt><big>(</big><em>c1</em>, <em>c2</em>, <em>col=(1</em>, <em>1</em>, <em>1)</em>, <em>lbl=''</em><big>)</big><a class="headerlink" href="#pymol_util.showsegment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pymol_util.showcyl">
+<tt class="descclassname">pymol_util.</tt><tt class="descname">showcyl</tt><big>(</big><em>c1</em>, <em>c2</em>, <em>r</em>, <em>col=(1</em>, <em>1</em>, <em>1)</em>, <em>col2=None</em>, <em>lbl=''</em><big>)</big><a class="headerlink" href="#pymol_util.showcyl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pymol_util.showline">
+<tt class="descclassname">pymol_util.</tt><tt class="descname">showline</tt><big>(</big><em>a</em>, <em>c</em>, <em>col=(1</em>, <em>1</em>, <em>1)</em>, <em>lbl=''</em><big>)</big><a class="headerlink" href="#pymol_util.showline" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="class">
@@ -127,26 +147,6 @@
 <dl class="function">
 <dt id="pymol_util.chirality">
 <tt class="descclassname">pymol_util.</tt><tt class="descname">chirality</tt><big>(</big><em>fe1</em>, <em>fe2</em>, <em>fe3</em>, <em>fe4</em><big>)</big><a class="reference internal" href="_modules/pymol_util.html#chirality"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.chirality" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="pymol_util.dimeraxis1">
-<tt class="descclassname">pymol_util.</tt><tt class="descname">dimeraxis1</tt><big>(</big><em>m1</em>, <em>m2</em><big>)</big><a class="reference internal" href="_modules/pymol_util.html#dimeraxis1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.dimeraxis1" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="pymol_util.dimeraxis">
-<tt class="descclassname">pymol_util.</tt><tt class="descname">dimeraxis</tt><big>(</big><em>sel1</em>, <em>sel2</em>, <em>nsamp=100</em><big>)</big><a class="reference internal" href="_modules/pymol_util.html#dimeraxis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.dimeraxis" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="pymol_util.axisofrot1">
-<tt class="descclassname">pymol_util.</tt><tt class="descname">axisofrot1</tt><big>(</big><em>m1</em>, <em>m2</em>, <em>m3</em><big>)</big><a class="reference internal" href="_modules/pymol_util.html#axisofrot1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.axisofrot1" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="pymol_util.axisofrot">
-<tt class="descclassname">pymol_util.</tt><tt class="descname">axisofrot</tt><big>(</big><em>sel1</em>, <em>sel2</em>, <em>sel3</em>, <em>nsamp=100</em><big>)</big><a class="reference internal" href="_modules/pymol_util.html#axisofrot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.axisofrot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -380,6 +380,11 @@
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="pymol_util.getname1">
+<tt class="descclassname">pymol_util.</tt><tt class="descname">getname1</tt><big>(</big><em>s</em><big>)</big><a class="headerlink" href="#pymol_util.getname1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="pymol_util.lcs">
 <tt class="descclassname">pymol_util.</tt><tt class="descname">lcs</tt><big>(</big><em>S</em>, <em>T</em><big>)</big><a class="reference internal" href="_modules/pymol_util.html#lcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.lcs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -480,16 +485,6 @@
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="pymol_util.makecx">
-<tt class="descclassname">pymol_util.</tt><tt class="descname">makecx</tt><big>(</big><em>sel='all'</em>, <em>n=5</em><big>)</big><a class="reference internal" href="_modules/pymol_util.html#makecx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.makecx" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="pymol_util.makecxauto">
-<tt class="descclassname">pymol_util.</tt><tt class="descname">makecxauto</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/pymol_util.html#makecxauto"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.makecxauto" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="pymol_util.floats2vecs">
 <tt class="descclassname">pymol_util.</tt><tt class="descname">floats2vecs</tt><big>(</big><em>i</em><big>)</big><a class="reference internal" href="_modules/pymol_util.html#floats2vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.floats2vecs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -532,6 +527,46 @@
 <dl class="function">
 <dt id="pymol_util.bestalign">
 <tt class="descclassname">pymol_util.</tt><tt class="descname">bestalign</tt><big>(</big><em>s1</em>, <em>s2</em><big>)</big><a class="reference internal" href="_modules/pymol_util.html#bestalign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymol_util.bestalign" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pymol_util.move_down">
+<tt class="descclassname">pymol_util.</tt><tt class="descname">move_down</tt><big>(</big><big>)</big><a class="headerlink" href="#pymol_util.move_down" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pymol_util.move_up">
+<tt class="descclassname">pymol_util.</tt><tt class="descname">move_up</tt><big>(</big><big>)</big><a class="headerlink" href="#pymol_util.move_up" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pymol_util.cbow">
+<tt class="descclassname">pymol_util.</tt><tt class="descname">cbow</tt><big>(</big><big>)</big><a class="headerlink" href="#pymol_util.cbow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pymol_util.print_chains">
+<tt class="descclassname">pymol_util.</tt><tt class="descname">print_chains</tt><big>(</big><em>sele='all'</em><big>)</big><a class="headerlink" href="#pymol_util.print_chains" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pymol_util.renumber">
+<tt class="descclassname">pymol_util.</tt><tt class="descname">renumber</tt><big>(</big><em>selection='all'</em>, <em>start=1</em>, <em>startsele=None</em>, <em>quiet=1</em><big>)</big><a class="headerlink" href="#pymol_util.renumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>DESCRIPTION</p>
+<blockquote>
+<div>Set residue numbering (resi) based on connectivity.</div></blockquote>
+<p>ARGUMENTS</p>
+<blockquote>
+<div><p>selection = string: atom selection to renumber {default: all}</p>
+<p>start = integer: counting start {default: 1}</p>
+<p>startsele = string: residue to start counting from {default: first in
+selection}</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymol_util.tmpvis">
+<tt class="descclassname">pymol_util.</tt><tt class="descname">tmpvis</tt><big>(</big><em>s</em><big>)</big><a class="headerlink" href="#pymol_util.tmpvis" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>

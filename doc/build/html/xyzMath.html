@@ -79,6 +79,16 @@
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="xyzMath.islist">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">islist</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#islist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.islist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.istuple">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">istuple</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#istuple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.istuple" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="xyzMath.isvec">
 <tt class="descclassname">xyzMath.</tt><tt class="descname">isvec</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#isvec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.isvec" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -91,16 +101,6 @@
 <dl class="function">
 <dt id="xyzMath.isxform">
 <tt class="descclassname">xyzMath.</tt><tt class="descname">isxform</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#isxform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.isxform" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="xyzMath.islist">
-<tt class="descclassname">xyzMath.</tt><tt class="descname">islist</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#islist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.islist" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="xyzMath.istuple">
-<tt class="descclassname">xyzMath.</tt><tt class="descname">istuple</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#istuple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.istuple" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="class">
@@ -215,12 +215,22 @@
 
 <dl class="function">
 <dt id="xyzMath.randvec">
-<tt class="descclassname">xyzMath.</tt><tt class="descname">randvec</tt><big>(</big><em>n=1</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#randvec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.randvec" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">xyzMath.</tt><tt class="descname">randvec</tt><big>(</big><em>n=None</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#randvec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.randvec" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.randveccube">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">randveccube</tt><big>(</big><em>r=1.0</em><big>)</big><a class="headerlink" href="#xyzMath.randveccube" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.randvecball">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">randvecball</tt><big>(</big><em>r=1.0</em><big>)</big><a class="headerlink" href="#xyzMath.randvecball" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="xyzMath.randnorm">
-<tt class="descclassname">xyzMath.</tt><tt class="descname">randnorm</tt><big>(</big><em>n=1</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#randnorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.randnorm" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">xyzMath.</tt><tt class="descname">randnorm</tt><big>(</big><em>n=None</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#randnorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.randnorm" title="Permalink to this definition">¶</a></dt>
 <dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">randnorm</span><span class="p">()</span><span class="o">.</span><span class="n">length</span><span class="p">()</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0000001</span>
 </pre></div>
 </div>
@@ -232,7 +242,7 @@
 <dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">w</span> <span class="o">=</span> <span class="n">randvec</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">gauss</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span>     <span class="n">coplanar</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">u</span> <span class="o">+</span> <span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="n">u</span><span class="o">-</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">-</span><span class="n">w</span><span class="p">)</span> <span class="o">+</span> <span class="n">c</span><span class="o">*</span><span class="p">(</span><span class="n">w</span><span class="o">-</span><span class="n">u</span><span class="p">)</span> <span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="ow">not</span> <span class="n">coplanar</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">u</span> <span class="o">+</span> <span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="n">u</span><span class="o">-</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">-</span><span class="n">w</span><span class="p">)</span> <span class="o">+</span> <span class="n">c</span><span class="o">*</span><span class="p">(</span><span class="n">w</span><span class="o">-</span><span class="n">u</span><span class="p">)</span> <span class="o">+</span> <span class="n">randvec</span><span class="p">()</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">u</span><span class="o">-</span><span class="n">v</span><span class="p">)</span> <span class="p">)</span>   
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="ow">not</span> <span class="n">coplanar</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">u</span> <span class="o">+</span> <span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="n">u</span><span class="o">-</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">-</span><span class="n">w</span><span class="p">)</span> <span class="o">+</span> <span class="n">c</span><span class="o">*</span><span class="p">(</span><span class="n">w</span><span class="o">-</span><span class="n">u</span><span class="p">)</span> <span class="o">+</span> <span class="n">randvec</span><span class="p">()</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">u</span><span class="o">-</span><span class="n">v</span><span class="p">)</span> <span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -346,6 +356,16 @@
 </div>
 </dd></dl>
 
+<dl class="method">
+<dt id="xyzMath.Mat.euler_angles">
+<tt class="descname">euler_angles</tt><big>(</big><big>)</big><a class="headerlink" href="#xyzMath.Mat.euler_angles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="xyzMath.Mat.from_euler_angles">
+<tt class="descname">from_euler_angles</tt><big>(</big><em>euler</em><big>)</big><a class="headerlink" href="#xyzMath.Mat.from_euler_angles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="function">
@@ -414,7 +434,7 @@
 
 <dl class="function">
 <dt id="xyzMath.randrot">
-<tt class="descclassname">xyzMath.</tt><tt class="descname">randrot</tt><big>(</big><em>n=1</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#randrot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.randrot" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">xyzMath.</tt><tt class="descname">randrot</tt><big>(</big><em>n=None</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#randrot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.randrot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="class">
@@ -511,6 +531,10 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">cen2</span>                                               
 </pre></div>
 </div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span>                <span class="n">Xform</span><span class="p">(</span> <span class="n">Mat</span><span class="p">(</span> <span class="n">Vec</span><span class="p">(</span> <span class="mf">0.816587</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.306018</span><span class="p">,</span> <span class="mf">0.489427</span> <span class="p">),</span> <span class="n">Vec</span><span class="p">(</span> <span class="mf">0.245040</span><span class="p">,</span> <span class="mf">0.951487</span><span class="p">,</span> <span class="mf">0.186086</span> <span class="p">),</span> <span class="n">Vec</span><span class="p">(</span> <span class="o">-</span><span class="mf">0.522629</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.032026</span><span class="p">,</span> <span class="mf">0.851959</span> <span class="p">)</span> <span class="p">),</span> <span class="n">Vec</span><span class="p">(</span> <span class="mf">1.689794</span><span class="p">,</span> <span class="mf">1.535762</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.964428</span> <span class="p">)</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="nb">repr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="s">&quot;Xform( Mat( Vec( 0.816587, -0.306018, 0.489427 ), Vec( 0.245040, 0.951487, 0.186086 ), Vec( -0.522629, -0.032026, 0.851959 ) ), Vec( 1.689794, 1.535762, -0.964428 ) )&quot;</span>
+</pre></div>
+</div>
 <dl class="method">
 <dt id="xyzMath.Xform.from_four_points">
 <tt class="descname">from_four_points</tt><big>(</big><em>s</em>, <em>cen</em>, <em>a</em>, <em>b</em>, <em>c</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#Xform.from_four_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.Xform.from_four_points" title="Permalink to this definition">¶</a></dt>
@@ -544,19 +568,31 @@
 </dd></dl>
 
 <dl class="function">
+<dt id="xyzMath.read_tokens">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">read_tokens</tt><big>(</big><em>f</em><big>)</big><a class="headerlink" href="#xyzMath.read_tokens" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.read_xforms">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">read_xforms</tt><big>(</big><em>fname</em>, <em>N=9000000000.0</em>, <em>start=0</em><big>)</big><a class="headerlink" href="#xyzMath.read_xforms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="xyzMath.stub">
 <tt class="descclassname">xyzMath.</tt><tt class="descname">stub</tt><big>(</big><em>cen=None</em>, <em>a=None</em>, <em>b=None</em>, <em>c=None</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#stub"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.stub" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="xyzMath.randxform">
-<tt class="descclassname">xyzMath.</tt><tt class="descname">randxform</tt><big>(</big><em>n=1</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#randxform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.randxform" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">xyzMath.</tt><tt class="descname">randxform</tt><big>(</big><em>n=None</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#randxform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.randxform" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="xyzMath.rotation_around">
 <tt class="descclassname">xyzMath.</tt><tt class="descname">rotation_around</tt><big>(</big><em>axs</em>, <em>ang</em>, <em>cen</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#rotation_around"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.rotation_around" title="Permalink to this definition">¶</a></dt>
-<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">rotation_around</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">Uy</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">*</span> <span class="n">Uy</span>
+<span class="go">Vec( 0.000000, 1.000000, 0.000000 )</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -593,6 +629,11 @@
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="xyzMath.angle_degrees">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">angle_degrees</tt><big>(</big><em>p1</em>, <em>p2</em>, <em>p3=None</em><big>)</big><a class="headerlink" href="#xyzMath.angle_degrees" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="xyzMath.sin_cos_range">
 <tt class="descclassname">xyzMath.</tt><tt class="descname">sin_cos_range</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#sin_cos_range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.sin_cos_range" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -611,6 +652,16 @@
 </dd></dl>
 
 <dl class="function">
+<dt id="xyzMath.line_line_angle">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">line_line_angle</tt><big>(</big><em>a1</em>, <em>a2</em><big>)</big><a class="headerlink" href="#xyzMath.line_line_angle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.line_line_angle_degrees">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">line_line_angle_degrees</tt><big>(</big><em>a1</em>, <em>a2</em><big>)</big><a class="headerlink" href="#xyzMath.line_line_angle_degrees" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="xyzMath.line_line_distance">
 <tt class="descclassname">xyzMath.</tt><tt class="descname">line_line_distance</tt><big>(</big><em>a1</em>, <em>c1</em>, <em>a2</em>, <em>c2</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#line_line_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.line_line_distance" title="Permalink to this definition">¶</a></dt>
 <dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">line_line_distance</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="n">V0</span><span class="p">,</span><span class="n">Uy</span><span class="p">,</span><span class="n">V0</span><span class="p">)</span>
@@ -622,6 +673,117 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">randxform</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">line_line_distance</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">R</span><span class="o">*</span><span class="n">Ux</span><span class="p">,</span><span class="n">X</span><span class="o">*</span><span class="n">Vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">X</span><span class="o">.</span><span class="n">R</span><span class="o">*</span><span class="n">Ux</span><span class="p">,</span><span class="n">X</span><span class="o">*</span><span class="n">Vec</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> <span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
 <span class="go">1.41421356</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.line_line_closest_points">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">line_line_closest_points</tt><big>(</big><em>A1</em>, <em>C1</em>, <em>A2</em>, <em>C2</em><big>)</big><a class="headerlink" href="#xyzMath.line_line_closest_points" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">line_line_closest_points</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="n">Ux</span><span class="p">,</span><span class="n">Uy</span><span class="p">,</span><span class="n">Uy</span><span class="p">)</span>
+<span class="go">(Vec( 0.000000, 0.000000, 0.000000 ), Vec( 0.000000, 0.000000, 0.000000 ))</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">line_line_closest_points</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="n">Uy</span><span class="p">,</span><span class="n">Uy</span><span class="p">,</span><span class="n">Uz</span><span class="p">)</span>
+<span class="go">(Vec( 0.000000, 1.000000, 0.000000 ), Vec( 0.000000, 1.000000, 1.000000 ))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.skew_lines_center">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">skew_lines_center</tt><big>(</big><em>A1</em>, <em>C1</em>, <em>A2</em>, <em>C2</em><big>)</big><a class="headerlink" href="#xyzMath.skew_lines_center" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">skew_lines_center</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="n">V0</span><span class="p">,</span><span class="n">Uy</span><span class="p">,</span><span class="n">V0</span><span class="p">)</span>
+<span class="go">Vec( 0.000000, 0.000000, 0.000000 )</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">skew_lines_center</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="n">Uy</span><span class="p">,</span><span class="n">Uy</span><span class="p">,</span><span class="n">Ux</span><span class="p">)</span>
+<span class="go">Vec( 1.000000, 1.000000, 0.000000 )</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">skew_lines_center</span><span class="p">(</span><span class="mi">10</span><span class="o">*</span><span class="n">Ux</span><span class="p">,</span><span class="mi">10</span><span class="o">*</span><span class="n">Uy</span><span class="p">,</span><span class="mi">10</span><span class="o">*</span><span class="n">Uy</span><span class="p">,</span><span class="mi">10</span><span class="o">*</span><span class="n">Uz</span><span class="p">)</span>
+<span class="go">Vec( 0.000000, 10.000000, 5.000000 )</span>
+</pre></div>
+</div>
+<p># &gt;&gt;&gt; skew_lines_center(Ux,Uy,Uz,Ux)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.skew_lines_relation">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">skew_lines_relation</tt><big>(</big><em>a1</em>, <em>c1</em>, <em>a2</em>, <em>c2</em><big>)</big><a class="headerlink" href="#xyzMath.skew_lines_relation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.skew_lines_relation_z">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">skew_lines_relation_z</tt><big>(</big><em>axis</em>, <em>cen</em><big>)</big><a class="headerlink" href="#xyzMath.skew_lines_relation_z" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.align_skew_line_pairs">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">align_skew_line_pairs</tt><big>(</big><em>aa1</em>, <em>ac1</em>, <em>aa2</em>, <em>ac2</em>, <em>ba1</em>, <em>bc1</em>, <em>ba2</em>, <em>bc2</em><big>)</big><a class="headerlink" href="#xyzMath.align_skew_line_pairs" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aa1</span> <span class="o">=</span> <span class="n">Ux</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ac1</span> <span class="o">=</span> <span class="n">V0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aa2</span> <span class="o">=</span> <span class="n">Uy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ac2</span> <span class="o">=</span> <span class="n">V0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ba1</span> <span class="o">=</span> <span class="n">Ux</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bc1</span> <span class="o">=</span> <span class="n">V0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ba2</span> <span class="o">=</span> <span class="n">Uy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bc2</span> <span class="o">=</span> <span class="n">V0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">align_skew_line_pairs</span><span class="p">(</span><span class="n">aa1</span><span class="p">,</span><span class="n">ac1</span><span class="p">,</span><span class="n">aa2</span><span class="p">,</span><span class="n">ac2</span><span class="p">,</span><span class="n">ba1</span><span class="p">,</span><span class="n">bc1</span><span class="p">,</span><span class="n">ba2</span><span class="p">,</span><span class="n">bc2</span><span class="p">)</span>
+<span class="go">Xform( Mat[ (1.000000,-0.000000,-0.000000), (-0.000000,1.000000,0.000000), (0.000000,-0.000000,1.000000) ], (0.000000,0.000000,0.000000) )</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aa1</span> <span class="o">=</span> <span class="n">Uy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ac1</span> <span class="o">=</span> <span class="n">V0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aa2</span> <span class="o">=</span> <span class="n">Uz</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ac2</span> <span class="o">=</span> <span class="n">V0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ba1</span> <span class="o">=</span> <span class="n">Ux</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bc1</span> <span class="o">=</span> <span class="n">Uz</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ba2</span> <span class="o">=</span> <span class="n">Uy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bc2</span> <span class="o">=</span> <span class="n">Uz</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">align_skew_line_pairs</span><span class="p">(</span><span class="n">aa1</span><span class="p">,</span><span class="n">ac1</span><span class="p">,</span><span class="n">aa2</span><span class="p">,</span><span class="n">ac2</span><span class="p">,</span><span class="n">ba1</span><span class="p">,</span><span class="n">bc1</span><span class="p">,</span><span class="n">ba2</span><span class="p">,</span><span class="n">bc2</span><span class="p">)</span>
+<span class="go">Xform( Mat[ (0.000000,1.000000,0.000000), (0.000000,0.000000,1.000000), (1.000000,0.000000,0.000000) ], (0.000000,0.000000,1.000000) )</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.sindeg">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">sindeg</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#xyzMath.sindeg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.cosdeg">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">cosdeg</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#xyzMath.cosdeg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.asindeg">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">asindeg</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#xyzMath.asindeg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.acosdeg">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">acosdeg</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#xyzMath.acosdeg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.rotation_around_dof_to_set_vec_vec_angle">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">rotation_around_dof_to_set_vec_vec_angle</tt><big>(</big><em>dofaxis</em>, <em>tgt0</em>, <em>v1</em>, <em>v2</em><big>)</big><a class="headerlink" href="#xyzMath.rotation_around_dof_to_set_vec_vec_angle" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">random</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">dof</span> <span class="o">=</span> <span class="n">randnorm</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">tgt</span> <span class="o">=</span> <span class="n">random</span><span class="p">()</span><span class="o">*</span><span class="mi">180</span>
+<span class="gp">... </span>    <span class="n">v1</span> <span class="o">=</span> <span class="n">randnorm</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">v2</span> <span class="o">=</span> <span class="n">randnorm</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">ANGs</span> <span class="o">=</span> <span class="n">rotation_around_dof_to_set_vec_vec_angle</span><span class="p">(</span><span class="n">dof</span><span class="p">,</span><span class="n">tgt</span><span class="p">,</span><span class="n">v1</span><span class="p">,</span><span class="n">v2</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">ANGs</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="n">R</span> <span class="o">=</span> <span class="n">rotation_around_degrees</span><span class="p">(</span><span class="n">dof</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">Vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+<span class="gp">... </span>            <span class="n">act</span> <span class="o">=</span> <span class="n">line_line_angle_degrees</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span><span class="n">R</span><span class="o">*</span><span class="n">v2</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="k">if</span> <span class="mf">0.000001</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">act</span><span class="o">-</span><span class="n">tgt</span><span class="p">),</span><span class="nb">abs</span><span class="p">(</span><span class="n">act</span><span class="o">-</span><span class="mi">180</span><span class="o">+</span><span class="n">tgt</span><span class="p">)):</span>
+<span class="gp">... </span>                    <span class="k">print</span> <span class="n">a</span><span class="p">,</span><span class="n">tgt</span><span class="p">,</span><span class="n">act</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;if no other output, correct&quot;</span>
+<span class="go">if no other output, correct</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -686,17 +848,18 @@
 <dt id="xyzMath.alignvectors_minangle">
 <tt class="descclassname">xyzMath.</tt><tt class="descname">alignvectors_minangle</tt><big>(</big><em>a1</em>, <em>a2</em>, <em>b1</em>, <em>b2</em><big>)</big><a class="reference internal" href="_modules/xyzMath.html#alignvectors_minangle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xyzMath.alignvectors_minangle" title="Permalink to this definition">¶</a></dt>
 <dd><p>exact alignment:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">angdeg</span> <span class="o">=</span> <span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="mi">180</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">a1</span> <span class="o">=</span> <span class="n">randvec</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">b1</span> <span class="o">=</span> <span class="n">randnorm</span><span class="p">()</span><span class="o">*</span><span class="n">a1</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">l2</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">a2</span> <span class="o">=</span> <span class="n">rotation_matrix_degrees</span><span class="p">(</span><span class="n">a1</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">randnorm</span><span class="p">()),</span><span class="n">angdeg</span><span class="p">)</span> <span class="o">*</span> <span class="n">a1</span> <span class="o">*</span> <span class="n">l2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">b2</span> <span class="o">=</span> <span class="n">rotation_matrix_degrees</span><span class="p">(</span><span class="n">b1</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">randnorm</span><span class="p">()),</span><span class="n">angdeg</span><span class="p">)</span> <span class="o">*</span> <span class="n">b1</span> <span class="o">*</span> <span class="n">l2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">angle</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span><span class="n">a2</span><span class="p">)</span> <span class="o">-</span> <span class="n">angle</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span><span class="n">b2</span><span class="p">))</span> <span class="o">&lt;</span> <span class="n">EPS</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">Xa2b</span> <span class="o">=</span> <span class="n">alignvectors_minangle</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span><span class="n">a2</span><span class="p">,</span><span class="n">b1</span><span class="p">,</span><span class="n">b2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">Xa2b</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">length</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">EPS</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="p">(</span><span class="n">Xa2b</span><span class="o">*</span><span class="n">a1</span><span class="p">)</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">b1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="p">(</span><span class="n">Xa2b</span><span class="o">*</span><span class="n">a2</span><span class="p">)</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">b2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">angdeg</span> <span class="o">=</span> <span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="mi">180</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">a1</span> <span class="o">=</span> <span class="n">randvec</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">b1</span> <span class="o">=</span> <span class="n">randnorm</span><span class="p">()</span><span class="o">*</span><span class="n">a1</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">l2</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">a2</span> <span class="o">=</span> <span class="n">rotation_matrix_degrees</span><span class="p">(</span><span class="n">a1</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">randnorm</span><span class="p">()),</span><span class="n">angdeg</span><span class="p">)</span> <span class="o">*</span> <span class="n">a1</span> <span class="o">*</span> <span class="n">l2</span>
+<span class="gp">... </span>    <span class="n">b2</span> <span class="o">=</span> <span class="n">rotation_matrix_degrees</span><span class="p">(</span><span class="n">b1</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">randnorm</span><span class="p">()),</span><span class="n">angdeg</span><span class="p">)</span> <span class="o">*</span> <span class="n">b1</span> <span class="o">*</span> <span class="n">l2</span>
+<span class="gp">... </span>    <span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">angle</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span><span class="n">a2</span><span class="p">)</span> <span class="o">-</span> <span class="n">angle</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span><span class="n">b2</span><span class="p">))</span> <span class="o">&lt;</span> <span class="n">EPS</span>
+<span class="gp">... </span>    <span class="n">Xa2b</span> <span class="o">=</span> <span class="n">alignvectors_minangle</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span><span class="n">a2</span><span class="p">,</span><span class="n">b1</span><span class="p">,</span><span class="n">b2</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">assert</span> <span class="n">Xa2b</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">length</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">EPS</span>
+<span class="gp">... </span>    <span class="k">assert</span> <span class="p">(</span><span class="n">Xa2b</span><span class="o">*</span><span class="n">a1</span><span class="p">)</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">b1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span>
+<span class="gp">... </span>    <span class="k">assert</span> <span class="p">(</span><span class="n">Xa2b</span><span class="o">*</span><span class="n">a2</span><span class="p">)</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">b2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span>
 </pre></div>
 </div>
 <p>if angle(a1,a2) != angle(b1,2b), minimize deviation</p>
@@ -706,6 +869,15 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="p">(</span><span class="n">b1</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span><span class="o">+</span><span class="n">b2</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">a2</span><span class="p">))</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">b1</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">Xa2b</span><span class="o">*</span><span class="n">a1</span><span class="p">)</span><span class="o">+</span><span class="n">b2</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">Xa2b</span><span class="o">*</span><span class="n">a2</span><span class="p">))</span>
 </pre></div>
 </div>
+<p># &gt;&gt;&gt; tgt1 = -Vec(0.816497,0.000000,0.577350)
+# &gt;&gt;&gt; tgt2 = Vec(0.000000,0.000000,1.000000)
+# &gt;&gt;&gt; orig1 = Vec(0.000000,0.000000,1.000000)
+# &gt;&gt;&gt; orig2 = Vec(-0.723746,0.377967,-0.577350)
+# &gt;&gt;&gt; print orig1.angle_degrees(orig2)
+# &gt;&gt;&gt; print tgt1.angle_degrees(tgt2)
+# &gt;&gt;&gt; x = alignvectors_minangle(orig1,orig2,tgt1,tgt2)
+# &gt;&gt;&gt; print tgt1,x*orig1
+# &gt;&gt;&gt; print tgt2,x*orig2</p>
 </dd></dl>
 
 <dl class="function">
@@ -759,6 +931,21 @@
 <span class="go">(4.0, 4.0, 4.0)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.cyclic_axis">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">cyclic_axis</tt><big>(</big><em>coords</em><big>)</big><a class="headerlink" href="#xyzMath.cyclic_axis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xyzMath.symmetrize_xform">
+<tt class="descclassname">xyzMath.</tt><tt class="descname">symmetrize_xform</tt><big>(</big><em>anchor</em>, <em>x</em>, <em>nf=None</em><big>)</big><a class="headerlink" href="#xyzMath.symmetrize_xform" title="Permalink to this definition">¶</a></dt>
+<dd><p># &gt;&gt;&gt; x = rotation_around_degrees(Uz,180,V0)
+# &gt;&gt;&gt; assert symmetrize_xform(Ux,x,2) == x
+#&gt;&gt;&gt; x = rotation_around_degrees(Vec(0,0,1),121,Vec(1,1,1))
+#&gt;&gt;&gt; x,c = symmetrize_xform(Ux,x,3); print x.pretty(); print c
+# &gt;&gt;&gt; print x.pretty()</p>
 </dd></dl>
 
 </div>
