@@ -428,6 +428,7 @@ def getframe(obj):
 	return xyz.stub(x,y,z)
 
 def getrelframe(newobj,refobj,Forigin=None):
+	"assume the obj's are identical"
 	if Forigin is None: Forigin = xyz.Xform(xyz.Imat,xyz.Vec(0,0,0))
 	Fref = getframe(refobj)
 	Fnew = getframe(newobj)
