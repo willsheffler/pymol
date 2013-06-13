@@ -89,6 +89,8 @@ def makecx(sel = 'all',name="TMP",n = 5,axis=Uz):
 	for i in range(n): rot("TMP__C%i_%i"%(n, i), axis, 360.0*float(i)/float(n))
 	for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i), "chain = '%s'"%chains[i])
 	util.cbc("TMP__C*")
+	# for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i),"resi=str(int(resi)+%i)"%(1000*i));
+	# util.cbc("TMP__C*")
 	cmd.create(name,"TMP__*")
 	cmd.delete("TMP__*")
 	cmd.set_view(v)
@@ -109,38 +111,41 @@ def makedx(sel = 'all', n = 5):
 	util.cbc("D*")
 	cmd.set_view(v)
 
-def maketet(sel='chain A+B',name="TET",n=12):
+def maketet(sel='chain A+B and name n+ca+c',name="TET",n=12):
 	v = cmd.get_view()
 	cmd.delete("TMP__C%i_*"%n)
+	cmd.delete(name)
 	chains = ROSETTA_CHAINS
 	for i in range(n): cmd.create("TMP__C%i_%i"%(n, i), sel+" and (not TMP__C%i_*)"%n)
 	for i in range(n): xform("TMP__C%i_%i"%(n, i), SYMTET[i])
-	for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i), "chain = '%s'"%chains[i])
+	for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i),"resi=str(int(resi)+%i)"%(1000*i));
 	util.cbc("TMP__C*")
 	cmd.create(name,"TMP__*")
 	cmd.delete("TMP__*")
 	cmd.set_view(v)
 
-def makeoct(sel='chain A+B',name="OCT",n=18):
+def makeoct(sel='chain A+B and name n+ca+c',name="OCT",n=24):
 	v = cmd.get_view()
 	cmd.delete("TMP__C%i_*"%n)
+	cmd.delete(name)
 	chains = ROSETTA_CHAINS
 	for i in range(n): cmd.create("TMP__C%i_%i"%(n, i), sel+" and (not TMP__C%i_*)"%n)
 	for i in range(n): xform("TMP__C%i_%i"%(n, i), SYMOCT[i])
-	for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i), "chain = '%s'"%chains[i])
+	for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i),"resi=str(int(resi)+%i)"%(1000*i));
 	util.cbc("TMP__C*")
 	cmd.create(name,"TMP__*")
 	cmd.delete("TMP__*")
 	cmd.set_view(v)
 
-def makeicos(sel='chain A+B',name="ICOS",n=30):
+def makeicos(sel='chain A+B and name n+ca+c and visible',name="ICOS",n=60):
 	v = cmd.get_view()
 	cmd.delete("TMP__C%i_*"%n)
+	cmd.delete(name)
 	chains = ROSETTA_CHAINS
 	for i in range(n): cmd.create("TMP__C%i_%i"%(n, i), sel+" and (not TMP__C%i_*)"%n)
 	for i in range(n): xform("TMP__C%i_%i"%(n, i), SYMICS[i])
-	for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i), "chain = '%s'"%chains[i])
-	util.cbc("TMP__C*")
+	for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i),"resi=str(int(resi)+%i)"%(1000*i));
+	# util.cbc("TMP__C*")
 	cmd.create(name,"TMP__*")
 	cmd.delete("TMP__*")
 	cmd.set_view(v)
