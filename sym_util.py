@@ -567,6 +567,49 @@ def alignsym(sel="all",arch="I32",ax1=Vec(0,0,1),ax2=Vec(0.356825,0.000002,0.934
 	x = alignvectors( ax1, ax2, tgt1, tgt2 )
 	xform(sel,x)
 
+def xtal_frames(tgt=None,skip=tuple(),r=100):
+	axes = list()
+	objs = cmd.get_object_list()
+	if not tgt: tgt = objs[0]
+	assert tgt in objs
+	c = com(tgt)
+	covered = list()
+	for o in objs:
+		if o == tgt: continue
+		x = getrelframe(tgt,o)
+
+		# seenit = False
+		# for xc in covered:
+		# 	if x.t.distance(xc.t) < 0.001:
+		# 		seenit = True
+		# if seenit: continue
+
+		axis,ang = x.rotation_axis()
+		if ang < 1.0: continue # hack, nfold <= 6
+		mov = proj( axis, x.t).length()
+		if abs(mov) > 0.001: continue
+		nf = 2*math.pi/ang
+		if nf % 1.0 > 0.001: continue
+		nf = int(nf)
+		if nf in skip: continue
+		if nf > 6 or nf == 5 or nf == 1: continue
+		ctot = Vec(0,0,0)
+		xtot = Xform()
+		for i in range(nf):
+			ctot += c
+			covered.append(xtot)
+			c = x * c
+			xtot *= x
+		ctot /= nf
+		# beg = ctot - r*axis
+		# end = ctot + r*axis
+		beg = ray_sphere_intersection( axis,ctot,c,r)
+		end = ray_sphere_intersection(-axis,ctot,c,r)
+		if not beg or not end: continue
+		if nf is not 2: showcyl(beg,end,0.3,col=(1.0,1.0,1.0))
+		else:           showcyl(beg,end,0.2,col=(1.0,0.5,0.2))
+		print round(nf),ctot,o
+
 def nulltest():
 	"""
 	>>> print "foo"

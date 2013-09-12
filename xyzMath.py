@@ -7,7 +7,7 @@ from itertools import chain,product,izip
 import math
 import operator as op
 
-EPS = 0.000000001
+EPS = 0.00001
 SQRTEPS = sqrt(EPS)
 ATET = 54.735610317245360079 # asin(sr2/sr3)
 AOCT = 35.264389682754668343 # asin(sr1/sr3)
@@ -904,6 +904,30 @@ def rotation_around_dof_to_set_vec_vec_angle(dofaxis,tgt0,v1,v2):
 	return ret
 
 
+def ray_sphere_intersection(lin,l0in,cen,r):
+	"""
+	>>> v = randnorm()
+	>>> v = Ux
+	>>> assert v.distance( ray_sphere_intersection(v,V0,V0,1) ) < 0.00001
+	>>> assert not ray_sphere_intersection(v,V0,-2*v,1.0)
+	"""
+	l = lin.normalized()
+	l0 = l0in - cen
+ 	a = l.dot(l)
+ 	b = l.dot(l0)*2.0
+ 	c = l0.dot(l0) - r*r
+ 	disc = b * b - 4 * a * c;
+ 	if disc < 0: return None
+ 	distSqrt = sqrt(disc)
+ 	if b < 0: q = (-b - distSqrt)/2.0
+ 	else:     q = (-b + distSqrt)/2.0
+ 	t0 = q / a;
+ 	t1 = c / q;
+ 	if t0 > t1: t0,t1 = t1,t0
+ 	if t1 >= 0:
+	 	if t0 >= 0: return l*t0+l0+cen
+ 		else:       return l*t1+l0+cen
+ 	return None
 
 def line_plane_intersection(l,l0,n,p0):
 	"""

@@ -78,16 +78,16 @@ aa_1_3 = {'A': 'ALA',
 		  'I': 'ILE',
 		  'K': 'LYS',
 		  'L': 'LEU',
-		  'xyz.Mat': 'MET',
+		  'M': 'MET',
 		  'N': 'ASN',
 		  'P': 'PRO',
 		  'R': 'ARG',
 		  'Q': 'GLN',
 		  'S': 'SER',
 		  'T': 'THR',
-		  'xyz.Vec': 'VAL',
+		  'V': 'VAL',
 		  'W': 'TRP',
-		  'Uy': 'TYR',
+		  'Y': 'TYR',
  }
 aa_3_1 = {'ALA': 'A',
 		  'ASP': 'D',
@@ -99,16 +99,16 @@ aa_3_1 = {'ALA': 'A',
 		  'ILE': 'I',
 		  'LYS': 'K',
 		  'LEU': 'L',
-		  'MET': 'xyz.Mat',
+		  'MET': 'M',
 		  'ASN': 'N',
 		  'PRO': 'P',
 		  'GLN': 'Q',
 		  'ARG': 'R',
 		  'SER': 'S',
 		  'THR': 'T',
-		  'VAL': 'xyz.Vec',
+		  'VAL': 'V',
 		  'TRP': 'W',
-		  'TYR': 'Uy',
+		  'TYR': 'Y',
  }
 aa_types = {
   'A': 'hydrophobic',
@@ -150,6 +150,73 @@ def showaxes():
         ]
     cmd.load_cgo(obj,'axes')
     cmd.set_view(v)
+
+
+class PutCenterCallback(object):
+    prev_v = None
+
+    def __init__(self, name, corner=0):
+        self.name = name
+        self.corner = corner
+        self.cb_name = cmd.get_unused_name('_cb')
+
+    def load(self):
+        cmd.load_callback(self, self.cb_name)
+
+    def __call__(self):
+        if self.name not in cmd.get_names('objects'):
+            cmd.delete(self.cb_name)
+            return
+
+        v = cmd.get_view()
+        if v == self.prev_v:
+            return
+        self.prev_v = v
+
+        t = v[12:15]
+
+        if self.corner:
+            vp = cmd.get_viewport()
+            R_mc = [v[0:3], v[3:6], v[6:9]]
+            off_c = [0.15 * v[11] * vp[0] / vp[1], 0.15 * v[11], 0.0]
+            if self.corner in [2,3]:
+                off_c[0] *= -1
+            if self.corner in [3,4]:
+                off_c[1] *= -1
+            off_m = cpv.transform(R_mc, off_c)
+            t = cpv.add(t, off_m)
+
+        z = -v[11] / 30.0
+        m = [z, 0, 0, t[0] / z, 0, z, 0, t[1] / z, 0, 0, z, t[2] / z, 0, 0, 0, 1]
+        cmd.set_object_ttt(self.name, m, homogenous=1)
+
+from chempy import cpv
+def corneraxes(name='axes'):
+    '''
+DESCRIPTION
+
+    Puts coordinate axes to the lower left corner of the viewport.
+    '''
+    from pymol import cgo
+
+    cmd.set('auto_zoom', 0)
+
+    w = 0.06 # cylinder width
+    l = 0.75 # cylinder length
+    h = 0.25 # cone hight
+    d = w * 1.618 # cone base diameter
+
+    obj = [cgo.CYLINDER, 0.0, 0.0, 0.0,   l, 0.0, 0.0, w, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+           cgo.CYLINDER, 0.0, 0.0, 0.0, 0.0,   l, 0.0, w, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+           cgo.CYLINDER, 0.0, 0.0, 0.0, 0.0, 0.0,   l, w, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+           cgo.CONE,   l, 0.0, 0.0, h+l, 0.0, 0.0, d, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0,
+           cgo.CONE, 0.0,   l, 0.0, 0.0, h+l, 0.0, d, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0,
+           cgo.CONE, 0.0, 0.0,   l, 0.0, 0.0, h+l, d, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0]
+
+    PutCenterCallback(name, 1).load()
+    cmd.load_cgo(obj, name)
+
+cmd.extend('corneraxes', corneraxes)
 
 def showaxes2():
     v = cmd.get_view()
@@ -281,6 +348,23 @@ def showline(a, c, col=(1,1,1), lbl=''):
         cgo.COLOR, col[0], col[1],col[2],
         cgo.VERTEX, c.x-a.x, c.y-a.y, c.z-a.z,
         cgo.VERTEX, c.x+a.x, c.y+a.y, c.z+a.z,
+        cgo.END
+	]
+	cmd.load_cgo(OBJ,lbl)
+	cmd.set_view(v)
+
+def showlineabs(a, c, col=(1,1,1), lbl=''):
+	if not lbl:
+		global numline
+		lbl = "line%i"%numline
+		numline += 1
+	cmd.delete(lbl)
+	v = cmd.get_view()
+	OBJ = [
+        cgo.BEGIN, cgo.LINES,
+        cgo.COLOR, col[0], col[1],col[2],
+        cgo.VERTEX, c.x, c.y, c.z,
+        cgo.VERTEX, a.x, a.y, a.z,
         cgo.END
 	]
 	cmd.load_cgo(OBJ,lbl)
@@ -468,6 +552,7 @@ def rot(sel, axis, ang, cen=xyz.V0):
 	if not xyz.isvec(axis): raise NotImplementedError
 	if not xyz.isnum(ang): raise NotImplementedError
 	if not xyz.isvec(cen): raise NotImplementedError
+	if cen is None: cen = com(sel)
 	# if abs(axis.x) < 0.00001: axis.x = 0.0
 	# if abs(axis.y) < 0.00001: axis.y = 0.0
 	# if abs(axis.z) < 0.00001: axis.z = 0.0[[]]
@@ -548,7 +633,8 @@ def alignaxis(sel, newaxis, oldaxis = None, cen = xyz.Vec(0, 0, 0)):
 #
 
 
-def mysetview(look, up, pos = None, cen = None, ncp = None, fcp = None):
+def mysetview(look, up=None, pos = None, cen = None, ncp = None, fcp = None):
+	if not up: up = randnorm()
 	Xaxis = -look.cross(up).normalized()
 	Yaxis = xyz.projperp(look, up).normalized()
 	Zaxis = -look.normalized()
@@ -1579,10 +1665,49 @@ def bestalign(s1,s2):
 		if o2 not in keepers:
 			cmd.delete(o2)
 
+def process_native():
+	native = None
+	for o in cmd.get_object_list():
+		if o.lower().count("native"):
+			if native is not None:
+				print "more than one native!"
+				return
+			native = o
+	print "NATIVE:",native
+	if not native: return
+	cmd.create("natA",native+" and chain A")
+	cmd.create("natB",native+" and chain B")
+	cmd.alter("natA","chain='A'")
+	cmd.alter("natB","chain='B'")
+	cmd.delete(native)
+	cmd.align("natA","vis and chain A")
+	cmd.align("natB","vis and chain B")
+	cmd.color("white","natA and ele C")
+	cmd.color("white","natB and ele C")
+
+
+
+
+MOVE_UP_DOWN_SPECIAL_OBJS = ["axes",]
+
+def move_up_down_add_to_ignore_list(sel):
+	global MOVE_UP_DOWN_SPECIAL_OBJS
+	print sel
+	toadd = cmd.get_object_list(sel)
+	print toadd
+	if toadd: MOVE_UP_DOWN_SPECIAL_OBJS.extend(toadd)
+
+def my_get_obj(enabled_only=0):
+	global MOVE_UP_DOWN_SPECIAL_OBJS
+	objs = cmd.get_names("objects",enabled_only)
+	for special in MOVE_UP_DOWN_SPECIAL_OBJS:
+		if special in objs:
+			objs.remove(special)
+	return objs
 
 def move_down():
-	enabled_objs = cmd.get_names("objects",enabled_only=1)
-	all_objs = cmd.get_names("objects",enabled_only=0)
+	enabled_objs = my_get_obj(enabled_only=1)
+	all_objs = my_get_obj(enabled_only=0)
 	for obj in enabled_objs:
 		cmd.disable(obj)
 		last_obj=obj
@@ -1592,20 +1717,22 @@ def move_down():
 					cmd.enable( all_objs[0] )
 				else:
 					cmd.enable( all_objs[i+1] )
-	cmd.orient
+	# cmd.zoom( " or ".join(my_get_obj(enabled_only=True)), complete=True, buffer=3.0 )
+	# cmd.orient
 def move_up():
-	enabled_objs = cmd.get_names("objects",enabled_only=1)
-	all_objs = cmd.get_names("objects",enabled_only=0)
+	enabled_objs = my_get_obj(enabled_only=1)
+	all_objs = my_get_obj(enabled_only=0)
 	for obj in enabled_objs:
-			cmd.disable(obj)
-			last_obj=obj
-			for i in range(0,len(all_objs)):
-					if all_objs[i] == obj:
-							if i-1 < 0:
-									cmd.enable( all_objs[-1] )
-							else:
-									cmd.enable( all_objs[i-1] )
-	cmd.orient
+		cmd.disable(obj)
+		last_obj=obj
+		for i in range(0,len(all_objs)):
+			if all_objs[i] == obj:
+				if i-1 < 0:
+					cmd.enable( all_objs[-1] )
+				else:
+					cmd.enable( all_objs[i-1] )
+	# cmd.zoom( " or ".join(my_get_obj(enabled_only=True)), complete=True, buffer=3.0 )
+	# cmd.orient
 
 def cbow():
 	for i in cmd.get_object_list():
