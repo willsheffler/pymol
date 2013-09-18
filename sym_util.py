@@ -610,10 +610,11 @@ def xtal_frames(tgt=None,skip=tuple(),r=100):
 		else:           showcyl(beg,end,0.2,col=(1.0,0.5,0.2))
 		print round(nf),ctot,o
 
-def makeh(n=10):
-	x0 = getrelframe('chain B','chain A')
+def makeh(sele='vis',n=10):
+	v = cmd.get_view()
+	x0 = getrelframe(sele+' and chain B','chain A')
 	x = Xform()
-	cmd.create('tmp','chain A and name n+ca+c')
+	cmd.create('tmp',sele+' and chain A and name n+ca+c')
 	for i in range(30):
 		cmd.create('Htmp%i'%i,'tmp')
 		xform('Htmp%i'%i,x)
@@ -625,6 +626,10 @@ def makeh(n=10):
 	cmd.delete('tmp')
 	cmd.hide('ev','HELIX')
 	cmd.show('rib','helix')
+	util.cbc('HELIX')
+	cmd.set_view(v)
+
+cmd.extend('makeh',makeh)
 
 
 def nulltest():
