@@ -610,6 +610,23 @@ def xtal_frames(tgt=None,skip=tuple(),r=100):
 		else:           showcyl(beg,end,0.2,col=(1.0,0.5,0.2))
 		print round(nf),ctot,o
 
+def makeh(n=10):
+	x0 = getrelframe('chain B','chain A')
+	x = Xform()
+	cmd.create('tmp','chain A and name n+ca+c')
+	for i in range(30):
+		cmd.create('Htmp%i'%i,'tmp')
+		xform('Htmp%i'%i,x)
+		cmd.alter('Htmp%i'%i,"chain='%s'"%ROSETTA_CHAINS[i])
+		print ROSETTA_CHAINS[i]
+		x = x * x0
+	cmd.create("HELIX",'Htmp*')
+	cmd.delete("Htmp*")
+	cmd.delete('tmp')
+	cmd.hide('ev','HELIX')
+	cmd.show('rib','helix')
+
+
 def nulltest():
 	"""
 	>>> print "foo"

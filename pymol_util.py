@@ -1889,6 +1889,12 @@ SEE ALSO
                  i = 0
 
 
+def tcdock_set_chain_by_cluster():
+	for i in range(1,100):
+		print i
+		cmd.alter("*F_%i_*"%i,"chain="+ROSETTA_CHAINS[( i-1 )%len(ROSETTA_CHAINS)])
+		cmd.alter("*F_%i_*"%i,"chain="+ROSETTA_CHAINS[(100-i)%len(ROSETTA_CHAINS)])
+
 # HSV to RGB routine taken from Robert L. Campbell's color_b.py script
 #   See http://pldserver1.biochem.queensu.ca/~rlc/work/pymol/
 # Original algorithm from: http://www.cs.rit.edu/~ncs/color/t_convert.html
