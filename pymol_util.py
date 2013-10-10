@@ -1688,7 +1688,7 @@ def process_native():
 
 
 
-MOVE_UP_DOWN_SPECIAL_OBJS = ["axes",]
+MOVE_UP_DOWN_SPECIAL_OBJS = ["axes","ref"]
 
 def move_up_down_add_to_ignore_list(sel):
 	global MOVE_UP_DOWN_SPECIAL_OBJS
@@ -1940,6 +1940,46 @@ def hsv_to_rgb(hsv):
 
 # Add color_obj to the PyMOL command list
 cmd.extend("color_obj",color_obj)
+
+
+def make_zdock_set(d="/work/sheffler/Dropbox/project/zdock/pdb_lib",tgt="/work/sheffler/data/zdock_AB"):
+	for p in os.listdir(d):
+		fn0 = "%(d)s/%(p)s/%(p)s.pdb"%vars()
+		fn1 = "%(d)s/%(p)s/%(p)s_1.pdb"%vars()
+		fn2 = "%(d)s/%(p)s/%(p)s_2.pdb"%vars()
+		if os.path.exists(fn0) and os.path.exists(fn1) and os.path.exists(fn2):
+			cmd.delete('all')
+			cmd.load(fn1,"chainA")
+			cmd.load(fn2,"chainB")
+			cmd.alter("chainA","chain='A'")
+			cmd.alter("chainB","chain='B'")
+			cmd.save("%(tgt)s/%(p)s_AB.pdb"%vars())
+			cmd.delete('all')
+
+def make_inputs_from_cb_only(d="/work/sheffler/Dropbox/test/silva/run_resl_6/",tgt="/work/sheffler/Dropbox/test/matdes/asym_iface"):
+	for p in os.listdir(d):
+		if not p.endswith(".pdb") and not p.endswith(".pdb.gz"): continue
+		cmd.delete('tmp')
+		# cmd.load(d+"/"+p,"tmp")
+
+		nat1 = p.split("_")[1].replace(".gz","").replace(".pdb","")
+		nat2 = p.split("_")[2].replace(".gz","").replace(".pdb","")
+		nat1file = d+"../input/scaffolds/"+p.split("_")[1]
+		nat2file = d+"../input/scaffolds/"+p.split("_")[2]
+		print p
+		print nat1,nat1file
+		print nat2,nat2file
+		if nat1 not in cmd.get_object_list(): cmd.load(nat1file,nat1)
+		if nat2 not in cmd.get_object_list(): cmd.load(nat2file,nat2)
+		cmd.load(d+"/"+p,"tmp")
+		cmd.super(nat1,"tmp")
+		cmd.super(nat2,"tmp")
+		cmd.alter(nat1,"chain='A'")
+		cmd.alter(nat2,"chain='B'")
+		cmd.save(tgt+"/"+p,"tmp")
+		cmd.delete("tmp")
+
+
 
 
 def tmpvis(s):

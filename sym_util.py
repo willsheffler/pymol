@@ -86,7 +86,7 @@ def makecx(sel = 'all',name="TMP",n = 5,axis=Uz):
 	cmd.delete("TMP__C%i_*"%n)
 	chains = ROSETTA_CHAINS
 	for i in range(n): cmd.create("TMP__C%i_%i"%(n, i), sel+" and (not TMP__C%i_*)"%n)
-	for i in range(n): rot("TMP__C%i_%i"%(n, i), axis, 360.0*float(i)/float(n))
+	for i in range(n): rot("TMP__C%i_%i"%(n, i), axis, -360.0*float(i)/float(n))
 	for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i), "chain = '%s'"%chains[i])
 	util.cbc("TMP__C*")
 	# for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i),"resi=str(int(resi)+%i)"%(1000*i));
@@ -610,12 +610,13 @@ def xtal_frames(tgt=None,skip=tuple(),r=100):
 		else:           showcyl(beg,end,0.2,col=(1.0,0.5,0.2))
 		print round(nf),ctot,o
 
-def makeh(sele='vis',n=10):
+def makeh(sele='vis',n=30):
+	cmd.delete('helix')
 	v = cmd.get_view()
-	x0 = getrelframe(sele+' and chain B','chain A')
+	x0 = getrelframe(sele+' and chain B',sele+' and chain A')
 	x = Xform()
 	cmd.create('tmp',sele+' and chain A and name n+ca+c')
-	for i in range(30):
+	for i in range(n):
 		cmd.create('Htmp%i'%i,'tmp')
 		xform('Htmp%i'%i,x)
 		cmd.alter('Htmp%i'%i,"chain='%s'"%ROSETTA_CHAINS[i])
@@ -625,12 +626,21 @@ def makeh(sele='vis',n=10):
 	cmd.delete("Htmp*")
 	cmd.delete('tmp')
 	cmd.hide('ev','HELIX')
-	cmd.show('rib','helix')
+	cmd.show('lines','helix')
 	util.cbc('HELIX')
 	cmd.set_view(v)
 
 cmd.extend('makeh',makeh)
 
+def make_ab_components(dir):
+	if not os.path.exists(dir+"_AB"):
+		os.mkdir(dir+"_AB")
+	for fn in os.listdir(dir):
+		if not fn.endswith(".pdb") and not fn.endswith(".pdb.gz"): continue
+		cmd.delete("all")
+		cmd.load(dir+"/"+fn,"a")
+		makec6("a",name="c6")
+		cmd.save(dir+"_AB/"+fn,"c6 and chain A+B")
 
 def nulltest():
 	"""

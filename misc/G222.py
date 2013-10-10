@@ -9404,9 +9404,9 @@ def gyroid(s=62.35,fx=-0.25,fy=0.25,fz=-0.25,r=80,c=Vec(0,0,0),t=0.1,a=1.0):
 					pi0,pi1,pi2 = s*points[i][0]+s*(dx+fx), s*points[i][1]+s*(dy+fy), s*points[i][2]+s*(dz+fz)
 					pj0,pj1,pj2 = s*points[j][0]+s*(dx+fx), s*points[j][1]+s*(dy+fy), s*points[j][2]+s*(dz+fz)
 					pk0,pk1,pk2 = s*points[k][0]+s*(dx+fx), s*points[k][1]+s*(dy+fy), s*points[k][2]+s*(dz+fz)
-					ni0,ni1,ni2 = normals[i][0],normals[i][1],normals[i][2]
-					nj0,nj1,nj2 = normals[j][0],normals[j][1],normals[j][2]
-					nk0,nk1,nk2 = normals[k][0],normals[k][1],normals[k][2]
+					ni0,ni1,ni2 =  normals[i][0]          ,  normals[i][1]          ,   normals[i][2]
+					nj0,nj1,nj2 =  normals[j][0]          ,  normals[j][1]          ,   normals[j][2]
+					nk0,nk1,nk2 =  normals[k][0]          ,  normals[k][1]          ,   normals[k][2]
 					pcen = Vec( (pi0+pj0+pk0)/3.0, (pi1+pj1+pk1)/3.0, (pi2+pj2+pk2)/3.0 )
 					if c.distance_squared(pcen) > r2: continue
 					obj.extend( (
@@ -9414,7 +9414,7 @@ def gyroid(s=62.35,fx=-0.25,fy=0.25,fz=-0.25,r=80,c=Vec(0,0,0),t=0.1,a=1.0):
 						NORMAL,  ni0, ni1, ni2,	VERTEX, pi0+t*ni0,pi1+t*ni1,pi2+t*ni2,
 						NORMAL,  nj0, nj1, nj2,	VERTEX, pj0+t*nj0,pj1+t*nj1,pj2+t*nj2,
 						NORMAL,  nk0, nk1, nk2,	VERTEX, pk0+t*nk0,pk1+t*nk1,pk2+t*nk2,
-						COLOR, 0,1,0,
+						COLOR, 1,1,0,
 						NORMAL, -ni0,-ni1,-ni2,	VERTEX, pi0-t*ni0,pi1-t*ni1,pi2-t*ni2,
 						NORMAL, -nk0,-nk1,-nk2,	VERTEX, pk0-t*nk0,pk1-t*nk1,pk2-t*nk2,
 						NORMAL, -nj0,-nj1,-nj2,	VERTEX, pj0-t*nj0,pj1-t*nj1,pj2-t*nj2,
