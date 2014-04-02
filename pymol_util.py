@@ -33,6 +33,36 @@ numray = 0
 numline = 0
 numseg = 0
 
+RAINBOW = ( "0xFFFFFF",
+			"0xFF0000",
+			# "0xFF3300",
+			"0xFF6600",
+			# "0xFF9900",
+			"0xFFCC00",
+			"0xFFFF00",
+			"0xCCFF00",
+			# "0x99FF00",
+			"0x66FF00",
+			# "0x33FF00",
+			"0x00FF00",
+			# "0x00FF33",
+			"0x00FF66",
+			"0x00FF99",
+			"0x00FFCC",
+			# "0x00FFFF",
+			"0x00CCFF",
+			# "0x0099FF",
+			"0x0066FF",
+			# "0x0033FF",
+			"0x0000FF",
+	)
+
+def rainbow_chains():
+	for i in range(26):
+		col = RAINBOW[i%len(RAINBOW)]
+		print i, col
+		cmd.color( col ,"chain %s"%(alphabet[i]))
+
 COLORS = ('cyan', 'lightmagenta', 'yellow', 'salmon', 'hydrogen', 'slate', 'orange',
  'lime',
  'deepteal',
@@ -272,7 +302,7 @@ def showsphere(c,r=1,col=(1,1,1),lbl=''):
 	v = cmd.get_view()
 	if not lbl:
 		global numvec
-		lbl = "vec%i"%numvec
+		lbl = "sphere%i"%numvec
 		numvec += 1
 	mycgo = [cgo.COLOR, col[0], col[1], col[2], cgo.SPHERE, c.x, c.y, c.z, r] ## white sphere with 3A radius
 	cmd.load_cgo(mycgo,lbl)
@@ -633,7 +663,7 @@ def alignaxis(sel, newaxis, oldaxis = None, cen = xyz.Vec(0, 0, 0)):
 #
 
 
-def mysetview(look, up=None, pos = None, cen = None, ncp = None, fcp = None):
+def mysetview(look=Uz, up=Uy, pos = None, cen = None, ncp = None, fcp = None):
 	if not up: up = randnorm()
 	Xaxis = -look.cross(up).normalized()
 	Yaxis = xyz.projperp(look, up).normalized()
@@ -1014,9 +1044,9 @@ def useOccRadii(sel = "all"):
 	cmd.rebuild()
 
 def useTempRadii(sel = "all"):
-	for ii in range(30):
-		radius = "%0.1f"%(float(ii+1)/10)
-		cmd.alter(sel+" and b = "+radius, "vdw = "+radius)
+	for a in cmd.get_model(sel).atom:
+		b = a.b-2.0
+		cmd.alter("%s and resi %s and name %s"%(sel, a.resi, a.name), "vdw = %f"%(b))
 	cmd.rebuild()
 
 
@@ -1690,6 +1720,7 @@ def process_native():
 
 MOVE_UP_DOWN_SPECIAL_OBJS = ["axes","ref"]
 
+
 def move_up_down_add_to_ignore_list(sel):
 	global MOVE_UP_DOWN_SPECIAL_OBJS
 	print sel
@@ -1730,13 +1761,13 @@ def move_up():
 				if i-1 < 0:
 					cmd.enable( all_objs[-1] )
 				else:
-					cmd.enable( all_objs[i-1] )
+					cmd.enable( all_objs[i-1] ) 
 	# cmd.zoom( " or ".join(my_get_obj(enabled_only=True)), complete=True, buffer=3.0 )
 	# cmd.orient
 
-def cbow():
+def cbow(sel="all"):
 	for i in cmd.get_object_list():
-		util.chainbow(i)
+		util.chainbow("((%s) and (%s))"%(i,sel))
 
 cmd.extend("cbow", cbow)
 cmd.extend("com", com)
@@ -1956,7 +1987,8 @@ def make_zdock_set(d="/work/sheffler/Dropbox/project/zdock/pdb_lib",tgt="/work/s
 			cmd.save("%(tgt)s/%(p)s_AB.pdb"%vars())
 			cmd.delete('all')
 
-def make_inputs_from_cb_only(d="/work/sheffler/Dropbox/test/silva/run_resl_6/",tgt="/work/sheffler/Dropbox/test/matdes/asym_iface"):
+def make_inputs_from_cb_only(d="/work/sheffler/Dropbox/test/silva/run_resl_6/",tgt="/work/sheffler/tmp/asym_iface"):
+	if not os.path.exists(tgt): os.mkdir(tgt)
 	for p in os.listdir(d):
 		if not p.endswith(".pdb") and not p.endswith(".pdb.gz"): continue
 		cmd.delete('tmp')
@@ -1976,9 +2008,8 @@ def make_inputs_from_cb_only(d="/work/sheffler/Dropbox/test/silva/run_resl_6/",t
 		cmd.super(nat2,"tmp")
 		cmd.alter(nat1,"chain='A'")
 		cmd.alter(nat2,"chain='B'")
-		cmd.save(tgt+"/"+p,"tmp")
+		cmd.save(tgt+"/"+p,nat1+" or "+nat2)
 		cmd.delete("tmp")
-
 
 
 

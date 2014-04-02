@@ -1285,7 +1285,7 @@ SYMICS = [
 
 def cyclic_axis(coords):
 	if max(len(x) for x in coords) != min(len(x) for x in coords):
-		print "coord vectors not same length",
+		print "coord vectors not same length!", [len(x) for x in coords]
 		return None
 	cen = reduce(op.add,(x for c in coords for x in c),V0) / len(coords[0]*len(coords))
 	guesses = []

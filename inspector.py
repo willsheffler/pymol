@@ -16,7 +16,7 @@ import cProfile
 
 class Inspector(object):
 	"""docstring for Inspector"""
-	def __init__(self, l="/Users/sheffler/runs/I53/130930_matdes_fixbb/filt_sc_area_nobup_5k.list",tgt="/Users/sheffler/runs/I53/130930_matdes_fixbb/pymol_picks/"):
+	def __init__(self, l="/Users/sheffler/tmp/ariel10_p6_32_reverted/list",tgt="/Users/sheffler/tmp/ariel10_p6_32_reverted/pymol_picks/"):
 		super(Inspector, self).__init__()
 		self.pdblist = list()
 		with open(l) as infile:
@@ -38,15 +38,19 @@ class Inspector(object):
 			for x in self.seenit: outfile.write(x+"\n")
 
 	def next(self):
-		if self.current: cmd.delete(self.current)
+		if self.current:
+			cmd.delete(self.current)
+			cmd.delete(self.nat1)
+			cmd.delete(self.nat2)
+			cmd.delete("all")
+			self.seenit.append(self.pdblist[self.index])
+			self.write_seenit()
 
 		while self.pdblist[self.index] in self.seenit:
 			self.index += 1
 			if self.index >= len(self.pdblist):
 				print "out of structures!"
 				return
-		self.seenit.append(self.pdblist[self.index])
-		self.write_seenit()
 
 		cmd.load(self.pdblist[self.index])
 		self.current = cmd.get_object_list()[-1]
@@ -67,6 +71,19 @@ class Inspector(object):
 		cmd.show('sti','iface')
 		cmd.hide('ev','hydro')
 		cmd.select('None')
+		v = cmd.get_view()
+
+		self.nat1 = self.current[ 0: 9]
+		self.nat2 = self.current[10:19]
+		print self.nat1, self.nat2
+		cmd.load("/work/sheffler/data/jacob_"+self.nat1[:2]+"/"+self.nat1+".pdb.gz")
+		cmd.load("/work/sheffler/data/jacob_"+self.nat2[:2]+"/"+self.nat2+".pdb.gz")
+		cmd.super(self.nat1,self.current+" and chain C")
+		cmd.super(self.nat2,self.current+" and chain A")
+		cmd.color("white","(%s or %s) and elem C"%(self.nat1,self.nat2))
+		cmd.hide("ev","(%s or %s)"%(self.nat1,self.nat2))
+		cmd.show("lines","(%s or %s)"%(self.nat1,self.nat2))
+		cmd.set_view(v)
 
 	def keep(self):
 		if self.current:

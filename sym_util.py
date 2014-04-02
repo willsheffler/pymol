@@ -3,29 +3,145 @@ import sys,os,inspect,functools
 newpath = os.path.dirname(inspect.getfile(inspect.currentframe())) # script directory
 if not newpath in sys.path: sys.path.append(newpath)
 import string,re,gzip,itertools
+import collections
 from pymol_util import *
 import operator as op
 from xyzMath import *
+from itertools import product,ifilter
+from cluster import HierarchicalClustering
+
 
 nsymmetrizecx = 0
 
-def guesscxaxis(sele,nfold=None,chains=list(),extrasel="name CA"):
-	sele = "(("+sele+") and ("+extrasel+"))"
-	if not chains: chains.extend(cmd.get_chains(sele))
-	if not nfold: nfold = len(chains)
-	# print chains
-	if len(chains) != nfold:
-		print chains
+def get_xforms_by_chain(sele="all"):
+	v = cmd.get_view()
+	cen = com("("+sele+") and (name CA and not HET)")
+	chains = cmd.get_chains(sele)
+	xforms = dict()
+	maxrms = 0.0
+	for c1,c2 in filter( lambda t: t[0]<t[1], product(chains,chains) ):
+		refsele = "((%s) and chain %s and name CA and not HET)"%(sele,c1)
+		movsele = "((%s) and chain %s and name CA and not HET)"%(sele,c2)
+		x,rms = getrelframe_rmsalign( movsele, refsele, Xform(-cen) )
+		maxrms = max(maxrms,rms)
+		xforms[c1,c2] = x
+	cmd.set_view(v)
+	return xforms, maxrms
+
+def find_symelems(sele_or_xforms="all",verbose=False):
+	xforms = sele_or_xforms
+	if isinstance(sele_or_xforms,basestring): xforms, maxrms = get_xforms_by_chain(sele_or_xforms)
+	elif not isinstance(sele_or_xforms,dict): raise ValueError
+	symelems = list()
+	for c,x in xforms.items():
+		assert len(c)==2
+		assert isinstance(x,Xform)
+		if c[0]==c[1]: continue
+		dis = x.t.length()
+		if dis > 3: continue
+		axis,ang = x.rotation_axis()
+		nfold = round(math.pi*2.0/ang)
+		angerr = abs(ang-math.pi*2.0/nfold)
+		if angerr > 0.1: continue
+		symelems.append( (nfold,axis,c) ) 
+	symelemdis = lambda x,y: line_line_angle_degrees(x[1],y[1]) if x[0]==y[0] else 9e9
+	if verbose:
+		for se1,se2 in filter( lambda t: t[0]<t[1], product(symelems,symelems) ):
+				print se1
+				print se2
+				print symelemdis(se1,se2), "degrees"
+				print
+	hier = HierarchicalClustering(symelems, symelemdis )
+	thresh = 6.0
+	clusters = hier.getlevel(thresh);
+	print "number of symmetry element clusters at threshold",thresh,"degrees is" , len(clusters)
+	centers0 = list()
+	for clust in clusters:
+		print "symelem cluster:",clust
+		center = list(clust[0])
+		center[2] = list((center[2],))
+		for i in range(1,len(clust)):
+			ax = clust[i][1]
+			center[1] = center[1] + ( ax if ax.dot(center[1]) > 0 else -ax )
+			center[2].append(clust[i][2])
+		center[1].normalize()
+		centers0.append(center)
+	# sort on nfold, then on number of chain pairs in cluster
+	centers0 = sorted( centers0, cmp = lambda x,y: cmp(y[0],x[0]) if x[0]!=y[0] else cmp(len(y[2]),len(x[2])) )
+	centers = list()
+	for center in centers0:
+		if verbose: print "DEBUG prune center:",center
+		seenit = False
+		for censeen in centers:
+			remainder = abs( ( censeen[0] / center[0] ) % 1.0)
+			if verbose: print "   ",remainder,censeen
+			if remainder > 0.01: continue # not a symmetry multiple
+			if 1.0-abs(center[1].dot(censeen[1])) < 0.01:
+				seenit = True # axis are same
+		if not seenit:
+			centers.append(center)
+	print "centers:"
+	cen_of_geom = com("("+sele_or_xforms+") and (name CA and not HET)")
+	for center in centers:
+		print center
+		# if center[0]>2.1: continue
+		#showvecfrompoint(50*center[1],cen_of_geom)
+	return centers, maxrms
+
+def guessdxaxes(sele="all"):
+	nfold = len(cmd.get_chains(sele))
+	assert nfold % 2 is 0
+	nfold /= 2
+	symelems, maxrms = find_symelems(sele)
+	assert len(symelems) > 1
+	assert symelems[0][0] == float(nfold)
+	assert symelems[1][0] == float(2)
+	axis_high = symelems[0][1]
+	axis_low  = symelems[1][1]
+	return axis_high, axis_low, maxrms
+
+def aligndx(sele='all'):
+	trans(sele,-com(sele+" and name CA and not HET"))
+	haxis, laxis, maxrms = guessdxaxes(sele)
+	xalign = alignvectors( haxis, laxis, Uz, Ux )
+	xform(sele,xalign)
+	return maxrms
+
+def guesscxaxis(sele,nfold=None,chains0=list(),extrasel="name CA"):
+	sele = "(("+sele+") and ("+extrasel+") and (not het))"
+	check = False
+	if not chains0:
+		chains0.extend(cmd.get_chains(sele))
+		check = True
+	if not nfold:
+		nfold = len(chains0)
+		check = True
+	# print chains0
+	if check and len(chains0) != nfold:
+		print chains0
 		print "num chains != n-fold"
 		return None
+	print "chains0:", chains0
+	chains = list()
+	for i,c in enumerate(chains0):
+		if isinstance(c,basestring):
+			chains.append( (c,) )
+		elif isinstance(c,collections.Iterable):
+			chains.append( c )
+		else:
+			raise ValueError("chain must be string or list of strings")
 	atoms = cmd.get_model(sele).atom
-	idx = {}
-	for i,c in enumerate(chains): idx[c] = i
+	chain_index = {}
+	for i,clist in enumerate(chains):
+		for c in clist:
+			chain_index[c] = i
 	coords = [list() for c in chains]
 	print len(coords),[len(x) for x in coords]
 	for a in atoms:
-		if a.chain in idx:
-			coords[idx[a.chain]].append(Vec(a.coord))
+		if a.chain in chain_index:
+			coords[chain_index[a.chain]].append(Vec(a.coord))
+	for c in coords:
+		print len(c)
 	return cyclic_axis(coords)
 
 def aligncx(sele,nfold,alignsele=None,tgtaxis=Uz,chains=list(),extrasel="name CA"):
@@ -42,8 +158,9 @@ def alignd2(sele='all',chains=list()):
 	alignsele = "(("+sele+") and (name CA))"
 	if not chains: chains.extend(cmd.get_chains(alignsele))
 	if 4 is not len(chains): raise NotImplementedError("D2 must have chains")
-	ga1 = guesscxaxis(alignsele,2,(chains[0],chains[1]))
-	ga2 = guesscxaxis(alignsele,2,(chains[0],chains[2]))
+	ga1 = guesscxaxis( alignsele, 2,[ (chains[0],chains[1]), (chains[2],chains[3]) ] )
+	ga2 = guesscxaxis( alignsele, 2,[ (chains[0],chains[2]), (chains[1],chains[3]) ] )
+	assert ga1 is not None and ga2 is not None
 	err = 90.0 - line_line_angle_degrees(ga1[0],ga2[0])
 	x = alignvectors(ga1[0],ga2[0],Uz,Uy)
 	xform(sele,x)
@@ -94,22 +211,30 @@ def makecx(sel = 'all',name="TMP",n = 5,axis=Uz):
 	cmd.create(name,"TMP__*")
 	cmd.delete("TMP__*")
 	cmd.set_view(v)
+	cmd.disable(sel)
 
-def makedx(sel = 'all', n = 5):
+def makedx(sel = 'all', n = 2, newname=None):
+	if not newname:	newname = sel.replace("+","").replace(" ","")+"_D%i"%n
+	cmd.delete(newname)
 	v = cmd.get_view()
-	cmd.delete("D%i_*"%n)
-	chains = ROSETTA_CHAINS
+	cmd.delete("_TMP_D%i_*"%n)
+	ALLCHAIN = ROSETTA_CHAINS
+	chains = cmd.get_chains(sel)
 	for i in range(n):
-		dsel  = "D%i_%i"%(n,  i)
-		dsel2 = "D%i_%i"%(n,n+i)
-		cmd.create(dsel , sel+" and (not D%i_*)"%n)
+		dsel  = "_TMP_D%i_%i"%(n,  i)
+		dsel2 = "_TMP_D%i_%i"%(n,n+i)
+		cmd.create(dsel , sel+" and (not _TMP_D%i_*)"%n)
 		rot       (dsel , Uz, 360.0*float(i)/float(n))
 		cmd.create(dsel2, dsel )
 		rot       (dsel2, Uy, 180.0 )
-		cmd.alter (dsel , "chain = '%s'"%chains[i])
-		cmd.alter (dsel2, "chain = '%s'"%chains[i+n])
-	util.cbc("D*")
+		for ic,c in enumerate(chains):
+			cmd.alter ("((%s) and chain %s )"%(dsel ,c), "chain = '%s'"%ALLCHAIN[len(chains)*(i  )+ic])
+			cmd.alter ("((%s) and chain %s )"%(dsel2,c), "chain = '%s'"%ALLCHAIN[len(chains)*(i+n)+ic])
+	cmd.create(newname,"_TMP_D*")
+	util.cbc(newname)
+	cmd.delete("_TMP_D*")
 	cmd.set_view(v)
+	cmd.disable(sel)
 
 def maketet(sel='chain A+B and name n+ca+c',name="TET",n=12):
 	v = cmd.get_view()
@@ -358,18 +483,30 @@ def getframe(obj):
 	x = xyz.Vec(m.atom[       0     ].coord)
 	y = xyz.Vec(m.atom[len(m.atom)/2].coord)
 	z = xyz.Vec(m.atom[      -1     ].coord)
-	return xyz.stub(x,y,z)
+	frame = xyz.stub(x,y,z)
+	# print "getframe:",frame
+	return frame
 
 def getrelframe(newobj,refobj,Forigin=None):
-	"assume the obj's are identical"
+	"""get transform between two objects, assume the obj's are identical"""
 	if Forigin is None: Forigin = xyz.Xform(xyz.Imat,xyz.Vec(0,0,0))
-	Fref = getframe(refobj)
-	Fnew = getframe(newobj)
+	Fref = Forigin*getframe(refobj+" and name CA")
+	Fnew = Forigin*getframe(newobj+" and name CA")
 	Fdelta = Fnew * ~Fref
-	#print (Fdelta * Forigin).pretty()
-	return Fdelta * Forigin
+	return Fdelta
 
-
+def getrelframe_rmsalign(movsel,refsel,Forigin=None):
+	"""get transform between two objects using rmsalign"""
+	tmpref = "TMP__getrelframe_rmsalign_REF"
+	tmpmov = "TMP__getrelframe_rmsalign_MOV"	
+	cmd.create(tmpref,refsel)
+	cmd.create(tmpmov,refsel)
+	# cmd.super(tmpref,refsel) # shouldn't be necessary
+	alignresult = cmd.align(tmpmov,movsel)	
+	result = getrelframe(tmpmov,tmpref,Forigin)
+	cmd.delete(tmpmov)
+	cmd.delete(tmpref)	
+	return result, alignresult[0]
 
 def rechain(sel,nres):
 	chains = ROSETTA_CHAINS
@@ -588,6 +725,7 @@ def xtal_frames(tgt=None,skip=tuple(),r=100):
 		if ang < 1.0: continue # hack, nfold <= 6
 		mov = proj( axis, x.t).length()
 		if abs(mov) > 0.001: continue
+		print o
 		nf = 2*math.pi/ang
 		if nf % 1.0 > 0.001: continue
 		nf = int(nf)
@@ -631,6 +769,17 @@ def makeh(sele='vis',n=30):
 	cmd.set_view(v)
 
 cmd.extend('makeh',makeh)
+
+def color_by_2component(col1="green",col2="cyan"):
+	chains = r"""ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz!@#$&.<>?]{}|-_\~=%"""
+	chains1 = [chains[i] for i in range(0,len(chains),2)]
+	chains2 = [chains[i] for i in range(1,len(chains),2)]
+	for c in chains1:
+		print c+c+c+c+c
+		cmd.color(col1,"chain "+c)
+	for c in chains2:
+		print c+c+c+c+c
+		cmd.color(col2,"chain "+c)
 
 def make_ab_components(dir):
 	if not os.path.exists(dir+"_AB"):
