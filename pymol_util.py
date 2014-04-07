@@ -24,8 +24,8 @@ except ImportError as e:
 	cmd.extend = (lambda x,y: x)
 	def inpymol(): return False
 
-alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"*10
-ROSETTA_CHAINS = r"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$&.<>?]{}|-_\~=%zyxwvutsrqponmlkjihgfedcba" * 10
+alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"*100
+ROSETTA_CHAINS = r"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$&.<>?]{}|-_~=%zyxwvutsrqponmlkjihgfedcba" * 100
 
 numcom = 0
 numvec = 0

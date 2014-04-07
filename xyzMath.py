@@ -20,13 +20,17 @@ def isiter (x): return hasattr(x,"__iter__")
 def islist (x): return type(x) is list
 def istuple(x): return type(x) is tuple
 
-def isvec  (x): return type(x) is Vec
-def ismat  (x): return type(x) is Mat
-def isxform(x): return type(x) is Xform
+def isvec  (x): return hasattr(x,"__Vec__")
+def ismat  (x): return hasattr(x,"__Mat__")
+def isxform(x): return hasattr(x,"__Xform__")
 
-# def isvec  (x): return str(type(x)).split('.')[-1] == "Vec'>"
-# def ismat  (x): return str(type(x)).split('.')[-1] == "Mat'>"
-# def isxform(x): return str(type(x)).split('.')[-1] == "Xform'>"
+#def isvec  (x): return type(x) is Vec
+#def ismat  (x): return type(x) is Mat
+#def isxform(x): return type(x) is Xform
+
+#def isvec  (x): return str(type(x)).split('.')[-1] == "Vec'>"
+#def ismat  (x): return str(type(x)).split('.')[-1] == "Mat'>"
+#def isxform(x): return str(type(x)).split('.')[-1] == "Xform'>"
 
 class Vec(object):
 	"""a Vector like xyzVector<Real> in rosetta
@@ -40,6 +44,7 @@ class Vec(object):
 	14.0
 	>>> assert Vec(1,0,-0) == Vec(1,-0,0)
 	"""
+	def __Vec__(self): return True
 	def __init__(self,x=0.0,y=None,z=None):
 		if y is None:
 			if isnum(x):
@@ -193,6 +198,7 @@ class Mat(object):
 	>>> m = Mat(100,2,3,4,5,6,7,8,9)
 	>>> assert m * ~m == Imat
 	"""
+	def __Mat__(self): return True
 	def __init__(self, xx=None, xy=None, xz=None, yx=None, yy=None, yz=None, zx=None, zy=None, zz=None):
 		super(Mat, self).__init__()
 		if xx is None: # identity default
@@ -546,6 +552,7 @@ class Xform(object):
 	>>> x =                Xform( Mat( Vec( 0.816587, -0.306018, 0.489427 ), Vec( 0.245040, 0.951487, 0.186086 ), Vec( -0.522629, -0.032026, 0.851959 ) ), Vec( 1.689794, 1.535762, -0.964428 ) )
 	>>> assert repr(x) == "Xform( Mat( Vec( 0.816587, -0.306018, 0.489427 ), Vec( 0.245040, 0.951487, 0.186086 ), Vec( -0.522629, -0.032026, 0.851959 ) ), Vec( 1.689794, 1.535762, -0.964428 ) )"
 	"""
+	def __Xform__(self): return True
 	def __init__(self, R=None, t=None):
 		super(Xform, self).__init__()
 		if isvec(R) and t is None: R,t = Imat,R
@@ -664,16 +671,19 @@ def randxform(n=None):
 	if n is None: return Xform(randrot(),randvec())
 	return (Xform(randrot(),randvec()) for i in range(n))
 
-def rotation_around(axs,ang,cen):
+def rotation_around(axs,ang,cen=None):
 	"""
 	>>> x = rotation_around(Ux,1,Uy)
 	>>> x * Uy
 	Vec( 0.000000, 1.000000, 0.000000 )
 	"""
+	if not cen: cen = Vec(0,0,0)
 	R = rotation_matrix(axs,ang)
 	return Xform(R,R*-cen+cen)
 
-def rotation_around_degrees(axs,ang,cen): return rotation_around(axs,radians(ang),cen)
+def rotation_around_degrees(axs,ang,cen=None): return rotation_around(axs,radians(ang),cen)
+
+RAD = rotation_around_degrees
 
 def test():
 	test_rotation_mat()
@@ -1077,7 +1087,7 @@ def get_test_generators1():
 	x2 = rotation_around_degrees(Vec(1,1,1),120,Vec(1,0,0))
 	return x1,x2
 
-def expand_xforms(G,N=3,c=Vec(1,3,10)):
+def expand_xforms(G,N=3,c=Vec(1,3,10),maxrad=9e9):
 	"""
 	>>> G = get_test_generators1()
 	>>> for x in expand_xforms(G): print x*Ux
@@ -1096,6 +1106,7 @@ def expand_xforms(G,N=3,c=Vec(1,3,10)):
 	for Xs in chain(G,*(product(G,repeat=n) for n in range(2,N+1))):
 		X = Xs if isinstance(Xs,Xform) else reduce(Xform.__mul__,Xs)
 		v = X*c
+		if (X*Vec(0,0,0)).length() > maxrad: continue
 		key = (round(v.x,3),round(v.y,3),round(v.z,3))
 		if key not in seenit:
 			seenit.add(key)

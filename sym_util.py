@@ -13,40 +13,68 @@ from cluster import HierarchicalClustering
 
 nsymmetrizecx = 0
 
-def get_xforms_by_chain(sele="all"):
+
+def makesym(G,sele="all",newobj="MAKESYM",depth=3,maxrad=9e9):
+	v = cmd.get_view()
+	cmd.delete(newobj)
+	sele = sele + " and (not TMP_makesym_*)"
+	for i,x in enumerate(expand_xforms(G,N=depth,maxrad=maxrad)):
+		# print i, x.pretty()
+		tmpname = "TMP_makesym_%i"%i
+		cmd.create(tmpname,sele)
+		cmd.alter(tmpname,"chain='%s'"%ROSETTA_CHAINS[i])
+		xform(tmpname,x)
+	cmd.create(newobj,"TMP_makesym_*")
+	cmd.delete("TMP_makesym_*")
+	cmd.set_view(v)
+	util.cbc()
+
+
+def get_xforms_by_chain(sele="all",verbose=False,userms=False):
 	v = cmd.get_view()
 	cen = com("("+sele+") and (name CA and not HET)")
 	chains = cmd.get_chains(sele)
 	xforms = dict()
 	maxrms = 0.0
-	for c1,c2 in filter( lambda t: t[0]<t[1], product(chains,chains) ):
+	for c1,c2 in filter( lambda t: True, product(chains,chains) ):
 		refsele = "((%s) and chain %s and name CA and not HET)"%(sele,c1)
 		movsele = "((%s) and chain %s and name CA and not HET)"%(sele,c2)
-		x,rms = getrelframe_rmsalign( movsele, refsele, Xform(-cen) )
+		if userms: x,rms = getrelframe_rmsalign( movsele, refsele, Xform(-cen) )
+		else:      x,rms = getrelframe( movsele, refsele, Xform(-cen)), 0.0
 		maxrms = max(maxrms,rms)
 		xforms[c1,c2] = x
+		#if c1 in "AB" and c2 in "AB":
+		#	print movsele
+		#	print refsele
+		#	print x.pretty()
+		#	print
+	# raise Exception
 	cmd.set_view(v)
 	return xforms, maxrms
 
 def find_symelems(sele_or_xforms="all",verbose=False):
 	xforms = sele_or_xforms
-	if isinstance(sele_or_xforms,basestring): xforms, maxrms = get_xforms_by_chain(sele_or_xforms)
+	if isinstance(sele_or_xforms,basestring): xforms, maxrms = get_xforms_by_chain(sele_or_xforms,verbose=True)
 	elif not isinstance(sele_or_xforms,dict): raise ValueError
 	symelems = list()
+	maxangerr = 0.0
 	for c,x in xforms.items():
 		assert len(c)==2
 		assert isinstance(x,Xform)
 		if c[0]==c[1]: continue
 		dis = x.t.length()
-		if dis > 3: continue
+		if dis > 5.0: continue
 		axis,ang = x.rotation_axis()
 		nfold = round(math.pi*2.0/ang)
-		angerr = abs(ang-math.pi*2.0/nfold)
-		if angerr > 0.1: continue
-		symelems.append( (nfold,axis,c) ) 
+		angerr = abs(ang-math.pi*2.0/nfold)*180.0/math.pi
+		if verbose: print "candidate symelem:",nfold, c, angerr, axis
+		if angerr > 360.0/nfold/8.0: continue # require unambiguous symelems
+		maxangerr = max(maxangerr,angerr*nfold)
+		symelems.append( (nfold,axis,c,angerr) )
 	symelemdis = lambda x,y: line_line_angle_degrees(x[1],y[1]) if x[0]==y[0] else 9e9
 	if verbose:
 		for se1,se2 in filter( lambda t: t[0]<t[1], product(symelems,symelems) ):
+			if se1[0]==se2[0]:
 				print se1
 				print se2
 				print symelemdis(se1,se2), "degrees"
@@ -56,6 +84,7 @@ def find_symelems(sele_or_xforms="all",verbose=False):
 	clusters = hier.getlevel(thresh);
 	print "number of symmetry element clusters at threshold",thresh,"degrees is" , len(clusters)
 	centers0 = list()
+	maxaxiserr = 0.0
 	for clust in clusters:
 		print "symelem cluster:",clust
 		center = list(clust[0])
@@ -64,8 +93,12 @@ def find_symelems(sele_or_xforms="all",verbose=False):
 			ax = clust[i][1]
 			center[1] = center[1] + ( ax if ax.dot(center[1]) > 0 else -ax )
 			center[2].append(clust[i][2])
+			center[3] = max(center[3],clust[i][3])
 		center[1].normalize()
 		centers0.append(center)
+		axiserr = 0.0
+		for c in clust:	axiserr = max( axiserr, 1.0-abs(center[1].dot(c[1])) )
+		maxaxiserr = max(maxaxiserr,axiserr)
 	# sort on nfold, then on number of chain pairs in cluster
 	centers0 = sorted( centers0, cmp = lambda x,y: cmp(y[0],x[0]) if x[0]!=y[0] else cmp(len(y[2]),len(x[2])) )
 	centers = list()
@@ -86,26 +119,26 @@ def find_symelems(sele_or_xforms="all",verbose=False):
 		print center
 		# if center[0]>2.1: continue
 		#showvecfrompoint(50*center[1],cen_of_geom)
-	return centers, maxrms
+	return centers, maxrms, maxangerr, maxaxiserr
 
-def guessdxaxes(sele="all"):
+def guessdxaxes(sele="all",verbose=False):
 	nfold = len(cmd.get_chains(sele))
 	assert nfold % 2 is 0
 	nfold /= 2
-	symelems, maxrms = find_symelems(sele)
+	symelems, maxrms, angerr, axiserr = find_symelems(sele,verbose=verbose)
 	assert len(symelems) > 1
 	assert symelems[0][0] == float(nfold)
 	assert symelems[1][0] == float(2)
 	axis_high = symelems[0][1]
 	axis_low  = symelems[1][1]
-	return axis_high, axis_low, maxrms
+	return axis_high, axis_low, maxrms, angerr, axiserr
 
-def aligndx(sele='all'):
+def aligndx(sele='all',verbose=False):
 	trans(sele,-com(sele+" and name CA and not HET"))
-	haxis, laxis, maxrms = guessdxaxes(sele)
+	haxis, laxis, maxrms, angerr, axiserr = guessdxaxes(sele,verbose=verbose)
 	xalign = alignvectors( haxis, laxis, Uz, Ux )
 	xform(sele,xalign)
-	return maxrms
+	return maxrms, angerr, axiserr
 
 def guesscxaxis(sele,nfold=None,chains0=list(),extrasel="name CA"):
 	sele = "(("+sele+") and ("+extrasel+") and (not het))"
@@ -154,18 +187,18 @@ def aligncx(sele,nfold,alignsele=None,tgtaxis=Uz,chains=list(),extrasel="name CA
 	return tmp
 
 
-def alignd2(sele='all',chains=list()):
-	alignsele = "(("+sele+") and (name CA))"
-	if not chains: chains.extend(cmd.get_chains(alignsele))
-	if 4 is not len(chains): raise NotImplementedError("D2 must have chains")
-	ga1 = guesscxaxis( alignsele, 2,[ (chains[0],chains[1]), (chains[2],chains[3]) ] )
-	ga2 = guesscxaxis( alignsele, 2,[ (chains[0],chains[2]), (chains[1],chains[3]) ] )
-	assert ga1 is not None and ga2 is not None
-	err = 90.0 - line_line_angle_degrees(ga1[0],ga2[0])
-	x = alignvectors(ga1[0],ga2[0],Uz,Uy)
-	xform(sele,x)
-	trans(sele,-com(alignsele))
-	return err
+# def alignd2(sele='all',chains=list()):
+# 	alignsele = "(("+sele+") and (name CA))"
+# 	if not chains: chains.extend(cmd.get_chains(alignsele))
+# 	if 4 is not len(chains): raise NotImplementedError("D2 must have chains")
+# 	ga1 = guesscxaxis( alignsele, 2,[ (chains[0],chains[1]), (chains[2],chains[3]) ] )
+# 	ga2 = guesscxaxis( alignsele, 2,[ (chains[0],chains[2]), (chains[1],chains[3]) ] )
+# 	assert ga1 is not None and ga2 is not None
+# 	err = 90.0 - line_line_angle_degrees(ga1[0],ga2[0])
+# 	x = alignvectors(ga1[0],ga2[0],Uz,Uy)
+# 	xform(sele,x)
+# 	trans(sele,-com(alignsele))
+# 	return err
 
 def symmetrize(sele="not symmetrized_*",alignsele=None,chains=list(),delete=True):
 	global nsymmetrizecx
