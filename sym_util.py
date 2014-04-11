@@ -17,7 +17,7 @@ nsymmetrizecx = 0
 def makesym(G,sele="all",newobj="MAKESYM",depth=3,maxrad=9e9):
 	v = cmd.get_view()
 	cmd.delete(newobj)
-	sele = sele + " and (not TMP_makesym_*)"
+	sele = "(("+sele + ") and (not TMP_makesym_*))"
 	for i,x in enumerate(expand_xforms(G,N=depth,maxrad=maxrad)):
 		# print i, x.pretty()
 		tmpname = "TMP_makesym_%i"%i
@@ -245,6 +245,7 @@ def makecx(sel = 'all',name="TMP",n = 5,axis=Uz):
 	cmd.delete("TMP__*")
 	cmd.set_view(v)
 	cmd.disable(sel)
+	cmd.enable(newname)
 
 def makedx(sel = 'all', n = 2, newname=None):
 	if not newname:	newname = sel.replace("+","").replace(" ","")+"_D%i"%n
@@ -259,7 +260,7 @@ def makedx(sel = 'all', n = 2, newname=None):
 		cmd.create(dsel , sel+" and (not _TMP_D%i_*)"%n)
 		rot       (dsel , Uz, 360.0*float(i)/float(n))
 		cmd.create(dsel2, dsel )
-		rot       (dsel2, Uy, 180.0 )
+		rot       (dsel2, Ux, 180.0 )
 		for ic,c in enumerate(chains):
 			cmd.alter ("((%s) and chain %s )"%(dsel ,c), "chain = '%s'"%ALLCHAIN[len(chains)*(i  )+ic])
 			cmd.alter ("((%s) and chain %s )"%(dsel2,c), "chain = '%s'"%ALLCHAIN[len(chains)*(i+n)+ic])
@@ -268,6 +269,7 @@ def makedx(sel = 'all', n = 2, newname=None):
 	cmd.delete("_TMP_D*")
 	cmd.set_view(v)
 	cmd.disable(sel)
+	cmd.enable(newname)
 
 def maketet(sel='chain A+B and name n+ca+c',name="TET",n=12):
 	v = cmd.get_view()
