@@ -14,20 +14,6 @@ from cluster import HierarchicalClustering
 nsymmetrizecx = 0
 
 
-def makesym(G,sele="all",newobj="MAKESYM",depth=3,maxrad=9e9):
-	v = cmd.get_view()
-	cmd.delete(newobj)
-	sele = "(("+sele + ") and (not TMP_makesym_*))"
-	for i,x in enumerate(expand_xforms(G,N=depth,maxrad=maxrad)):
-		# print i, x.pretty()
-		tmpname = "TMP_makesym_%i"%i
-		cmd.create(tmpname,sele)
-		cmd.alter(tmpname,"chain='%s'"%ROSETTA_CHAINS[i])
-		xform(tmpname,x)
-	cmd.create(newobj,"TMP_makesym_*")
-	cmd.delete("TMP_makesym_*")
-	cmd.set_view(v)
-	util.cbc()
 
 
 def get_xforms_by_chain(sele="all",verbose=False,userms=False):
@@ -231,85 +217,6 @@ alignc4 = functools.partial(aligncx,nfold=4)
 alignc5 = functools.partial(aligncx,nfold=5)
 alignc6 = functools.partial(aligncx,nfold=6)
 
-def makecx(sel = 'all',name="TMP",n = 5,axis=Uz):
-	v = cmd.get_view()
-	cmd.delete("TMP__C%i_*"%n)
-	chains = ROSETTA_CHAINS
-	for i in range(n): cmd.create("TMP__C%i_%i"%(n, i), sel+" and (not TMP__C%i_*)"%n)
-	for i in range(n): rot("TMP__C%i_%i"%(n, i), axis, -360.0*float(i)/float(n))
-	for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i), "chain = '%s'"%chains[i])
-	util.cbc("TMP__C*")
-	# for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i),"resi=str(int(resi)+%i)"%(1000*i));
-	# util.cbc("TMP__C*")
-	cmd.create(name,"TMP__*")
-	cmd.delete("TMP__*")
-	cmd.set_view(v)
-	cmd.disable(sel)
-	cmd.enable(newname)
-
-def makedx(sel = 'all', n = 2, newname=None):
-	if not newname:	newname = sel.replace("+","").replace(" ","")+"_D%i"%n
-	cmd.delete(newname)
-	v = cmd.get_view()
-	cmd.delete("_TMP_D%i_*"%n)
-	ALLCHAIN = ROSETTA_CHAINS
-	chains = cmd.get_chains(sel)
-	for i in range(n):
-		dsel  = "_TMP_D%i_%i"%(n,  i)
-		dsel2 = "_TMP_D%i_%i"%(n,n+i)
-		cmd.create(dsel , sel+" and (not _TMP_D%i_*)"%n)
-		rot       (dsel , Uz, 360.0*float(i)/float(n))
-		cmd.create(dsel2, dsel )
-		rot       (dsel2, Ux, 180.0 )
-		for ic,c in enumerate(chains):
-			cmd.alter ("((%s) and chain %s )"%(dsel ,c), "chain = '%s'"%ALLCHAIN[len(chains)*(i  )+ic])
-			cmd.alter ("((%s) and chain %s )"%(dsel2,c), "chain = '%s'"%ALLCHAIN[len(chains)*(i+n)+ic])
-	cmd.create(newname,"_TMP_D*")
-	util.cbc(newname)
-	cmd.delete("_TMP_D*")
-	cmd.set_view(v)
-	cmd.disable(sel)
-	cmd.enable(newname)
-
-def maketet(sel='chain A+B and name n+ca+c',name="TET",n=12):
-	v = cmd.get_view()
-	cmd.delete("TMP__C%i_*"%n)
-	cmd.delete(name)
-	chains = ROSETTA_CHAINS
-	for i in range(n): cmd.create("TMP__C%i_%i"%(n, i), sel+" and (not TMP__C%i_*)"%n)
-	for i in range(n): xform("TMP__C%i_%i"%(n, i), SYMTET[i])
-	for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i),"resi=str(int(resi)+%i)"%(1000*i));
-	util.cbc("TMP__C*")
-	cmd.create(name,"TMP__*")
-	cmd.delete("TMP__*")
-	cmd.set_view(v)
-
-def makeoct(sel='chain A+B and name n+ca+c',name="OCT",n=24):
-	v = cmd.get_view()
-	cmd.delete("TMP__C%i_*"%n)
-	cmd.delete(name)
-	chains = ROSETTA_CHAINS
-	for i in range(n): cmd.create("TMP__C%i_%i"%(n, i), sel+" and (not TMP__C%i_*)"%n)
-	for i in range(n): xform("TMP__C%i_%i"%(n, i), SYMOCT[i])
-	for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i),"resi=str(int(resi)+%i)"%(1000*i));
-	util.cbc("TMP__C*")
-	cmd.create(name,"TMP__*")
-	cmd.delete("TMP__*")
-	cmd.set_view(v)
-
-def makeicos(sel='chain A+B and name n+ca+c and visible',name="ICOS",n=60):
-	v = cmd.get_view()
-	cmd.delete("TMP__C%i_*"%n)
-	cmd.delete(name)
-	chains = ROSETTA_CHAINS
-	for i in range(n): cmd.create("TMP__C%i_%i"%(n, i), sel+" and (not TMP__C%i_*)"%n)
-	for i in range(n): xform("TMP__C%i_%i"%(n, i), SYMICS[i])
-	for i in range(n): cmd.alter("TMP__C%i_%i"%(n, i),"resi=str(int(resi)+%i)"%(1000*i));
-	# util.cbc("TMP__C*")
-	cmd.create(name,"TMP__*")
-	cmd.delete("TMP__*")
-	cmd.set_view(v)
-
 
 
 def showcxaxis(sele,nfold=None,chains=list(),length=30,col=(1,1,1),lbl="Cx Axis"):
@@ -322,138 +229,6 @@ def myint(s):
    if not i: return None
    return int(s[:i])
 
-def mki213(N, sel = 'all'):
-	v = cmd.get_view()
-	cmd.delete("i213_*")
-	cmd.delete('base80345769083457')
-	cmd.delete('tmp80345769083457')
-	c2 = com(sel)
-	c3 = xyz.Vec(0, 0, 0)
-	cmd.create( 'tmp80345769083457', sel)
-	a2 = c2axis('tmp80345769083457')
-	cmd.delete( 'tmp80345769083457')
-	a3 = xyz.Vec(0, 0, 1)
-	cmd.create('base80345769083457', sel+" and chain A and visible")
-	seenit = []
-	R2 = [xyz.rotation_matrix_degrees(a2, 0), xyz.rotation_matrix_degrees(a2, 180), ]
-	R3 = [xyz.rotation_matrix_degrees(a3, 0), xyz.rotation_matrix_degrees(a3, 120), xyz.rotation_matrix_degrees(a3, 240), ]
-	C = alphabet
-	print a2, c2, a3, c3
-	for i21 in range(2):
-		for i32 in range(3 if N > 1 else 1):
-			for i22 in range(2 if N > 2 else 1):
-				for i33 in range(3 if N > 3 else 1):
-					for i23 in range(2 if N > 4 else 1):
-						for i34 in range(3 if N > 5 else 1):
-							for i24 in range(2 if N > 6 else 1):
-								for i35 in range(3 if N > 7 else 1):
-									for i25 in range(2 if N > 8 else 1):
-										test = xyz.Vec(0, 0, 0)
-										test = R2[i21]*(test-c2)+c2
-										test = R3[i32]*(test-c3)+c3
-										test = R2[i22]*(test-c2)+c2
-										test = R3[i33]*(test-c3)+c3
-										test = R2[i23]*(test-c2)+c2
-										test = R3[i34]*(test-c3)+c3
-										test = R2[i24]*(test-c2)+c2
-										test = R3[i35]*(test-c3)+c3
-										test = R2[i25]*(test-c2)+c2
-										#print test
-										seen = False
-										for xs in seenit:
-											if (xs-test).length() < 0.1:
-												seen = True
-												break
-										if seen: continue
-										else: seenit.append(test)
-										n = "i213_%i%i%i%i%i%i%i%i%i"%(i25, i35, i24, i34, i23, i33, i22, i32, i21)
-										cmd.create(n, 'base80345769083457')
-										rot(n, a2, i21*180.0, c2)
-										rot(n, a3, i32*120.0, c3)
-										rot(n, a2, i22*180.0, c2)
-										rot(n, a3, i33*120.0, c3)
-										rot(n, a2, i23*180.0, c2)
-										rot(n, a3, i34*120.0, c3)
-										rot(n, a2, i24*180.0, c2)
-										rot(n, a3, i35*120.0, c3)
-										rot(n, a2, i25*180.0, c2)
-	print len(seenit)
-	cmd.delete('base80345769083457')
-	cmd.set_view(v)
-
-def viewi213(sel = "all"):
-	cmd.hide('ev')
-	cmd.show('rib')
-	mki213(sel)
-	cmd.show('car', 'not i213*')
-	cmd.hide('rib', 'not i213*')
-	cmd.show('lines', '(byres (%s and not i213* and chain A) within 7.0 of (%s and not i213* and chain B))'%(sel, sel))
-	cmd.show('lines', '(byres (%s and not i213* and chain B) within 7.0 of (%s and not i213* and chain A))'%(sel, sel))
-
-
-def mkp23(N, R=43.5, i=0, sel = 'all'):
-	v = cmd.get_view()
-	cmd.delete("p23_*")
-	cmd.delete('base80345769083457')
-	cmd.delete('tmp80345769083457')
-	c2 = xyz.Vec(0, 0, 0)
-	c3 = xyz.Vec(R,R,-R)
-	cmd.create( 'tmp80345769083457', sel)
-	cmd.delete( 'tmp80345769083457')
-	a3 = [xyz.Vec(0,0,0),xyz.Vec(1,1,1),xyz.Vec(-1,-1,-1)]
-	a2 = [xyz.Vec(0,0,0),xyz.Vec(1,0,0),xyz.Vec(0,1,0),xyz.Vec(0,0,1)]
-	cmd.create('base80345769083457', sel+" and visible")
-	seenit = []
-	R2 = [xyz.rotation_matrix_degrees(a2[1],  0), # hack
-		  xyz.rotation_matrix_degrees(a2[1],180),
-		  xyz.rotation_matrix_degrees(a2[2],180),
-		  xyz.rotation_matrix_degrees(a2[3],180) ]
-	R3 = [xyz.rotation_matrix_degrees(a3[1],  0), # hack!
-		  xyz.rotation_matrix_degrees(a3[1],120),
-		  xyz.rotation_matrix_degrees(a3[2],120), ]
-	C = alphabet
-	print a2, c2, a3, c3
-	for i21 in range(4):
-		for i32 in range(3 if N > 1 else 1):
-			for i22 in range(4 if N > 2 else 1):
-				for i33 in range(3 if N > 3 else 1):
-					for i23 in range(4 if N > 4 else 1):
-						for i34 in range(3 if N > 5 else 1):
-							for i24 in range(4 if N > 6 else 1):
-								for i35 in range(3 if N > 7 else 1):
-									for i25 in range(4 if N > 8 else 1):
-										test = xyz.Vec(1, 1, 1)
-										test = R2[i21]*(test-c2)+c2
-										test = R3[i32]*(test-c3)+c3
-										test = R2[i22]*(test-c2)+c2
-										test = R3[i33]*(test-c3)+c3
-										test = R2[i23]*(test-c2)+c2
-										test = R3[i34]*(test-c3)+c3
-										test = R2[i24]*(test-c2)+c2
-										test = R3[i35]*(test-c3)+c3
-										test = R2[i25]*(test-c2)+c2
-										#print test
-										seen = False
-										for xs in seenit:
-											if (xs-test).length() < 0.1:
-												seen = True
-												break
-										if seen: continue
-										else: seenit.append(test)
-										n = "p23_%i%i%i%i%i%i%i%i%i"%(i25, i35, i24, i34, i23, i33, i22, i32, i21)
-										cmd.create(n, 'base80345769083457')
-										if i21 > 0: rot(n, a2[i21], 180.0, c2)
-										if i32 > 0: rot(n, a3[i32], 120.0, c3)
-										if i22 > 0: rot(n, a2[i22], 180.0, c2)
-										if i33 > 0: rot(n, a3[i33], 120.0, c3)
-										if i23 > 0: rot(n, a2[i23], 180.0, c2)
-										if i34 > 0: rot(n, a3[i34], 120.0, c3)
-										if i24 > 0: rot(n, a2[i24], 180.0, c2)
-										if i35 > 0: rot(n, a3[i35], 120.0, c3)
-										if i25 > 0: rot(n, a2[i25], 180.0, c2)
-	print "seen:",len(seenit)
-	cmd.delete('base80345769083457')
-	cmd.set_view(v)
 
 def selbycomp(trn=0):
 	cmd.select("TRI1","TRI and chain A+B+C")
@@ -550,16 +325,6 @@ def rechain(sel,nres):
 	for i in range(ntot/nres):
 		cmd.alter("resi %i-%i"%( nres*i+1,nres*(i+1)),"chain='%s'"%chains[i])
 
-for i in range(2,21):
-		globals()['makec%i'%i] = partial(makecx,n=i)
-
-for i in range(2,21):
-		globals()['maked%i'%i] = partial(makedx,n=i)
-
-def makecxauto():
-	for o in cmd.get_object_list():
-		n = int(re.search("_C\d+_", o).group(0)[2:-1])
-		makecx(o, n)
 
 def makekinwire(sel,movres,fixres):
 	v = cmd.get_view()

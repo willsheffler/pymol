@@ -298,13 +298,16 @@ def showcom(sel="all"):
 	numcom += 1
 
 
+def cgo_sphere(c,r=1,col=(1,1,1)):
+	return [cgo.COLOR, col[0], col[1], col[2], cgo.SPHERE, c.x, c.y, c.z, r] ## white sphere with 3A radius
+
 def showsphere(c,r=1,col=(1,1,1),lbl=''):
 	v = cmd.get_view()
 	if not lbl:
 		global numvec
 		lbl = "sphere%i"%numvec
 		numvec += 1
-	mycgo = [cgo.COLOR, col[0], col[1], col[2], cgo.SPHERE, c.x, c.y, c.z, r] ## white sphere with 3A radius
+	mycgo = cgo_sphere(c=c,r=r,col=col)
 	cmd.load_cgo(mycgo,lbl)
 	cmd.set_view(v)
 
@@ -330,13 +333,7 @@ def showvecfrompoint(a, c, col=(1,1,1), lbl=''):
 	# 				col[0],col[1],col[2],col[0],col[1],col[2],], lbl)
 	cmd.set_view(v)
 
-def showsegment(c1, c2, col=(1,1,1), lbl=''):
-	if not lbl:
-		global numseg
-		lbl = "seg%i"%numseg
-		numseg += 1
-	cmd.delete(lbl)
-	v = cmd.get_view()
+def cgo_segment(c1, c2, col=(1,1,1)):
 	OBJ = [
         cgo.BEGIN, cgo.LINES,
         cgo.COLOR, col[0], col[1],col[2],
@@ -344,27 +341,43 @@ def showsegment(c1, c2, col=(1,1,1), lbl=''):
         cgo.VERTEX, c2.x, c2.y, c2.z,
         cgo.END
 	]
-	cmd.load_cgo(OBJ,lbl)
 	# cmd.load_cgo([cgo.COLOR, col[0],col[1],col[2],
 	# 			  cgo.CYLINDER, c1.x,     c1.y,     c1.z,
 	# 						    c2.x,     c2.y,     c2.z, 0.02,
 	# 				col[0],col[1],col[2],col[0],col[1],col[2],], lbl)
-	cmd.set_view(v)
+	return OBJ
 
-def showcyl(c1, c2, r, col=(1,1,1), col2=None, lbl=''):
-	if not col2:
-		col2 = col
+def showsegment(c1, c2, col=(1,1,1), lbl=''):
 	if not lbl:
 		global numseg
 		lbl = "seg%i"%numseg
 		numseg += 1
 	cmd.delete(lbl)
 	v = cmd.get_view()
-	cmd.load_cgo([#cgo.COLOR, col[0],col[1],col[2],
+	cmd.load_cgo( cgo_segment(c1=c1,c2=c2,col=col) ,lbl)
+	# cmd.load_cgo([cgo.COLOR, col[0],col[1],col[2],
+	# 			  cgo.CYLINDER, c1.x,     c1.y,     c1.z,
+	# 						    c2.x,     c2.y,     c2.z, 0.02,
+	# 				col[0],col[1],col[2],col[0],col[1],col[2],], lbl)
+	cmd.set_view(v)
+
+def cgo_cyl(c1, c2, r, col=(1,1,1), col2=None):
+	if not col2: col2 = col
+	return [#cgo.COLOR, col[0],col[1],col[2],
 				  cgo.CYLINDER, c1.x,     c1.y,     c1.z,
 							    c2.x,     c2.y,     c2.z, r,
-					col[0],col[1],col[2],col2[0],col2[1],col2[2],], lbl)
+					col[0],col[1],col[2],col2[0],col2[1],col2[2],]
+
+def showcyl(c1, c2, r, col=(1,1,1), col2=None, lbl=''):
+	if not lbl:
+		global numseg
+		lbl = "seg%i"%numseg
+		numseg += 1
+	cmd.delete(lbl)
+	v = cmd.get_view()
+	cmd.load_cgo( cgo_cyl(c1=c1,c2=c2,col=col,col2=col2), lbl)
 	cmd.set_view(v)
+
 
 def showline(a, c, col=(1,1,1), lbl=''):
 	if not lbl:
@@ -383,6 +396,16 @@ def showline(a, c, col=(1,1,1), lbl=''):
 	cmd.load_cgo(OBJ,lbl)
 	cmd.set_view(v)
 
+def cgo_lineabs(a,c,col=(1,1,1)):
+	return [
+        cgo.BEGIN, cgo.LINES,
+        cgo.COLOR, col[0], col[1],col[2],
+        cgo.VERTEX, c.x, c.y, c.z,
+        cgo.VERTEX, a.x, a.y, a.z,
+        cgo.END
+	]
+
+
 def showlineabs(a, c, col=(1,1,1), lbl=''):
 	if not lbl:
 		global numline
@@ -390,14 +413,8 @@ def showlineabs(a, c, col=(1,1,1), lbl=''):
 		numline += 1
 	cmd.delete(lbl)
 	v = cmd.get_view()
-	OBJ = [
-        cgo.BEGIN, cgo.LINES,
-        cgo.COLOR, col[0], col[1],col[2],
-        cgo.VERTEX, c.x, c.y, c.z,
-        cgo.VERTEX, a.x, a.y, a.z,
-        cgo.END
-	]
-	cmd.load_cgo(OBJ,lbl)
+	cgo = cgo_lineabs(a,c,col)
+	cmd.load_cgo(cgo,lbl)
 	cmd.set_view(v)
 
 
@@ -621,6 +638,23 @@ def rot_by_matrix(sel, R, cen = xyz.Vec(0, 0, 0)):
 
 def rotrad(sel, axis, ang, cen = None):
 	return rot(sel, axis, ang*180.0/math.pi, cen)
+
+def test(x,y,z):
+	print x
+	print y
+	print z
+
+def rotview(axis,ang,cen=xyz.Vec(0,0,0)):
+	v = list(cmd.get_view())
+	x = Xform(xyz.Mat(*v[:9]),xyz.Vec(*v[12:15]))
+	x = RAD(axis,ang,cen) * x
+	v[0] = x.R.xx; v[1] = x.R.xy; v[2] = x.R.xz; 
+	v[3] = x.R.yx; v[4] = x.R.yy; v[5] = x.R.yz; 	
+	v[6] = x.R.zx; v[7] = x.R.zy; v[8] = x.R.zz;
+	v[12] = x.t.x
+	v[13] = x.t.y
+	v[14] = x.t.z		
+	cmd.set_view( v )
 
 def pointaxis(sel):
 	u = xyz.Vec(1, 1, 1)
@@ -2010,6 +2044,28 @@ def make_inputs_from_cb_only(d="/work/sheffler/Dropbox/test/silva/run_resl_6/",t
 		cmd.alter(nat2,"chain='B'")
 		cmd.save(tgt+"/"+p,nat1+" or "+nat2)
 		cmd.delete("tmp")
+
+def get_closest_atom_pair(selpairs_or_sel1,sel2=None):
+	selpairs = (selpairs_or_sel1,sel2) if sel2 else selpairs_or_sel1
+	mindis = 9e9
+	minpair = None
+	for target,candidate in selpairs:
+		target_atoms = cmd.get_model(target).atom
+		candidate_atoms = cmd.get_model(candidate).atom
+		for ta in target_atoms:
+			for ca in candidate_atoms:
+				dis = xyz.Vec(ta.coord).distance(xyz.Vec(ca.coord))
+				if dis < mindis:
+					mindis = dis
+					minpair = (ta,ca)
+	return minpair,mindis
+
+def get_first_last_resi(sele):
+	model = cmd.get_model(sele)
+	beg = model.atom[ 0].resi
+	end = model.atom[-1].resi	
+	return int(beg),int(end)
+
 
 
 
