@@ -7,19 +7,23 @@ import re
 symelem_nshow = 0
 class SymElem(object):
 	"""docstring for SymElem"""
-	def __init__(self, kind, axis=Vec(0,0,1), cen=Vec(0,0,0), axis2=Vec(1,0,0)):
+	def __init__(self, kind, axis=Vec(0,0,1), cen=Vec(0,0,0), axis2=Vec(1,0,0), col=None,input_xform=None):
 		super(SymElem, self).__init__()
 		self.kind = kind
 		self.axis = axis.normalized()
 		self.cen = cen
 		self.axis2 = axis2.normalized()
+		self.col=col
 		self.frames = []
+		self.input_xform = input_xform
 		if self.kind.startswith("C"):
+			assert not input_xform
 			self.nfold = int(self.kind[1:])
 			for i in range(self.nfold):
 				deg = i*360.0/self.nfold
 				self.frames.append( RAD(self.axis,deg,cen) )
 		elif self.kind.startswith("D"):
+			assert not input_xform
 			self.nfold = int(self.kind[1:])
 			assert abs(axis.dot(axis2)) < 0.00001
 			for i in range(self.nfold):
@@ -42,7 +46,10 @@ class SymElem(object):
 				Xform( Mat( Vec(-1, 0, 0), Vec( 0, 1, 0), Vec( 0, 0,-1) ), Vec(0,0,0) ),
 				Xform( Mat( Vec(-1, 0, 0), Vec( 0,-1, 0), Vec( 0, 0, 1) ), Vec(0,0,0) )
 			]
-			xc = Xform(cen)
+			if input_xform:
+				xc = input_xform * Xform(cen)
+			else:
+				xc = Xform(cen)
 			for i,x in enumerate(self.frames):
 				self.frames[i] = xc*x*(~xc)
 		elif self.kind == "O":
@@ -72,7 +79,10 @@ class SymElem(object):
 				Xform( Mat( Vec(-1,-0,-0), Vec(+0,-1,-0), Vec(-0,-0,+1) ), Vec(0,0,0) ),
 				Xform( Mat( Vec(+0,-1,-0), Vec(-1,-0,-0), Vec(+0,+0,-1) ), Vec(0,0,0) ),
 			]
-			xc = Xform(cen)
+			if input_xform:
+				xc = input_xform * Xform(cen)
+			else:
+				xc = Xform(cen)
 			for i,x in enumerate(self.frames):
 				self.frames[i] = xc*x*(~xc)
 		assert self.frames
@@ -89,7 +99,8 @@ class SymElem(object):
 		CGO = self.cgo(**kwargs)
 		pymol.cmd.load_cgo(CGO,label)
 		pymol.cmd.set_view(v)
-	def cgo(self, length=20.0, radius=0.5, sphereradius=1.5, col=None, **kwargs):
+	def cgo(self, length=20.0, radius=0.5, sphereradius=1.5, col=None,showshape=0,**kwargs):
+		if not col and self.col: col = self.col
 		CGO = []
 		x = Xform()
 		if "xform" in kwargs:
@@ -136,7 +147,7 @@ class SymElem(object):
 						x = kwargs["xform"]
 						c  = x*c; c1 = x*c1; c2 = x*c2	
 					c.round0(); c1.round0(); c2.round0()
-					r = radius if self.nfold==2 else radius/2.0
+					r = radius if self.nfold==2 else radius
 					CGO.extend( [
 						pymol.cgo.CYLINDER, c1.x,     c1.y,     c1.z,      c2.x,     c2.y,     c2.z, r,
 						col[0], col[1], col[2],
@@ -183,7 +194,53 @@ class SymElem(object):
 				if not c4a in seen4:
 					CGO.extend( cgo_cyl(cen+c4a,cen+c4b,radius,col=(0,0,1)) )
 					seen4.append(c4a)
-					seen4.append(c4b)					
+					seen4.append(c4b)
+		if showshape:
+			if self.kind=="C2":
+				axs = x.R*self.axis
+				cen = x*self.cen
+				p1 = x.R*projperp(self.axis,Vec(7,3,1)).normalized()*30.0
+				p2 = RAD(axs,180.0)*p1
+				p3 = x.R*projperp(self.axis,Vec(1,3,7)).normalized()*30.0
+				p4 = RAD(axs,180.0)*p3
+				p1 = cen + p1; p2 = cen + p2; p3 = cen + p3; p4 = cen + p4;
+				axs.round0(); p1.round0(); p2.round0(); p3.round0(); p4.round0()
+				# print p1,p2,p3,p4
+				CGO.extend([
+					pymol.cgo.BEGIN, pymol.cgo.TRIANGLES, pymol.cgo.COLOR, col[0], col[1], col[2], pymol.cgo.ALPHA, 1,
+						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p1.x+axs.x/10.0, p1.y+axs.y/10.0, p1.z+axs.z/10.0,
+						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p2.x+axs.x/10.0, p2.y+axs.y/10.0, p2.z+axs.z/10.0,
+						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p3.x+axs.x/10.0, p3.y+axs.y/10.0, p3.z+axs.z/10.0,
+						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p1.x+axs.x/10.0, p1.y+axs.y/10.0, p1.z+axs.z/10.0, 
+						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p2.x+axs.x/10.0, p2.y+axs.y/10.0, p2.z+axs.z/10.0,
+						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p4.x+axs.x/10.0, p4.y+axs.y/10.0, p4.z+axs.z/10.0,
+						 pymol.cgo.COLOR, 1-col[0], 1-col[1], 1-col[2], 
+						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p1.x-axs.x/10.0, p1.y-axs.y/10.0, p1.z-axs.z/10.0,
+						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p2.x-axs.x/10.0, p2.y-axs.y/10.0, p2.z-axs.z/10.0,
+						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p3.x-axs.x/10.0, p3.y-axs.y/10.0, p3.z-axs.z/10.0,
+						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p1.x-axs.x/10.0, p1.y-axs.y/10.0, p1.z-axs.z/10.0, 
+						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p2.x-axs.x/10.0, p2.y-axs.y/10.0, p2.z-axs.z/10.0,
+						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p4.x-axs.x/10.0, p4.y-axs.y/10.0, p4.z-axs.z/10.0,
+					pymol.cgo.END,
+				])
+			if self.kind=="C3":
+				axs = x.R*self.axis
+				cen = x*self.cen
+				p1 = projperp(axs,Vec(1,2,3)).normalized()*35.0
+				p2 = RAD(axs,120.0)*p1
+				p3 = RAD(axs,240.0)*p1
+				p1 = cen + p1; p2 = cen + p2; p3 = cen + p3;
+				CGO.extend([
+					pymol.cgo.BEGIN, pymol.cgo.TRIANGLES, pymol.cgo.COLOR, col[0], col[1], col[2], pymol.cgo.ALPHA, 1,
+						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p1.x+axs.x/10.0, p1.y+axs.y/10.0, p1.z+axs.z/10.0, 
+						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p2.x+axs.x/10.0, p2.y+axs.y/10.0, p2.z+axs.z/10.0,
+						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p3.x+axs.x/10.0, p3.y+axs.y/10.0, p3.z+axs.z/10.0,
+						 pymol.cgo.COLOR, 1-col[0], 1-col[1], 1-col[2], 
+						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p1.x-axs.x/10.0, p1.y-axs.y/10.0, p1.z-axs.z/10.0, 
+						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p2.x-axs.x/10.0, p2.y-axs.y/10.0, p2.z-axs.z/10.0,
+						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p3.x-axs.x/10.0, p3.y-axs.y/10.0, p3.z-axs.z/10.0,
+					pymol.cgo.END,
+				])
 		return CGO
 	def __eq__(self,other):
 		return self.kind==other.kind and self.cen==other.cen and self.axis==other.axis and self.axis2==other.axis2
@@ -435,8 +492,10 @@ def make_d3tet(d3,cage,cage_trimer_chain="A", depth=4, maxrad=9e9):
 	cmd.show("sph","MAKESYM")
 	# cmd.disable("all")
 	cmd.enable("MAKESYM")
-def cube(lb=Vec(-10,-10,-10),ub=Vec(10,10,10),r=0.5):
+def cube(lb=Vec(-10,-10,-10),ub=Vec(10,10,10),r=0.5,xform=Xform()):
 	v = cmd.get_view()
+	lb = xform*lb
+	ub = xform*ub
 	cmd.load_cgo([
 		cgo.CYLINDER, ub.x, ub.y, ub.z   , ub.x, ub.y, lb.z, r, 1,1,1, 1,1,1,
 		cgo.CYLINDER, ub.x, ub.y, lb.z   , ub.x, lb.y, lb.z, r, 1,1,1, 1,1,1,
@@ -504,6 +563,7 @@ class BuildCGO(object):
 			(1,0,1),
 			(0.5,0.5,0.5),
 		]
+		self.kwargs = kwargs
 	def bounds_check(self,v):
 		if self.origin.distance(v) > self.maxrad:	return False
 		if not self.bbox[0].x <= v.x <= self.bbox[1].x: return False
@@ -539,10 +599,11 @@ class BuildCGO(object):
 		if self.showelems:
 			for elem in node.generators:
 				if self.bounds_check(x*elem.cen):
-					self.add_symelem(elem,x)
-	def add_symelem(self,elem,x):
+					mergeargs = dict(kwargs.items()+self.kwargs.items())
+					self.add_symelem(elem,x,**mergeargs)
+	def add_symelem(self,elem,x,**kwargs):
 		# should add duplicate checks here
-		self.CGO.extend(elem.cgo(xform=x))
+		self.CGO.extend(elem.cgo(**kwargs))
 	def add_sphere(self,cen,rad,text="",icol=0):
 		# should add duplicate checks here		
 		cen.round0()
@@ -707,9 +768,11 @@ class ComponentCenterVisitor(object):
 		cmd.delete(self.label)
 		cmd.load_cgo(CGO,self.label)
 		cmd.set_view(v)
-	def make_symdef(self):
-		XYZ_TEMPLATE = r"xyz  %-25s  %+012.9f,%+012.9f,%+012.9f  %+012.9f,%+012.9f,%+012.9f  %+014.9f,%+014.9f,%+014.9f" + "\n"
+	def make_symdef(self,**kwargs):
+		XYZ_TEMPLATE = r"xyz  %-30s  %+012.9f,%+012.9f,%+012.9f  %+012.9f,%+012.9f,%+012.9f  %+014.9f,%+014.9f,%+014.9f" + "\n"
 		if not self.parentmap: self.makeCCtree()
+		scale = 1.0
+		if "symdef_scale" in kwargs: scale = kwargs['symdef_scale']
 		# for k,v in self.parentmap.items(): print "parentmap:",k,v
 		node2num = VecDict()
 		for ip,val in enumerate(self.priCCtoCCframes.items()):
@@ -731,34 +794,45 @@ class ComponentCenterVisitor(object):
 				CC,STNs = val2
 				assert len(STNs) > 0
 				PCC = None if not CC in self.parentmap.keys() else self.parentmap[CC]
-				if  PCC: PCCname    = "CMP%02i_CEN%03i" %node2num[PCC]
-				if  PCC: PCCDOFname = PCCname+"_CELLDOF_%i_%i"%(ip,icc)
-				if True: CCname     = "CMP%02i_CEN%03i" %(ip,icc)
-				if True: CCDOFname  = "CMP%02i_CEN%03i_COMPDOF" %(ip,icc)
+				if  PCC: PCCName       = "CMP%02i_CEN%03i" %node2num[PCC]
+				if  PCC: PCCDofBegName = PCCName+"_CELLDofBeg_%i_%i"%(icc,ip) # NOTE icc FIRST!!!!
+				if  PCC: PCCDofEndName = PCCName+"_CELLDofEnd_%i_%i"%(icc,ip) # NOTE icc FIRST!!!
+				if True: CCDofBegName  = "CMP%02i_CEN%03i"%(ip,icc)
+				if True: CCDofEndName  = "CMP%02i_CEN%03i_CmpDofEnd"%(ip,icc)
+				# if True: CCDOFName  = "CMP%02i_CEN%03i_COMPDOF" %(ip,icc)
 				if  PCC: DIR  = (CC-PCC).normalized()
 				if  PCC: DIR2 = projperp(DIR,Vec(1,2,3)).normalized()
 				if True: ELEMDIR  = STNs[0].position.R * self.symelems[ip].axis
 				if True: ELEMDIR2 = projperp(ELEMDIR,Vec(1,2,3)).normalized()
-				if  PCC: Sxyz += (XYZ_TEMPLATE % ( PCCDOFname,DIR.x,DIR.y,DIR.z, DIR2.x,DIR2.y,DIR2.z, PCC.x,PCC.y,PCC.z ) )
-				if True: Sxyz += (XYZ_TEMPLATE % ( CCname   , ELEMDIR.x,ELEMDIR.y,ELEMDIR.z, ELEMDIR2.x,ELEMDIR2.y,ELEMDIR2.z, CC.x,CC.y,CC.z ) )
-				if True: Sxyz += (XYZ_TEMPLATE % ( CCDOFname, ELEMDIR.x,ELEMDIR.y,ELEMDIR.z, ELEMDIR2.x,ELEMDIR2.y,ELEMDIR2.z, CC.x,CC.y,CC.z ) )
-				if  PCC: edges.append( (PCCname,PCCDOFname) )
-				if  PCC: edges.append( (PCCDOFname, CCname) )
-				if True: edges.append( (CCname, CCDOFname) )					
-				if  PCC: celldofjumps.append( (PCCDOFname, CCname) )
-				if True: compdofjumps[ip].append( (CCname, CCDOFname) )					
+				if  PCC: Sxyz += (XYZ_TEMPLATE % ( PCCDofBegName,DIR.x,DIR.y,DIR.z, DIR2.x,DIR2.y,DIR2.z, PCC.x*scale,PCC.y*scale,PCC.z*scale ) )
+				if  PCC: Sxyz += (XYZ_TEMPLATE % ( PCCDofEndName,DIR.x,DIR.y,DIR.z, DIR2.x,DIR2.y,DIR2.z,  CC.x*scale, CC.y*scale, CC.z*scale ) )
+				if True: Sxyz += (XYZ_TEMPLATE % ( CCDofBegName, ELEMDIR.x,ELEMDIR.y,ELEMDIR.z, ELEMDIR2.x,ELEMDIR2.y,ELEMDIR2.z, CC.x*scale, CC.y*scale, CC.z*scale ) )
+				if True: Sxyz += (XYZ_TEMPLATE % ( CCDofEndName, ELEMDIR.x,ELEMDIR.y,ELEMDIR.z, ELEMDIR2.x,ELEMDIR2.y,ELEMDIR2.z, CC.x*scale, CC.y*scale, CC.z*scale ) )
+				if  PCC: edges.append( (PCCName      ,PCCDofBegName) )
+				if  PCC: edges.append( (PCCDofBegName,PCCDofEndName) )
+				if  PCC: edges.append( (PCCDofEndName, CCDofBegName) )				
+				if True: edges.append( (CCDofBegName, CCDofEndName) )								
+				# if True: edges.append( (CCDofEndName, CCDOFName) )					
+				if  PCC: celldofjumps.append( (PCCDofBegName, PCCDofEndName) )
+				if True: compdofjumps[ip].append( (CCDofBegName, CCDofEndName) )					
 				for isub,stn in enumerate(STNs):
-					SUBname = "CMP%02i_CEN%03i_SUB%03i" %(ip,icc,isub)
-					if ip==0: SUBAs.append(SUBname)
-					SUBs[ip].append((SUBname,stn.position))
-					edges.append( (CCDOFname , SUBname) )
-					# edges.append( (SUBname, "SUBUNIT %s"%("ABCDEFG"[ip]) ) )
+					SUBName = "CMP%02i_CEN%03i_SUB%03i" %(ip,icc,isub)
+					if ip==0: SUBAs.append(SUBName)
+					SUBs[ip].append((SUBName,stn.position))
+					# edges.append( (CCDOFName , SUBName) )
+					edges.append( (CCDofEndName , SUBName) )					
+					# edges.append( (SUBName, "SUBUNIT %s"%("ABCDEFG"[ip]) ) )
 					SX = stn.position.R * Vec(1,0,0)
 					SY = stn.position.R * Vec(0,1,0)
 					SO = stn.position * priCC
-					Sxyz += (XYZ_TEMPLATE % ( SUBname,SX.x,SX.y,SX.z, SY.x,SY.y,SY.z, SO.x,SO.y,SO.z ) )
+					Sxyz += (XYZ_TEMPLATE % ( SUBName,SX.x,SX.y,SX.z, SY.x,SY.y,SY.z, SO.x*scale, SO.y*scale, SO.z*scale ) )
 				edges.append((None,None)) # spacer
 				Sxyz += "\n"
+
+		# dummy jumps, sometimes needed by dumb rosetta protocols
+		Sxyz += "xyz DUMMY_VIRT 1,0,0 0,1,0 0,0,0\n\n" # for stupid reasons
+
+		celldofjumps = sorted(celldofjumps)
 
 		s = "symmetry_name FUBAR\n\nsubunits %i\n\nnumber_of_interfaces %i\n\n" % (len(SUBAs),len(SUBAs)-1)
 		s += "E = 2*%s"%SUBAs[0]
@@ -807,9 +881,14 @@ class ComponentCenterVisitor(object):
 					subunit_group_map[chain].append(jname)
 			s += "\n"
 
+
 		s += "#####################################################################################\n"
 		s += "##################################### DOFs ##########################################\n"
 		s += "#####################################################################################\n\n"
+
+		s += "########################### stupid dummy DOF ################################\n\n"
+		s += "connect_virtual DUMMY_JUMP CMP00_CEN000 DUMMY_VIRT\n"
+		s += "set_dof DUMMY_JUMP x\n\n"
 
 		s += "################# CELL DOFs ############################\n\n"
 		s += "set_dof   JUMP__%s__to__%s   x\n\n" % celldofjumps[0]
@@ -817,8 +896,9 @@ class ComponentCenterVisitor(object):
 		s += "################# COMPONENT DOFs ############################\n\n"
 		for icomp,dofs in enumerate(compdofjumps):
 			if not dofs: continue
-			if self.symelems[icomp].kind[0]=="C":
-				s += "set_dof   JUMP__%s__to__%s   x angle_x\n\n" % dofs[0]
+			if self.symelems[icomp].kind[0]!="C":
+				s += "#NOTCYCLIC# "
+			s += "set_dof   JUMP__%s__to__%s   x angle_x\n\n" % dofs[0]
 
 		s += "#####################################################################################\n"
 		s += "################################## JUMP GROUPS ######################################\n"
@@ -848,13 +928,20 @@ class ComponentCenterVisitor(object):
 				s += "  %s"%jump
 			s += "\n\n"
 
-		#################################################################################
-		# HACK!?! make sure subunit jump names are in alphabetical order for Rosetta??
-		#################################################################################
-		for chain,jumps in subunit_group_map.items():
-			for ijump,jump in enumerate(jumps):
-				svname = jump.split("__")[1]
-				s = s.replace(svname,"S%sO%03i_%s"%(chain,ijump,svname))
+		# #################################################################################
+		# # for debugging, make sure subunit jump names are in alphabetical order for Rosetta??
+		# #################################################################################
+		# for chain,jumps in subunit_group_map.items():
+		# 	for ijump,jump in enumerate(jumps):
+		# 		svname = jump.split("__")[1]
+		# 		s = s.replace(svname,"S%sO%03i_%s"%(chain,ijump,svname))
+
+		if 'generic_names' in kwargs and kwargs['generic_names']:
+			# rename some jumps
+			s = s.replace( "JUMP__%s__to__%s" % celldofjumps[0], "CELL_DOF" )
+			for icomp,dofs in enumerate(compdofjumps):
+				if not dofs: continue
+				s = s.replace( "JUMP__%s__to__%s" % dofs[0], "COMP_DOF_%i"%(icomp+1) )
 
 		return s
 
@@ -886,12 +973,12 @@ class RosettaSymDef(object):
 			elif line.startswith("connect_virtual"):
 				line = line.replace("SUBUNIT ","SUBUNIT")
 				splt = re.split(r'\s+',line.strip())
-				print "SPLT:", splt
+				# print "SPLT:", splt
 				dummy,name,v1name,v2name = splt[:4]
 				self.add_edge(name,v1name,v2name)
 	def displaycen(self,name,virt,offset=5.0):
-		if   re.match(".*DOFBEG.*",name): return virt[2] + offset*virt[0] # shift +X only 
-		elif re.match(".*DOFEND.*",name): return virt[2] - offset*virt[0] # shift -X only
+		if   re.match(".*DofBeg.*",name): return virt[2] + offset*virt[0] # shift +X only 
+		elif re.match(".*DofEnd.*",name): return virt[2] - offset*virt[0] # shift -X only
 		return virt[2]+offset*virt[0]+offset*virt[1]
 	def sanity_check(self):
 		for name,vnames in self.edges.items():
@@ -931,6 +1018,12 @@ class RosettaSymDef(object):
 			cen1 = self.displaycen(name,v1,offset=XYlen)
 			cen2 = self.displaycen(name,v2,offset=XYlen)			
 			CGO.extend( cgo_lineabs( cen1, cen2, (1,1,1) ) )
+			upmid = (cen1 + 3.0*cen2)/4.0
+			CGO.extend( cgo_sphere( upmid ))
+			v = cmd.get_view()
+			axes = [ [v[0],v[3],v[6]], [v[1],v[4],v[7]], [v[2],v[5],v[8]]  ]
+			# pymol.cgo.wire_text(CGO,pymol.vfont.plain,[upmid[0],upmid[1],upmid[2]],name)
+
 		cmd.load_cgo(CGO,tag)
 		
 
@@ -983,15 +1076,16 @@ def test_D4OCT(depth=4):
 	buildcgo.show()
 
 def test_xtal(G,cell,depth=4,mindepth=0,symdef=1,shownodes=1,**kwargs):
+	v = cmd.get_view()
 	CEN = [g.cen for g in G]
 	FN = list()
 	for d in range(mindepth,depth+1):
 		symtrie = generate_sym_trie(G,depth=d)
 		# buildcgo = BuildCGO( nodes=[ CEN1+Vec(2,3,4), CEN2+Vec(2,4,3), ] )	
 		nodes = []
-		if "component_pos" in kwargs.keys():
-			nodes = kwargs["component_pos"][:1]
-		buildcgo = BuildCGO( nodes=nodes, origin=Vec(0,0,0), label="DEPTH%i"%d,**kwargs )
+		# if "component_pos" in kwargs.keys():
+			# nodes = kwargs["component_pos"][:1]
+		buildcgo = BuildCGO( nodes=nodes, label="DEPTH%i"%d,**kwargs )
 		symtrie.visit(buildcgo)
 		buildcgo.show()
 		if shownodes:
@@ -999,16 +1093,17 @@ def test_xtal(G,cell,depth=4,mindepth=0,symdef=1,shownodes=1,**kwargs):
 			symtrie.visit(find_nodes)
 			FN.append(find_nodes)
 			if symdef:
-				sdef_string = FN[-1].make_symdef()
+				sdef_string = FN[-1].make_symdef(**kwargs)
 				tag = "test" if not "tag" in kwargs else kwargs['tag']
 				print "==================== SYMDEF (dump to "+tag+"_"+str(d)+".sym) ===================="
 				print sdef_string
 				print "====================================================================="
 				with open(tag+"_"+str(d)+".sym","w") as out:
 					out.write(sdef_string)
-				sdef = RosettaSymDef()
-				sdef.parse(sdef_string)
-				sdef.show("SYMDEF_"+tag)
+				if 'symdef_check' in kwargs and kwargs['symdef_check']:
+					sdef = RosettaSymDef()
+					sdef.parse(sdef_string)
+					sdef.show("SYMDEF_"+tag)
 	for fn in FN:
 		fn.show(**kwargs) # dumb order hack for pymol up/dn	
 	cmd.disable("all")
@@ -1017,11 +1112,12 @@ def test_xtal(G,cell,depth=4,mindepth=0,symdef=1,shownodes=1,**kwargs):
 	count = CountFrames()
 	symtrie.visit(count)
 	print "N Frames:",count.count
+	cmd.set_view(v)
 	# cube( cell*Vec(-0.5,-0.5,-0.5), cell*Vec(0.5,0.5,0.5) )
 
 
 def test_P23_TD2A(cell=200,**kwargs):
-	# delete all; run /Users/sheffler/pymol/symgen.py; test_P23(depth=1,mindepth=1)
+	# delete all; run ~/pymol/symgen.py; test_P23_TD2B( depth=2, cell=200, symdef_scale=0.000001, generic_names=1 )
 	G = [ SymElem( "D2", cen=cell*Vec(0.0,0.0,0.0) ),
 	      SymElem( "T" , cen=cell*Vec(0.0,0.0,0.5) ),	]
 	component_pos=[ Vec(-8,-7,6), Vec(-7,0,-11), ]
@@ -1029,17 +1125,19 @@ def test_P23_TD2A(cell=200,**kwargs):
 	cube( cell*Vec(0,0,-0.5), cell*Vec(1,1,0.5) )
 
 def test_P23_TD2B(cell=150,**kwargs):
-	# delete all; run /Users/sheffler/pymol/symgen.py; test_P23(depth=1,mindepth=1)
-	G = [ SymElem( "D2", cen=cell*Vec(0.0,0.0,0.0) ),
-	      SymElem( "T" , cen=cell*Vec(0.0,0.5,0.5) ),	]
+	# delete all; run ~/pymol/symgen.py; test_P23_TD2B( depth=2, cell=200, symdef_scale=0.000001, generic_names=1 )
+	G = [
+		SymElem( "D2", cen=cell*Vec(0.0,0.0,0.0) ),
+	    SymElem( "T" , cen=cell*Vec(0.0,0.5,0.5) ),
+	]
 	component_pos=[ Vec(3,7,6), Vec(0,-7,-11), ]
 	test_xtal(G,cell,component_pos=component_pos,tag="P23_TD2B",**kwargs)
 	cube( cell*Vec(0,-0.5,-0.5), cell*Vec(1,0.5,0.5) )
 
 def test_F432_TD2(cell=150,**kwargs):
-	# delete all; run /Users/sheffler/pymol/symgen.py; test_P23(depth=1,mindepth=1)
-	G = [ SymElem( "D2", cen=cell*Vec(0.0,0.0,0.0), axis2=Vec(1,1,0) ),
-	      SymElem( "T" , cen=cell*Vec(0.0,0.0,0.5) ),	
+	# delete all; run ~/pymol/symgen.py; test_F432_TD2( depth=2, cell=200, symdef_scale=0.000001, generic_names=1 )
+	G = [ SymElem( "D2", cen=cell*Vec(0.0,0.0,0.0) ), # , axis2=Vec(1,1,0) ),
+	      SymElem( "T" , cen=cell*Vec(0.0,0.0,0.5), input_xform=RAD(Uz,45) ),	
 	      # SymElem( "O" , cen=cell*Vec(0.5,0.5,0.0) ),	
 	    ]
 	component_pos=[ Vec(2,4,8), Vec(2,5,-12), Vec(4,6,8) ]
@@ -1073,10 +1171,29 @@ def test_F432_OTD2(cell=80,**kwargs):
 
 def test_P44(cell=80,**kwargs):
 	G = [ SymElem( "C4", cen=cell*Vec(0.0,0.0,0.0) ),
-	      # SymElem( "C2", cen=cell*Vec(0.5,0.0,0.0) ),	
-	      SymElem( "C4", cen=cell*Vec(0.5,0.5,0.0) ),	
+	      SymElem( "C2", cen=cell*Vec(0.5,0.0,0.0) ),	
+	      #SymElem( "C4", cen=cell*Vec(0.5,0.5,0.0) ),	
 	     ]
 	test_xtal(G,cell,tag='test_P4_44',**kwargs)
+
+def test_I4132(cell=100,**kwargs):
+	# delete all; test_I4132(depth=7,shownodes=0,cell=200,maxrad=180); run /Users/sheffler/pymol/misc/G222.py; gyroid(200,r=180)
+	# SymElem( "D3", cen=cell*Vec(0.625,0.625,0.625), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(0,1,0) ),
+	# SymElem( "D2", cen=cell*Vec(0.625,0.500,0.750), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(0,1,1) ),
+	# SymElem( "D3", cen=cell*Vec(0.375,0.375,0.375), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(1,0,0) ),
+	# SymElem( "D2", cen=cell*Vec(0.375,0.500,0.250), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(1,1,0) ),
+	G = [ 
+		# SymElem( "D3", cen=cell*Vec(0.125,0.125,0.125), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(0,1,0) ),
+		# SymElem( "D2", cen=cell*Vec(0.125,0.000,0.250), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(0,1,1) ),
+		# SymElem( "D3", cen=cell*Vec(-0.125,-0.125,-0.125), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(1,0,0) ),
+		# SymElem( "D2", cen=cell*Vec(-0.125,0.000,-0.250), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(1,1,0) ),
+		SymElem( "C3", axis=Vec(1,1,1) ),
+		SymElem( "C2", axis=Vec(1,1,0), cen=cell*Vec(-1, 1, 1)/8.0 ),
+		SymElem( "C2", axis=Vec(1,1,0), cen=cell*Vec( 1,-1,-1)/8.0, col=(1,1,0) ),
+	]
+	component_pos=[ Vec(-8,-7,6), Vec(-7,0,-11), ]
+	test_xtal(G,cell,component_pos=component_pos,tag="I4132",origin=cell*Vec(0.,0.,0.),showshape=1,**kwargs)
+	cube( cell*Vec(-0.5,-0.5,-0.5), cell*Vec(0.5,0.5,0.5) )
 
 
 def test_P432_OD4(cell=80,**kwargs):

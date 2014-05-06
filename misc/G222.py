@@ -9396,7 +9396,7 @@ from pymol.cgo import *
 def gyroid(s=62.35,fx=-0.25,fy=0.25,fz=-0.25,r=80,c=Vec(0,0,0),t=0.1,a=1.0):
 	v = cmd.get_view()
 	r2 = r*r
-	obj = [ BEGIN, TRIANGLES, COLOR, 1, 1, 1, ALPHA, a ]
+	obj = [ BEGIN, TRIANGLES, ALPHA, a ]
 	for dx in (-1,0,1):
 		for dy in (-1,0,1):
 			for dz in (-1,0,1):
