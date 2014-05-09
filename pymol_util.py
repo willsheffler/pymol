@@ -1,7 +1,7 @@
 # -*- mode:python;tab-width:2;indent-tabs-mode:t;show-trailing-whitespace:t;rm-trailing-spaces:t -*-
 
 import sys,os,inspect
-newpath = os.path.dirname(inspect.getfile(inspect.currentframe())) # script directory
+newpath = 225 # script directory
 if not newpath in sys.path:
 		sys.path.append(newpath)
 import string, math, re, gzip, itertools, glob, sets
@@ -13,11 +13,15 @@ from functools import partial
 import cProfile
 
 try:
+	import pymol
 	from pymol import cmd,CmdException,cgo,util
+	from chempy import cpv
 	def inpymol(): return True
 except ImportError as e:
 	print "can't load pymol, Mocking it for testing/doc"
 	from minimock import Mock
+	pymol = Mock("pymol")
+	cmd = Mock("cpv")
 	cmd = Mock("cmd")
 	cgo = Mock("cgo")
 	cgo = Mock("util")
@@ -220,7 +224,6 @@ class PutCenterCallback(object):
         m = [z, 0, 0, t[0] / z, 0, z, 0, t[1] / z, 0, 0, z, t[2] / z, 0, 0, 0, 1]
         cmd.set_object_ttt(self.name, m, homogenous=1)
 
-from chempy import cpv
 def corneraxes(name='axes'):
     '''
 DESCRIPTION

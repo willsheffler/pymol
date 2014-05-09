@@ -1,8 +1,7 @@
 from xyzMath import Vec,Mat,Xform,RAD,projperp,SYMTET,SYMOCT
-import itertools
-from pymol_util import cgo_cyl
-import pymol
-import re
+import itertools,re,os,inspect
+from pymol_util import cgo_cyl,pymol
+
 
 symelem_nshow = 0
 class SymElem(object):
@@ -367,6 +366,7 @@ def generate_sym_trie(generators,depth=10,opts=None):
 	root.visit(sanity_check)
 	return root
 
+	
 
 ################################################################################################################
 ################################################################################################################
@@ -377,13 +377,12 @@ def generate_sym_trie(generators,depth=10,opts=None):
 
 
 newpath = os.path.dirname(inspect.getfile(inspect.currentframe())) # script directory
+import sys
 if not newpath in sys.path: sys.path.append(newpath)
-from xyzMath import Vec,Mat,Xform,RAD,projperp
+from xyzMath import Vec,Mat,Xform,RAD,projperp,Ux,Uy,Uz
 from pymol_util import cgo_sphere,cgo_segment,cgo_cyl
-import pymol,pymol.vfont
 #from SymTrie import SymElem, SymTrieNode, generate_sym_trie
-import itertools
-import random
+import itertools, random, functools
 
 # run /Users/sheffler/pymol/una.py; make_d3oct("test*","o33*",depth=3)
 def makesym(frames0,sele="all",newobj="MAKESYM",depth=None,maxrad=9e9,n=9e9):
@@ -453,9 +452,9 @@ def makedx(sel = 'all', n = 2, name=None):
 	cmd.disable(sel)
 	cmd.enable(name)
 for i in range(2,21):
-		globals()['makec%i'%i] = partial(makecx,n=i)
+		globals()['makec%i'%i] = functools.partial(makecx,n=i)
 for i in range(2,21):
-		globals()['maked%i'%i] = partial(makedx,n=i)
+		globals()['maked%i'%i] = functools.partial(makedx,n=i)
 def makecxauto():
 	for o in cmd.get_object_list():
 		n = int(re.search("_C\d+_", o).group(0)[2:-1])
@@ -1079,22 +1078,22 @@ def test_xtal(G,cell,depth=4,mindepth=0,symdef=1,shownodes=1,**kwargs):
 	v = cmd.get_view()
 	CEN = [g.cen for g in G]
 	FN = list()
+	tag = "test" if not "tag" in kwargs else kwargs['tag']
 	for d in range(mindepth,depth+1):
 		symtrie = generate_sym_trie(G,depth=d)
 		# buildcgo = BuildCGO( nodes=[ CEN1+Vec(2,3,4), CEN2+Vec(2,4,3), ] )	
 		nodes = []
 		# if "component_pos" in kwargs.keys():
 			# nodes = kwargs["component_pos"][:1]
-		buildcgo = BuildCGO( nodes=nodes, label="DEPTH%i"%d,**kwargs )
+		buildcgo = BuildCGO( nodes=nodes, label=tag+"_DEPTH%i"%d,**kwargs )
 		symtrie.visit(buildcgo)
 		buildcgo.show()
 		if shownodes:
-			find_nodes = ComponentCenterVisitor(symelems=G,label="NODES%i"%d,**kwargs)
+			find_nodes = ComponentCenterVisitor(symelems=G,label=tag+"_NODES%i"%d,**kwargs)
 			symtrie.visit(find_nodes)
 			FN.append(find_nodes)
 			if symdef:
 				sdef_string = FN[-1].make_symdef(**kwargs)
-				tag = "test" if not "tag" in kwargs else kwargs['tag']
 				print "==================== SYMDEF (dump to "+tag+"_"+str(d)+".sym) ===================="
 				print sdef_string
 				print "====================================================================="
@@ -1107,8 +1106,8 @@ def test_xtal(G,cell,depth=4,mindepth=0,symdef=1,shownodes=1,**kwargs):
 	for fn in FN:
 		fn.show(**kwargs) # dumb order hack for pymol up/dn	
 	cmd.disable("all")
-	cmd.enable("DEPTH%i"%(depth))
-	cmd.enable("NODES%i"%(depth))
+	cmd.enable(tag+"_DEPTH%i"%(depth))
+	cmd.enable(tag+"_NODES%i"%(depth))
 	count = CountFrames()
 	symtrie.visit(count)
 	print "N Frames:",count.count
@@ -1124,7 +1123,7 @@ def test_P23_TD2A(cell=200,**kwargs):
 	test_xtal(G,cell,component_pos=component_pos,tag="P23_TD2A",**kwargs)
 	cube( cell*Vec(0,0,-0.5), cell*Vec(1,1,0.5) )
 
-def test_P23_TD2B(cell=150,**kwargs):
+def test_P23_TD2B(depth=3,cell=150,**kwargs):
 	# delete all; run ~/pymol/symgen.py; test_P23_TD2B( depth=2, cell=200, symdef_scale=0.000001, generic_names=1 )
 	G = [
 		SymElem( "D2", cen=cell*Vec(0.0,0.0,0.0) ),
@@ -1139,22 +1138,12 @@ def test_F432_TD2(cell=150,**kwargs):
 	G = [ SymElem( "D2", cen=cell*Vec(0.0,0.0,0.0) ), # , axis2=Vec(1,1,0) ),
 	      SymElem( "T" , cen=cell*Vec(0.0,0.0,0.5), input_xform=RAD(Uz,45) ),	
 	      # SymElem( "O" , cen=cell*Vec(0.5,0.5,0.0) ),	
-	    ]
+    ]
 	component_pos=[ Vec(2,4,8), Vec(2,5,-12), Vec(4,6,8) ]
 	test_xtal(G,cell,component_pos=component_pos,tag="F432_TD2",**kwargs)
 	cube( cell*Vec(-1,-1,-0.5), cell*Vec(1,1,1.5) )
 
-def test_F432_OD2(cell=80,**kwargs):
-	# delete all; run /Users/sheffler/pymol/symgen.py; test_P23(depth=1,mindepth=1)
-	G = [ SymElem( "D2", cen=cell*Vec(0.0,0.0,0.0), axis2=Vec(1,1,0) ),
-	      # SymElem( "T" , cen=cell*Vec(0.0,0.0,-0.5) ),	
-	      SymElem( "O" , cen=cell*Vec(0.5,0.5,0.0) ),	
-	    ]
-	component_pos=[ Vec(2,4,8), Vec(2,5,-12), Vec(4,6,8) ]
-	test_xtal(G,cell,component_pos=component_pos,tag="F432_TD2",**kwargs)
-	cube( cell*Vec(-1,-1,-0.5), cell*Vec(1,1,1.5) )
-
-def test_F432_OTD2(cell=80,**kwargs):
+def test_F432_OTD2(depth=3,cell=80,**kwargs):
 	# delete all; run /Users/sheffler/pymol/symgen.py; test_P23(depth=1,mindepth=1)
 	# ODT 96
 	# TDO 96
@@ -1168,11 +1157,29 @@ def test_F432_OTD2(cell=80,**kwargs):
 	test_xtal(G,cell,component_pos=component_pos,tag="F432_TD2",extranodes=extranodes,**kwargs)
 	cube( cell*Vec(-1,-1,-0.5), cell*Vec(1,1,1.5) )
 
+def test_I432_OD4(cell=80,**kwargs):
+	# delete all; run /Users/sheffler/pymol/symgen.py; test_F432_OD4( depth=3, cell=200, symdef_scale=0.000001, generic_names=1 )
+	# G = [ SymElem( "D2", cen=cell*Vec(0.0,0.0,0.0), axis2=Vec(1,1,0) ),
+	#       # SymElem( "T" , cen=cell*Vec(0.0,0.0,-0.5) ),	
+	#       SymElem( "O" , cen=cell*Vec(0.5,0.5,0.0) ),	
+	#     ]
+	G = [ SymElem( "D4", cen=cell*Vec(0.0,0.0,0.0)) , 
+	      # SymElem( "T" , cen=cell*Vec(0.0,0.0,-0.5) ),	
+	      SymElem( "O" , cen=cell*Vec(0.0,0.0,0.5), input_xform=RAD(Uz,45) ),	
+	    ]
+	component_pos=[ Vec(2,4,8), Vec(2,5,-12), Vec(4,6,8) ]
+	test_xtal(G,cell,component_pos=component_pos,tag="I432_OD4",**kwargs)
+	cube( cell*Vec(-1,-1,-0.5), cell*Vec(1,1,1.5) )
 
-def test_P44(cell=80,**kwargs):
+
+def test_P4(cell=80,**kwargs):
+	# delete all; run ~/pymol/symgen.py; test_P4( depth=4, cell=100, symdef_scale=0.000001, generic_names=1 )
 	G = [ SymElem( "C4", cen=cell*Vec(0.0,0.0,0.0) ),
 	      SymElem( "C2", cen=cell*Vec(0.5,0.0,0.0) ),	
-	      #SymElem( "C4", cen=cell*Vec(0.5,0.5,0.0) ),	
+	     ]
+	test_xtal(G,cell,tag='test_P4_42',**kwargs)
+	G = [ SymElem( "C4", cen=cell*Vec(0.0,0.0,0.0) ),
+	      SymElem( "C4", cen=cell*Vec(0.5,0.0,0.0) ),	# moved lattice WRP C2!!!!!
 	     ]
 	test_xtal(G,cell,tag='test_P4_44',**kwargs)
 
