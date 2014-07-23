@@ -2069,6 +2069,51 @@ def get_first_last_resi(sele):
 	end = model.atom[-1].resi	
 	return int(beg),int(end)
 
+def cube(lb=xyz.Vec(-10,-10,-10),ub=xyz.Vec(10,10,10),r=0.5,xform=xyz.Xform()):
+	v = cmd.get_view()
+	a = [
+		xform * xyz.Vec( ub.x, ub.y, ub.z ),
+		xform * xyz.Vec( ub.x, ub.y, lb.z ),
+		xform * xyz.Vec( ub.x, lb.y, lb.z ),
+		xform * xyz.Vec( ub.x, lb.y, ub.z ),
+		xform * xyz.Vec( lb.x, ub.y, ub.z ),
+		xform * xyz.Vec( lb.x, ub.y, lb.z ),
+		xform * xyz.Vec( lb.x, lb.y, lb.z ),
+		xform * xyz.Vec( lb.x, lb.y, ub.z ),
+		xform * xyz.Vec( lb.x, ub.y, ub.z ),
+		xform * xyz.Vec( lb.x, ub.y, lb.z ),
+		xform * xyz.Vec( lb.x, lb.y, ub.z ),
+		xform * xyz.Vec( lb.x, lb.y, lb.z ),
+	]
+	b = [
+		xform * xyz.Vec( ub.x, ub.y, lb.z ),
+		xform * xyz.Vec( ub.x, lb.y, lb.z ),
+		xform * xyz.Vec( ub.x, lb.y, ub.z ),
+		xform * xyz.Vec( ub.x, ub.y, ub.z ),
+		xform * xyz.Vec( lb.x, ub.y, lb.z ),
+		xform * xyz.Vec( lb.x, lb.y, lb.z ),
+		xform * xyz.Vec( lb.x, lb.y, ub.z ),
+		xform * xyz.Vec( lb.x, ub.y, ub.z ),
+		xform * xyz.Vec( ub.x, ub.y, ub.z ),
+		xform * xyz.Vec( ub.x, ub.y, lb.z ),
+		xform * xyz.Vec( ub.x, lb.y, ub.z ),
+		xform * xyz.Vec( ub.x, lb.y, lb.z ),
+	]
+	cmd.load_cgo([
+		cgo.CYLINDER, a[ 0].x, a[ 0].y, a[ 0].z   , b[ 0].x, b[ 0].y, b[ 0].z, r, 1,1,1, 1,1,1,
+		cgo.CYLINDER, a[ 1].x, a[ 1].y, a[ 1].z   , b[ 1].x, b[ 1].y, b[ 1].z, r, 1,1,1, 1,1,1,
+		cgo.CYLINDER, a[ 2].x, a[ 2].y, a[ 2].z   , b[ 2].x, b[ 2].y, b[ 2].z, r, 1,1,1, 1,1,1,
+		cgo.CYLINDER, a[ 3].x, a[ 3].y, a[ 3].z   , b[ 3].x, b[ 3].y, b[ 3].z, r, 1,1,1, 1,1,1,
+		cgo.CYLINDER, a[ 4].x, a[ 4].y, a[ 4].z   , b[ 4].x, b[ 4].y, b[ 4].z, r, 1,1,1, 1,1,1,
+		cgo.CYLINDER, a[ 5].x, a[ 5].y, a[ 5].z   , b[ 5].x, b[ 5].y, b[ 5].z, r, 1,1,1, 1,1,1,
+		cgo.CYLINDER, a[ 6].x, a[ 6].y, a[ 6].z   , b[ 6].x, b[ 6].y, b[ 6].z, r, 1,1,1, 1,1,1,
+		cgo.CYLINDER, a[ 7].x, a[ 7].y, a[ 7].z   , b[ 7].x, b[ 7].y, b[ 7].z, r, 1,1,1, 1,1,1,
+		cgo.CYLINDER, a[ 8].x, a[ 8].y, a[ 8].z   , b[ 8].x, b[ 8].y, b[ 8].z, r, 1,1,1, 1,1,1,
+		cgo.CYLINDER, a[ 9].x, a[ 9].y, a[ 9].z   , b[ 9].x, b[ 9].y, b[ 9].z, r, 1,1,1, 1,1,1,
+		cgo.CYLINDER, a[10].x, a[10].y, a[10].z   , b[10].x, b[10].y, b[10].z, r, 1,1,1, 1,1,1,
+		cgo.CYLINDER, a[11].x, a[11].y, a[11].z   , b[11].x, b[11].y, b[11].z, r, 1,1,1, 1,1,1,
+	],"UNIT_CELL")
+	cmd.set_view(v)
 
 
 

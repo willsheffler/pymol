@@ -45,10 +45,8 @@ class SymElem(object):
 				Xform( Mat( Vec(-1, 0, 0), Vec( 0, 1, 0), Vec( 0, 0,-1) ), Vec(0,0,0) ),
 				Xform( Mat( Vec(-1, 0, 0), Vec( 0,-1, 0), Vec( 0, 0, 1) ), Vec(0,0,0) )
 			]
-			if input_xform:
-				xc = input_xform * Xform(cen)
-			else:
-				xc = Xform(cen)
+			if input_xform: xc = Xform(cen) * input_xform
+			else:           xc = Xform(cen)
 			for i,x in enumerate(self.frames):
 				self.frames[i] = xc*x*(~xc)
 		elif self.kind == "O":
@@ -78,14 +76,12 @@ class SymElem(object):
 				Xform( Mat( Vec(-1,-0,-0), Vec(+0,-1,-0), Vec(-0,-0,+1) ), Vec(0,0,0) ),
 				Xform( Mat( Vec(+0,-1,-0), Vec(-1,-0,-0), Vec(+0,+0,-1) ), Vec(0,0,0) ),
 			]
-			if input_xform:
-				xc = input_xform * Xform(cen)
-			else:
-				xc = Xform(cen)
+			if input_xform: xc = Xform(cen) * input_xform
+			else:           xc = Xform(cen)
 			for i,x in enumerate(self.frames):
-				self.frames[i] = xc*x*(~xc)
+				self.frames[i] = (xc)*x*(~xc)
 		assert self.frames
-		if self.frames[0] != Xform():
+		if not self.frames[0] == Xform():
 			print self.kind,self.frames[0].pretty()
 			assert self.frames[0] == Xform()
 	def show(self, label=None, **kwargs):
@@ -491,25 +487,6 @@ def make_d3tet(d3,cage,cage_trimer_chain="A", depth=4, maxrad=9e9):
 	cmd.show("sph","MAKESYM")
 	# cmd.disable("all")
 	cmd.enable("MAKESYM")
-def cube(lb=Vec(-10,-10,-10),ub=Vec(10,10,10),r=0.5,xform=Xform()):
-	v = cmd.get_view()
-	lb = xform*lb
-	ub = xform*ub
-	cmd.load_cgo([
-		cgo.CYLINDER, ub.x, ub.y, ub.z   , ub.x, ub.y, lb.z, r, 1,1,1, 1,1,1,
-		cgo.CYLINDER, ub.x, ub.y, lb.z   , ub.x, lb.y, lb.z, r, 1,1,1, 1,1,1,
-		cgo.CYLINDER, ub.x, lb.y, lb.z   , ub.x, lb.y, ub.z, r, 1,1,1, 1,1,1,
-		cgo.CYLINDER, ub.x, lb.y, ub.z   , ub.x, ub.y, ub.z, r, 1,1,1, 1,1,1,
-		cgo.CYLINDER, lb.x, ub.y, ub.z   , lb.x, ub.y, lb.z, r, 1,1,1, 1,1,1,
-		cgo.CYLINDER, lb.x, ub.y, lb.z   , lb.x, lb.y, lb.z, r, 1,1,1, 1,1,1,
-		cgo.CYLINDER, lb.x, lb.y, lb.z   , lb.x, lb.y, ub.z, r, 1,1,1, 1,1,1,
-		cgo.CYLINDER, lb.x, lb.y, ub.z   , lb.x, ub.y, ub.z, r, 1,1,1, 1,1,1,
-		cgo.CYLINDER, lb.x, ub.y, ub.z   , ub.x, ub.y, ub.z, r, 1,1,1, 1,1,1,
-		cgo.CYLINDER, lb.x, ub.y, lb.z   , ub.x, ub.y, lb.z, r, 1,1,1, 1,1,1,
-		cgo.CYLINDER, lb.x, lb.y, ub.z   , ub.x, lb.y, ub.z, r, 1,1,1, 1,1,1,
-		cgo.CYLINDER, lb.x, lb.y, lb.z   , ub.x, lb.y, lb.z, r, 1,1,1, 1,1,1,
-	],"UNIT_CELL")
-	cmd.set_view(v)
 def print_node(node,**kwargs):
 	print kwargs['depth']*"    ", node, kwargs['xform'].pretty()
 def show_node(node,**kwargs):
@@ -1112,8 +1089,24 @@ def test_xtal(G,cell,depth=4,mindepth=0,symdef=1,shownodes=1,**kwargs):
 	symtrie.visit(count)
 	print "N Frames:",count.count
 	cmd.set_view(v)
-	# cube( cell*Vec(-0.5,-0.5,-0.5), cell*Vec(0.5,0.5,0.5) )
 
+
+def test_I432_OD3(cell=120,**kwargs):
+	X = alignvectors(Vec(1,1,1),Vec(1,0,-1),Vec(0,0,1),Vec(1,0,0))	
+	# G = [ SymElem( "O" , cen=cell*Vec(0.0,0.0,0.0) ),
+		  # SymElem( "D3", cen=cell*Vec(0.25,0.25,0.25), axis=Vec(1,1,1), axis2=Vec(1,-1,0) ), ]
+	# cube( cell*Vec(-0.5,-0.5,-0.5), cell*Vec(0.5,0.5,0.5) )
+	G = [ SymElem( "D3", cen=cell*Vec(0.0,0.0,0.0) ),
+		  SymElem( "O" , cen=cell*Vec(0.0,0.0,sqrt(3.0)/4.0), input_xform=X ),		]
+	cube( cell*Vec(-0.25,-0.25,-0.25), cell*Vec(0.75,0.75,0.75), xform=X )
+	test_xtal(G,cell,tag="I432_OD3",**kwargs)
+
+
+
+def test_P432_OD4(cell=80,**kwargs):
+	G = [ SymElem( "D4", cen=cell*Vec(0.0,0.0,0.0) ),
+	      SymElem( "O" , cen=cell*Vec(0.0,0.0,0.5) ),	]
+	test_xtal(G,cell,tag="P432_OD4",**kwargs)
 
 def test_P23_TD2A(cell=200,**kwargs):
 	# delete all; run ~/pymol/symgen.py; test_P23_TD2B( depth=2, cell=200, symdef_scale=0.000001, generic_names=1 )
@@ -1136,12 +1129,12 @@ def test_P23_TD2B(depth=3,cell=150,**kwargs):
 def test_F432_TD2(cell=150,**kwargs):
 	# delete all; run ~/pymol/symgen.py; test_F432_TD2( depth=2, cell=200, symdef_scale=0.000001, generic_names=1 )
 	G = [ SymElem( "D2", cen=cell*Vec(0.0,0.0,0.0) ), # , axis2=Vec(1,1,0) ),
-	      SymElem( "T" , cen=cell*Vec(0.0,0.0,0.5), input_xform=RAD(Uz,45) ),	
+	      SymElem( "T" , cen=cell*Vec(0.0,0.0,0.25), input_xform=RAD(Uz,45) ),	
 	      # SymElem( "O" , cen=cell*Vec(0.5,0.5,0.0) ),	
     ]
 	component_pos=[ Vec(2,4,8), Vec(2,5,-12), Vec(4,6,8) ]
 	test_xtal(G,cell,component_pos=component_pos,tag="F432_TD2",**kwargs)
-	cube( cell*Vec(-1,-1,-0.5), cell*Vec(1,1,1.5) )
+	cube( cell*Vec(-0.5,-0.5,-0.25), cell*Vec(0.5,0.5,0.75), xform=RAD(Uz,45) )
 
 def test_F432_OTD2(depth=3,cell=80,**kwargs):
 	# delete all; run /Users/sheffler/pymol/symgen.py; test_P23(depth=1,mindepth=1)
@@ -1185,28 +1178,24 @@ def test_P4(cell=80,**kwargs):
 
 def test_I4132(cell=100,**kwargs):
 	# delete all; test_I4132(depth=7,shownodes=0,cell=200,maxrad=180); run /Users/sheffler/pymol/misc/G222.py; gyroid(200,r=180)
-	# SymElem( "D3", cen=cell*Vec(0.625,0.625,0.625), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(0,1,0) ),
-	# SymElem( "D2", cen=cell*Vec(0.625,0.500,0.750), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(0,1,1) ),
-	# SymElem( "D3", cen=cell*Vec(0.375,0.375,0.375), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(1,0,0) ),
-	# SymElem( "D2", cen=cell*Vec(0.375,0.500,0.250), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(1,1,0) ),
 	G = [ 
-		# SymElem( "D3", cen=cell*Vec(0.125,0.125,0.125), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(0,1,0) ),
-		# SymElem( "D2", cen=cell*Vec(0.125,0.000,0.250), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(0,1,1) ),
-		# SymElem( "D3", cen=cell*Vec(-0.125,-0.125,-0.125), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(1,0,0) ),
-		# SymElem( "D2", cen=cell*Vec(-0.125,0.000,-0.250), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(1,1,0) ),
-		SymElem( "C3", axis=Vec(1,1,1) ),
-		SymElem( "C2", axis=Vec(1,1,0), cen=cell*Vec(-1, 1, 1)/8.0 ),
-		SymElem( "C2", axis=Vec(1,1,0), cen=cell*Vec( 1,-1,-1)/8.0, col=(1,1,0) ),
+		SymElem( "D3", cen=cell*Vec(0.625,0.625,0.625), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(0,1,0) ),
+		SymElem( "D2", cen=cell*Vec(0.625,0.500,0.750), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(0,1,1) ),
+		SymElem( "D3", cen=cell*Vec(0.375,0.375,0.375), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(1,0,0) ),
+		SymElem( "D2", cen=cell*Vec(0.375,0.500,0.250), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(1,1,0) ),
+	# 	SymElem( "D3", cen=cell*Vec(0.125,0.125,0.125), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(0,1,0) ),
+	# 	SymElem( "D2", cen=cell*Vec(0.125,0.000,0.250), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(0,1,1) ),
+	# 	SymElem( "D3", cen=cell*Vec(-0.125,-0.125,-0.125), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(1,0,0) ),
+	# 	SymElem( "D2", cen=cell*Vec(-0.125,0.000,-0.250), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(1,1,0) ),
+	# 	SymElem( "C3", axis=Vec(1,1,1) ),
+	# 	SymElem( "C2", axis=Vec(1,1,0), cen=cell*Vec(-1, 1, 1)/8.0 ),
+	# 	SymElem( "C2", axis=Vec(1,1,0), cen=cell*Vec( 1,-1,-1)/8.0, col=(1,1,0) ),
 	]
 	component_pos=[ Vec(-8,-7,6), Vec(-7,0,-11), ]
-	test_xtal(G,cell,component_pos=component_pos,tag="I4132",origin=cell*Vec(0.,0.,0.),showshape=1,**kwargs)
-	cube( cell*Vec(-0.5,-0.5,-0.5), cell*Vec(0.5,0.5,0.5) )
+	test_xtal(G,cell,component_pos=component_pos,tag="I4132",origin=cell*Vec(0.5,0.5,0.5),showshape=0,**kwargs)
+	# cube( cell*Vec(-0.5,-0.5,-0.5), cell*Vec(0.5,0.5,0.5) )
+	cube( cell*Vec(0,0,0), cell*Vec(1,1,1) )
 
-
-def test_P432_OD4(cell=80,**kwargs):
-	G = [ SymElem( "D4", cen=cell*Vec(0.0,0.0,0.0) ),
-	      SymElem( "O" , cen=cell*Vec(0.0,0.0,0.5) ),	]
-	test_xtal(G,cell,tag="P432_OD4",**kwargs)
 
 def test_I213(depth=16,cell=100,maxrad=9e9):
 	#C3 and C2 at angle = 54.7356 offset = 0.176777
@@ -1341,7 +1330,7 @@ def test_quasi( depth=8, cell=20.0, maxrad=9e9 ):
 	buildcgo = BuildCGO( nodes=nodes, maxrad=maxrad, origin=cell*Vec(0.5,0.5,0.5), showlinks=False, showelems=True )		
 	symtrie.visit(buildcgo)
 	buildcgo.show()
-def test_I432( depth=8, cell=50, **kwargs ):
+def test_I432( depth=6, cell=50, **kwargs ):
 	#**** I432 ****
 	#C2 and D3 at angle = 35.2644 offset = 0.353553
 	#     C2 axis=[-0.707107,0.707107,0]  origin=[0.25,0.25,0.25]
