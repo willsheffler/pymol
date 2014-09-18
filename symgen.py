@@ -1165,14 +1165,21 @@ def test_I432_OD4(cell=80,**kwargs):
 	cube( cell*Vec(-1,-1,-0.5), cell*Vec(1,1,1.5) )
 
 
-def test_P4(cell=80,**kwargs):
+def test_P442(cell=80,**kwargs):
 	# delete all; run ~/pymol/symgen.py; test_P4( depth=4, cell=100, symdef_scale=0.000001, generic_names=1 )
 	G = [ SymElem( "C4", cen=cell*Vec(0.0,0.0,0.0) ),
 	      SymElem( "C2", cen=cell*Vec(0.5,0.0,0.0) ),	
 	     ]
 	test_xtal(G,cell,tag='test_P4_42',**kwargs)
+def test_P444(cell=100,**kwargs):
 	G = [ SymElem( "C4", cen=cell*Vec(0.0,0.0,0.0) ),
 	      SymElem( "C4", cen=cell*Vec(0.5,0.0,0.0) ),	# moved lattice WRP C2!!!!!
+	     ]
+	test_xtal(G,cell,tag='test_P4_44',**kwargs)
+
+def test_P4m44(cell=100,**kwargs):
+	G = [ SymElem( "D4", cen=cell*Vec(0.0,0.0,0.0) ),
+	      SymElem( "D4", cen=cell*Vec(0.5,0.0,0.0) ),	# moved lattice WRP C2!!!!!
 	     ]
 	test_xtal(G,cell,tag='test_P4_44',**kwargs)
 

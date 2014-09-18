@@ -28,15 +28,18 @@ def drawtetra():
 		# count += 1
 
 def drawcells(E,col=(1,1,1),CR=0.53):
+	cgo = []
 	for p,q in E:
 		dis = p.distance(q)
 		print dis
 		if dis < 0.01: continue
 		cen = (p+q)/2.0
 		nrm = (p-q).normalized()
-		showcyl(cen+nrm/500,cen-nrm/500,sqrt(CR*CR-(dis*dis/4)),col=col)
+		cgo += cgo_cyl( c1 = cen+nrm/500, c2 = cen-nrm/500, r = sqrt(CR*CR-(dis*dis/4)), col=col )
+	return cgo
 
 def drawbcc(N=2,scale=1.0,col=(1,1,1)):
+	cgo = []
 	P,E = list(),list()
 	# with open("/work/sheffler/tmp/hex.pdb",'w') as o:
 	for ix,iy,iz in [(float(x),float(y),float(z)) for x in range(N+1) for y in range(N+1) for z in range(N+1)]:
@@ -50,10 +53,10 @@ def drawbcc(N=2,scale=1.0,col=(1,1,1)):
 	# for i,p in enumerate(P): P[i] = p-cen
 	# for p in P: showsphere(p,r=0.458*scale,col=col)
 	for p in P:
-		showsphere(p,r=0.1,col=col)
+		cgo += cgo_sphere(p,r=0.1,col=col)
 	print N, len(P)
 	E = [(p,q) for p in P for q in P if p is not q and p.distance(q) < 1.1*scale]
-	# drawcells(E ,col=col,CR=0.54*scale)
+	cgo += drawcells(E ,col=col,CR=0.54*scale)
 
 	# for p in P:
 	# 	R = 0.2 if p.z%1==0 else 0.15
@@ -72,6 +75,7 @@ def drawbcc(N=2,scale=1.0,col=(1,1,1)):
 	# 	# count += 1
 	# E2 = [(p,q) for p in P2 for q in P2 if p is not q and p.distance(q) < 0.55]
 	# drawcells(E2,col=(0.0,0.0,1.0),CR=0.27)
+	cmd.load_cgo(cgo,"bcc"+str(N))
 
 
 def drawfcc():
@@ -111,7 +115,7 @@ def drawfcc():
 cmd.delete('all')
 drawbcc(N= 1,scale=8.0,col=(0,1,0))
 drawbcc(N= 2,scale=4.0,col=(0,0,1))
-#drawbcc(N= 4,scale=2.0,col=(0,1,1))
+# drawbcc(N= 4,scale=2.0,col=(0,1,1))
 #drawbcc(N= 8,scale=1.0,col=(1,1,1))
 #drawbcc(N=16,scale=0.625,col=(1,1,0))
 #drawbcc(N=32,scale=0.625,col=(1,1,0))

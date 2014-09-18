@@ -1,7 +1,9 @@
 # -*- mode:python;tab-width:2;indent-tabs-mode:t;show-trailing-whitespace:t;rm-trailing-spaces:t -*-
 
 import sys,os,inspect
-newpath = 225 # script directory
+newpath = os.path.dirname(inspect.getfile(inspect.currentframe())) # script directory
+if not newpath in sys.path: sys.path.append(newpath)
+# newpath = 225 # script directory
 if not newpath in sys.path:
 		sys.path.append(newpath)
 import string, math, re, gzip, itertools, glob, sets
@@ -378,7 +380,7 @@ def showcyl(c1, c2, r, col=(1,1,1), col2=None, lbl=''):
 		numseg += 1
 	cmd.delete(lbl)
 	v = cmd.get_view()
-	cmd.load_cgo( cgo_cyl(c1=c1,c2=c2,col=col,col2=col2), lbl)
+	cmd.load_cgo( cgo_cyl(c1=c1,c2=c2,r=r,col=col,col2=col2), lbl)
 	cmd.set_view(v)
 
 
