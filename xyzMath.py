@@ -626,23 +626,34 @@ class Xform(object):
 		return X.R == Y.R and X.t == Y.t
 	def __neq__(self,other): return not self==other
 	def rotation_axis(X): return X.R.rotation_axis()
-	# def rotation_axis_center(X):
-	# 	"""
-	# 	R(x-c)+c = Rx+c-Rc = Rx+t  ->  c-Rc=t  (I-R)c=t
-	# 	singular! shit!
-	# 	>>> x = rotation_around_degrees(Vec(1,1,1),90,Vec(0,2,5))
-	# 	>>> print x.rotation_axis_center()
+	def rotation_axis_center(X):
+		axis, ang = X.R.rotation_axis()
 
-	# 	"""
-	# 	axis, ang = X.R.rotation_axis()
-	# 	p1before = Vec(0,0,0)
-	# 	p2before = Vec(1,0,0)
-	# 	p1after = X*p1before
-	# 	p2after = X*p2before
-	# 	vl1 = (p1after-p1before).cross(axis)
-	# 	vl2 = (p2after-p2before).cross(axis)
-	# 	cen = line_line_closest_points(vl1,p1after,vl2,p2after)
-	# 	return axis,ang,cen
+		# these points lie on a circle who's center is the center of rotation
+		p0 = Vec( 0,0,0 )
+		p1 = Vec( X * p0 )
+		p2 = Vec( X * p1 )
+		p1 -= axis * (p1-p0).dot(axis);
+		p2 -= axis * (p2-p1).dot(axis);		
+
+		assert( abs( (p1-p0).dot(axis) ) < 0.000001 );
+		assert( abs( (p2-p1).dot(axis) ) < 0.000001 );		
+
+		d = p1.length()
+
+		if( d < 0.000001 ):
+			return axis, ang, Vec(0,0,0)
+
+		l = d / ( 2.0 * math.tan(ang/2.0) );
+
+		tocen = p1.normalized().cross(axis) * l;
+		assert( abs(tocen.length()-l) < 0.0001 );
+
+		# correct direction based on curvature
+		if( tocen.dot( p2-p1 ) < 0.0 ): tocen = -tocen;
+
+		cen = ( p0 + p1 ) / 2.0 + tocen;
+		return axis, ang, cen
 	def pretty(self):
 		a,r = self.rotation_axis()
 		if self.t.length() > EPS: return "Xform( axis=%s, ang=%f, dir=%s, dis=%f )"%(str(a),degrees(r),str(self.t.normalized()),self.t.length())

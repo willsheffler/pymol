@@ -1,5 +1,29 @@
 from pymol import cmd
 
+count = 0
+
+def marshmallows_one(sel,col,name,resl=1):
+	global count
+	count += 1
+	cmd.delete('map%i'%count)
+	cmd.delete('surf%i'%count)	
+	cmd.do("remove hydro")
+	cmd.do("bg_color white")
+	#cmd.do("hide everything")
+	cmd.do("set surface_quality, 1")
+	cmd.do("alter all, b=50")
+	cmd.do("alter all, q=1")
+
+	cmd.do("set gaussian_resolution,10")
+	cmd.do("map_new map%i, gaussian, %i, (%s and name CA), 10"%(count,resl,sel))
+	cmd.do("isosurface %s, map%i"%(name,count))
+	
+	cmd.do("color %s, %s"%(col,name))
+	cmd.do("set antialias, 2")
+	cmd.do("set ray_trace_gain, 0.4")
+	cmd.do("set ray_shadows, 0")
+	cmd.do("set specular, 0")
+	cmd.do("show surface, %s"%name)
 
 
 def marshmallows(sel):

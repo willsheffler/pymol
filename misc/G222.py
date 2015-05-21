@@ -9394,6 +9394,7 @@ from random import random
 from pymol.cgo import *
 
 def gyroid(s=62.35,fx=-0.25,fy=0.25,fz=-0.25,r=80,c=Vec(0,0,0),t=0.1,a=1.0):
+	cmd.delete('gyroid')
 	v = cmd.get_view()
 	r2 = r*r
 	obj = [ BEGIN, TRIANGLES, ALPHA, a ]

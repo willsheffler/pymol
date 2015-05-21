@@ -8,7 +8,10 @@ from pymol_util import *
 import operator as op
 from xyzMath import *
 from itertools import product,ifilter
-from cluster import HierarchicalClustering
+try:
+	from cluster import HierarchicalClustering
+except:
+	print "couldn't import HierarchicalClustering from cluster"
 
 
 nsymmetrizecx = 0
@@ -548,18 +551,24 @@ def xtal_frames(tgt=None,skip=tuple(),r=100):
 		else:           showcyl(beg,end,0.2,col=(1.0,0.5,0.2))
 		print round(nf),ctot,o
 
-def makeh(sele='vis',n=30):
+def makeh(sele='vis',n=30,nfold=1):
+	n = n / nfold
 	cmd.delete('helix')
 	v = cmd.get_view()
 	x0 = getrelframe(sele+' and chain B',sele+' and chain A')
-	x = Xform()
+	axis, ang, cen = x0.rotation_axis_center()
+	# print axis, ang, cen
 	cmd.create('tmp',sele+' and chain A and name n+ca+c')
-	for i in range(n):
-		cmd.create('Htmp%i'%i,'tmp')
-		xform('Htmp%i'%i,x)
-		cmd.alter('Htmp%i'%i,"chain='%s'"%ROSETTA_CHAINS[i])
-		print ROSETTA_CHAINS[i]
-		x = x * x0
+	count = 0
+	for nf in range(nfold):
+		x = RAD( axis, nf * 360.0/nfold, cen )
+		print nf, x.pretty()
+		for i in range(n):
+			cmd.create('Htmp%i'%count,'tmp')
+			xform('Htmp%i'%count,x)
+			cmd.alter('Htmp%i'%count,"chain='%s'"%ROSETTA_CHAINS[count])
+			count += 1
+			x = x * x0
 	cmd.create("HELIX",'Htmp*')
 	cmd.delete("Htmp*")
 	cmd.delete('tmp')
@@ -590,6 +599,17 @@ def make_ab_components(dir):
 		cmd.load(dir+"/"+fn,"a")
 		makec6("a",name="c6")
 		cmd.save(dir+"_AB/"+fn,"c6 and chain A+B")
+
+def trim_sym(sel='all',na=1,nb=1):
+	a = [x[1] for x in getres(sel + " and chain A")]
+	b = [x[1] for x in getres(sel + " and chain B")]
+	for ia in range( len(a)/na, len(a) ):
+		cmd.remove( sel + " and chain A and resi " + str(a[ia]) )
+	for ib in range( len(b)/nb, len(b) ):
+		cmd.remove( sel + " and chain B and resi " + str(b[ib]) )
+
+cmd.extend('trim_sym',trim_sym)
+
 
 def nulltest():
 	"""

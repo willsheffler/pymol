@@ -2,7 +2,6 @@ from xyzMath import Vec,Mat,Xform,RAD,projperp,SYMTET,SYMOCT
 import itertools,re,os,inspect
 from pymol_util import cgo_cyl,pymol
 
-
 symelem_nshow = 0
 class SymElem(object):
 	"""docstring for SymElem"""
@@ -1060,7 +1059,8 @@ def test_xtal(G,cell,depth=4,mindepth=0,symdef=1,shownodes=1,**kwargs):
 		symtrie = generate_sym_trie(G,depth=d)
 		# buildcgo = BuildCGO( nodes=[ CEN1+Vec(2,3,4), CEN2+Vec(2,4,3), ] )	
 		nodes = []
-		# if "component_pos" in kwargs.keys():
+		if "component_pos" in kwargs.keys():
+			raise NotImplementedError("component_pos is no longer used")
 			# nodes = kwargs["component_pos"][:1]
 		buildcgo = BuildCGO( nodes=nodes, label=tag+"_DEPTH%i"%d,**kwargs )
 		symtrie.visit(buildcgo)
@@ -1101,6 +1101,13 @@ def test_I432_OD3(cell=120,**kwargs):
 	cube( cell*Vec(-0.25,-0.25,-0.25), cell*Vec(0.75,0.75,0.75), xform=X )
 	test_xtal(G,cell,tag="I432_OD3",**kwargs)
 
+def test_P23_TT(cell=100,**kwargs):
+	# delete all; run ~/pymol/symgen.py; test_P23_TD2B( depth=2, cell=200, symdef_scale=0.000001, generic_names=1 )
+	G = [ SymElem( "C3" , axis=Vec(1,1, 1), cen=cell*Vec(0.0, 0.0,0.0) ),
+	      SymElem( "C3" , axis=Vec(1,1,-1), cen=cell*Vec(0.5,-0.5,0.0) ),	]
+	component_pos=[ Vec(-8,-7,6), Vec(-7,0,-11), ]
+	test_xtal(G,cell,component_pos=component_pos,tag="P23_TT",**kwargs)
+	cube( cell*Vec(0,0,-0.5), cell*Vec(1,1,0.5) )
 
 
 def test_P432_OD4(cell=80,**kwargs):
@@ -1185,23 +1192,51 @@ def test_P4m44(cell=100,**kwargs):
 
 def test_I4132(cell=100,**kwargs):
 	# delete all; test_I4132(depth=7,shownodes=0,cell=200,maxrad=180); run /Users/sheffler/pymol/misc/G222.py; gyroid(200,r=180)
+	# delete all; run /Users/sheffler/pymol/symgen.py; test_I4132( cell=150, depth=7, shownodes=0, maxrad=150 );  gyroid(150,r=150,c=Vec(75,75,75))
+	r = random.random
 	G = [ 
 		SymElem( "D3", cen=cell*Vec(0.625,0.625,0.625), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(0,1,0) ),
 		SymElem( "D2", cen=cell*Vec(0.625,0.500,0.750), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(0,1,1) ),
 		SymElem( "D3", cen=cell*Vec(0.375,0.375,0.375), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(1,0,0) ),
 		SymElem( "D2", cen=cell*Vec(0.375,0.500,0.250), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(1,1,0) ),
-	# 	SymElem( "D3", cen=cell*Vec(0.125,0.125,0.125), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(0,1,0) ),
-	# 	SymElem( "D2", cen=cell*Vec(0.125,0.000,0.250), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(0,1,1) ),
-	# 	SymElem( "D3", cen=cell*Vec(-0.125,-0.125,-0.125), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(1,0,0) ),
-	# 	SymElem( "D2", cen=cell*Vec(-0.125,0.000,-0.250), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(1,1,0) ),
-	# 	SymElem( "C3", axis=Vec(1,1,1) ),
-	# 	SymElem( "C2", axis=Vec(1,1,0), cen=cell*Vec(-1, 1, 1)/8.0 ),
-	# 	SymElem( "C2", axis=Vec(1,1,0), cen=cell*Vec( 1,-1,-1)/8.0, col=(1,1,0) ),
+#		SymElem( "C3", axis=Vec(1,1,1) ),
+		# SymElem( "C2", axis=Vec(1,1,0), cen=cell*Vec(-1, 1, 1)/8.0 ),
+#		SymElem( "C2", axis=Vec(1,1,0), cen=cell*Vec( 1,-1,-1)/8.0 ),
+		# SymElem( "C2", axis=Vec(1,1,0), cen=cell*Vec( 1,-1,-1)/8.0, col=(1,1,0) ),
+		# SymElem( "D3", cen=cell*Vec(0.125,0.125,0.125), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(0,1,0) ),
+		# SymElem( "D2", cen=cell*Vec(0.125,0.000,0.250), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(0,1,1) ),
+		# SymElem( "D3", cen=cell*Vec(-0.125,-0.125,-0.125), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(1,0,0) ),
+		# SymElem( "D2", cen=cell*Vec(-0.125,0.000,-0.250), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(1,1,0) ),
 	]
 	component_pos=[ Vec(-8,-7,6), Vec(-7,0,-11), ]
 	test_xtal(G,cell,component_pos=component_pos,tag="I4132",origin=cell*Vec(0.5,0.5,0.5),showshape=0,**kwargs)
 	# cube( cell*Vec(-0.5,-0.5,-0.5), cell*Vec(0.5,0.5,0.5) )
-	cube( cell*Vec(0,0,0), cell*Vec(1,1,1) )
+	cube( cell*Vec(-0,-0,-0), cell*Vec(1,1,1) )
+
+def test_P213(cell=100,**kwargs):
+	AXS = [ Vec( 1, 1, 1),
+			Vec( 1, 1,-1) ]
+	CEN = [ cell * Vec(0,0,0),
+			cell * Vec(0.5,0,0.0) ]
+	G = [
+		SymElem( "C3", axis=AXS[0], cen=CEN[0] ),
+		SymElem( "C3", axis=AXS[1], cen=CEN[1] ),
+	]
+
+	component_pos=[ Vec(-18,-17,-16), Vec(7,0,11), ]
+
+	test_xtal(G,cell,tag="P213",origin=cell*Vec(0.0,0.0,0.0),showshape=0,**kwargs)
+
+	cube( Vec(0,0,0), cell*Vec(1,1,1) )
+
+def test_T32(cell=100,**kwargs):
+	print "========================================== T32 =========================================="
+	G = [ 
+		SymElem( "C3", axis=Vec(1,1,1) ),
+		SymElem( "C2", axis=Vec(1,0,0), cen=Vec(0.00001,0,0) ),
+	]
+	component_pos=[ Vec(8,6,5), Vec(7,2,1), ]
+	test_xtal(G,cell,component_pos=component_pos,tag="T32",origin=cell*Vec(0.0,0.0,0.0),showshape=0,**kwargs)
 
 
 def test_I213(depth=16,cell=100,maxrad=9e9):
@@ -1234,34 +1269,7 @@ def test_I213(depth=16,cell=100,maxrad=9e9):
 		print "show",g
 		g.show(radius=2.0,sphereradius=4.0)
 	return AXS,CEN
-def test_P213(depth=8,cell=50,maxrad=100):
-	#C3 and C3 at angle = 70.5288 offset = 0.353553
-	#     C3 axis=[-0.57735,-0.57735,0.57735]  origin=[-0.5,0,-0.5]
-	#     C3 axis=[ 0.57735,-0.57735,0.57735]  origin=[-0.333333,-0.166667,0.166667]
-	AXS = [ Vec( 1, 1, 1),
-			Vec( 1, 1,-1) ]
-	CEN = [ cell * Vec(0,0,0),
-			cell * Vec(0.5,0,0.0) ]
-	# AXS = [ Vec(-1,-1, 1),
-	#         Vec( 1,-1, 1) ]
-	# CEN = [ cell * Vec(-0.5,0,-0.5),
-	#         cell * Vec(-1./3,-1./6, 1./6) ]
-	G = [
-		SymElem( "C3", axis=AXS[0], cen=CEN[0] ),
-		SymElem( "C3", axis=AXS[1], cen=CEN[1] ),
-	]
-	symtrie = generate_sym_trie(G,depth=depth)
-	# buildcgo = BuildCGO( nodes=[ CEN1+Vec(2,3,4), CEN2+Vec(2,4,3), ] )	
-	cencell = cell/2.0 * Vec(1,1,1)
-	buildcgo = BuildCGO( nodes=[ CEN[1]+randnorm()*5.0, CEN[0]+randnorm()*8.0 ], origin=cencell, maxrad=maxrad, showlinks=False, showelems=True )		
-	symtrie.visit(buildcgo)
-	buildcgo.show()
 
-	cube( Vec(0,0,0), cell*Vec(1,1,1) )
-	for g in G:
-		print "show",g
-		g.show(radius=2.0,sphereradius=4.0)
-	return AXS,CEN
 def test_P4132(depth=8,cell=50,maxrad=80):
 	#**** P4132 ****
 	#C2 and C3 at angle = 35.2644 offset = 0.176777
@@ -1425,6 +1433,17 @@ def test_icos( depth=3, cell=30, **kwargs ):
 
 
 
+
+
+def test_F23_C2_T(cell=100,**kwargs):
+	#delete all ; run ~/pymolscripts/symgen.py; test_F23_C2_T(cell=100, depth=2)
+	G = [   SymElem( 'C2', cen=cell* Vec ( 0.0,0.0,0.0 ) , axis=Vec(0,0,1), #axis2=Vec(-,-,-) 
+			),
+			SymElem( 'T', cen=cell*Vec(0.25,0.25,0.0), axis=Vec(0.57735,-0.57735,0.57735), #axis2=Vec(,,) 
+		    ),
+			
+	       ]
+	test_xtal(G,cell,tag='test_F23_C2_T',**kwargs)
 
 
 
