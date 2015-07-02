@@ -175,7 +175,7 @@ def aligncx(sele,nfold,alignsele=None,tgtaxis=Uz,chains=list(),extrasel="name CA
 	alignaxis(sele,tgtaxis,axis,xyz.Vec(0,0,0))
 	return tmp
 
-def align_helix( sele, nrepeat ):
+def align_helix( sele, nrepeat, tgt_axis=Vec(1,0,0) ):
 	resi0 = int( cmd.get_model(sele).atom[0].resi )
 	sel1 = "( %s ) and resi %i-%i" % ( sele, resi0+0*nrepeat, resi0+1*nrepeat-1 )
 	sel2 = "( %s ) and resi %i-%i" % ( sele, resi0+1*nrepeat, resi0+2*nrepeat-1 )	
@@ -183,7 +183,7 @@ def align_helix( sele, nrepeat ):
 	axis, ang, cen = xform.rotation_axis_center()
 	print axis, ang, cen
 	trans( sele, -cen )
-	alignaxis( sele, Vec(0,0,1), axis )
+	alignaxis( sele, tgt_axis, axis )
 	trans( sele, Vec(0,0,-com(sele).z) )
 
 # def alignd2(sele='all',chains=list()):
