@@ -175,6 +175,16 @@ def aligncx(sele,nfold,alignsele=None,tgtaxis=Uz,chains=list(),extrasel="name CA
 	alignaxis(sele,tgtaxis,axis,xyz.Vec(0,0,0))
 	return tmp
 
+def align_helix( sele, nrepeat ):
+	resi0 = int( cmd.get_model(sele).atom[0].resi )
+	sel1 = "( %s ) and resi %i-%i" % ( sele, resi0+0*nrepeat, resi0+1*nrepeat-1 )
+	sel2 = "( %s ) and resi %i-%i" % ( sele, resi0+1*nrepeat, resi0+2*nrepeat-1 )	
+	xform = getrelframe_rmsalign( sel1, sel2 )[0]
+	axis, ang, cen = xform.rotation_axis_center()
+	print axis, ang, cen
+	trans( sele, -cen )
+	alignaxis( sele, Vec(0,0,1), axis )
+	trans( sele, Vec(0,0,-com(sele).z) )
 
 # def alignd2(sele='all',chains=list()):
 # 	alignsele = "(("+sele+") and (name CA))"
@@ -290,36 +300,6 @@ def selbycomp(trn=0):
 			0,0,1,0,0,1
 		]
 		cmd.load_cgo(obj,'LINEDIM%i'%i)
-
-def getframe(obj):
-	m = cmd.get_model(obj)
-	x = xyz.Vec(m.atom[       0     ].coord)
-	y = xyz.Vec(m.atom[len(m.atom)/2].coord)
-	z = xyz.Vec(m.atom[      -1     ].coord)
-	frame = xyz.stub(x,y,z)
-	# print "getframe:",frame
-	return frame
-
-def getrelframe(newobj,refobj,Forigin=None):
-	"""get transform between two objects, assume the obj's are identical"""
-	if Forigin is None: Forigin = xyz.Xform(xyz.Imat,xyz.Vec(0,0,0))
-	Fref = Forigin*getframe(refobj+" and name CA")
-	Fnew = Forigin*getframe(newobj+" and name CA")
-	Fdelta = Fnew * ~Fref
-	return Fdelta
-
-def getrelframe_rmsalign(movsel,refsel,Forigin=None):
-	"""get transform between two objects using rmsalign"""
-	tmpref = "TMP__getrelframe_rmsalign_REF"
-	tmpmov = "TMP__getrelframe_rmsalign_MOV"	
-	cmd.create(tmpref,refsel)
-	cmd.create(tmpmov,refsel)
-	# cmd.super(tmpref,refsel) # shouldn't be necessary
-	alignresult = cmd.align(tmpmov,movsel)	
-	result = getrelframe(tmpmov,tmpref,Forigin)
-	cmd.delete(tmpmov)
-	cmd.delete(tmpref)	
-	return result, alignresult[0]
 
 def rechain(sel,nres):
 	chains = ROSETTA_CHAINS

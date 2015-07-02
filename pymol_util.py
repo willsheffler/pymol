@@ -2117,7 +2117,35 @@ def cube(lb=xyz.Vec(-10,-10,-10),ub=xyz.Vec(10,10,10),r=0.5,xform=xyz.Xform()):
 	],"UNIT_CELL")
 	cmd.set_view(v)
 
+def getframe(obj):
+	m = cmd.get_model(obj)
+	x = xyz.Vec(m.atom[       0     ].coord)
+	y = xyz.Vec(m.atom[len(m.atom)/2].coord)
+	z = xyz.Vec(m.atom[      -1     ].coord)
+	frame = xyz.stub(x,y,z)
+	# print "getframe:",frame
+	return frame
 
+def getrelframe(newobj,refobj,Forigin=None):
+	"""get transform between two objects, assume the obj's are identical"""
+	if Forigin is None: Forigin = xyz.Xform(xyz.Imat,xyz.Vec(0,0,0))
+	Fref = Forigin*getframe(refobj+" and name CA")
+	Fnew = Forigin*getframe(newobj+" and name CA")
+	Fdelta = Fnew * ~Fref
+	return Fdelta
+
+def getrelframe_rmsalign(movsel,refsel,Forigin=None):
+	"""get transform between two objects using rmsalign"""
+	tmpref = "TMP__getrelframe_rmsalign_REF"
+	tmpmov = "TMP__getrelframe_rmsalign_MOV"	
+	cmd.create(tmpref,refsel)
+	cmd.create(tmpmov,refsel)
+	# cmd.super(tmpref,refsel) # shouldn't be necessary
+	alignresult = cmd.align(tmpmov,movsel)	
+	result = getrelframe(tmpmov,tmpref,Forigin)
+	cmd.delete(tmpmov)
+	cmd.delete(tmpref)	
+	return result, alignresult[0]
 
 def tmpvis(s):
 	a,b,c,d,e,f = [float(x) for x in s.split()]
