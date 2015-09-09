@@ -53,7 +53,7 @@ def get_correction_angle( axis, cen, coms, unit_xform, error ):
 				# TODO: check this logic!
 				if v1.cross(v2).dot(axis) < 0:
 					correction_ang *= -1.0
-				print "correction_ang",correction_ang,i,axis_dis
+				print "CORRECTION ANGLE:", i, correction_ang, axis_dis
 				nturns = j
 				break
 			hcom = unit_xform * hcom
@@ -70,10 +70,49 @@ delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C2_DR04_0
 delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C4_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
 delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C3_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
 delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N5_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
+delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
+
+
+STILL A PROBLEM: 
+N2_C1_DR14_001
+N2_C3_DR14_001
+N2_C3_DR14_008
+N2_C3_DR64_004
+N3_C1_DR05_008
+N3_C1_DR10_006
+N3_C1_DR14_003
+N3_C1_DR14_004
+N3_C2_DR14_004
+35
+/Users/sheffler/tmp/waiting_list/N2_C3_DR08_001.pdb
+delete all; load /Users/sheffler/tmp/waiting_list/N2_C3_DR08_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
+
 """
 
 	error = None
+
+	chains = cmd.get_chains(sele)
+
+	axis, ang1, cen = getrelframe( '((%s) and name ca and chain %s)'%(sele,chains[0]), '((%s) and name ca and chain %s)'%(sele,chains[1]) ).rotation_axis_center()
+	print "AXIS0:", axis
+	print "CEN0:", cen
+	# try to get better estimate of axis and cen by checking all chains vs. A
+	# probably not necessary?
+	ncen = 1
+	for c in chains[2:]:
+		axisB, ang1B, cenB = getrelframe( '((%s) and name ca and chain %s)'%(sele,'A'), '((%s) and name ca and chain %s)'%(sele,c) ).rotation_axis_center()
+		if not cenB:
+			continue
+		if axis.dot(axisB) < 0:
+			axisB = -axisB
+		if cen.distance( cenB ) < 0.1:
+			cen += cenB
+			ncen += 1
+		axis += axisB
+	axis = axis / float( len(chains)-1 )
+	cen = cen / float( ncen )
+	print "AXIS:", axis
+	print "CEN:", cen
 
 	axis, ang1, cen = getrelframe('((%s) and name ca and chain B)'%sele,'((%s) and name ca and chain A)'%sele
 		).rotation_axis_center()
@@ -82,7 +121,11 @@ delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C1_DR04_0
 		axis = Vec(0,0,0)-axis
 		ang1 = 2.0*math.pi - ang1
 
-	coms = [ com( "((%s) and name ca and chain %s)"%(sele,c) ) for c in cmd.get_chains(sele) ]	
+	# make sure all chains have same len
+	nres = [ len( getres( "((%s) and name ca and chain %s)"%(sele,c) ) ) for c in chains ]
+	assert min( nres ) == max( nres )
+
+	coms = [ com( "((%s) and name ca and chain %s)"%(sele,c) ) for c in chains ]	
 		# make sure sorted along axis
 		# coms_tosort = [ ( axis.dot(xyz-cen),xyz) for xyz in coms ]
 		# coms = [ xyz for t,xyz in sorted( coms_tosort ) ]
@@ -97,22 +140,70 @@ delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C1_DR04_0
 				trans = abs( axis.dot(c2-c1) )
 				if trans > 0.5: # assume is < 0.5, is cyclic sym related subunit
 					mintrans = min( mintrans, trans )
+	# numtrans = 0
+	# tmptrans = 0
+	# for c1 in coms:
+	# 	for c2 in coms:
+	# 		if c1 is not c2:
+	# 			trans = abs( axis.dot(c2-c1) )
+	# 			if trans - mintrans < 0.5:
+	# 				print "trans",trans
+	# 				tmptrans += trans
+	# 				numtrans += 1
+	# mintrans = tmptrans / numtrans
+
+	for i in range(4):
+		tmptrans = 0
+		numtrans = 0
+		for xyz in coms[1:]:
+			mult_actual = (xyz-coms[0]).dot(axis) / mintrans
+			if abs(mult_actual-round(mult_actual)) < 0.1 and mult_actual > 0.5:
+				# print "ARST", mult_actual
+				tmptrans += mintrans * mult_actual / round( mult_actual )
+				numtrans += 1
+			# elif abs(mult_actual-round(mult_actual))-0.5 < 0.1:
+			# 	# print "ASDF", mult_actual
+			# 	tmptrans += mintrans * ( (mult_actual+0.5) / round( mult_actual+0.5 ) )
+			# 	numtrans += 1
+				# print mintrans * mult_actual / round( mult_actual )
+		print "old mintrans", mintrans
+		mintrans = tmptrans / numtrans
+		print "new mintrans", mintrans
+
 	print "mintrans along axis is", mintrans
 
+	unit_trans = 0
+	for div in range(1,4):
+		allok = True
+		print "======",div,"======"
+		for xyz in coms[1:]:
+			mult_actual = (xyz-coms[0]).dot(axis) / mintrans
+			print mult_actual * div
+			if abs( round( mult_actual * div ) - mult_actual * div ) > 0.05:
+				allok = False
+		if allok: break
+	if not allok:
+		print "TROUBLE DETERMINING HELIX SPACING FROM COMs"
+		assert allok
+	mintrans /= div
 
 	unit_trans = 0
+	num_unit_trans = 0
 	for xyz in coms[1:]:
-		mult = round( (xyz-coms[0]).dot(axis) / mintrans )
-		unit_trans += (xyz-coms[0]).dot(axis) / mult
-		# print (xyz-coms[0]).dot(axis), mult, unit_trans, (xyz-coms[0]).dot(axis) / mult
-	unit_trans /= len(coms)-1 
+		mult_actual = (xyz-coms[0]).dot(axis) / mintrans
+		mult = round( mult_actual )
+		if mult > 0:
+			unit_trans += (xyz-coms[0]).dot(axis) / mult
+			num_unit_trans += 1
+			print mult_actual, mult, (xyz-coms[0]).dot(axis), unit_trans, (xyz-coms[0]).dot(axis) / mult
+	unit_trans /= num_unit_trans
 	sub2_trans = (coms[1]-coms[0]).dot(axis)
 	print mintrans, unit_trans, sub2_trans, sub2_trans/unit_trans
 
 	# check that each translation is even multiple of unit_trans
 	for xyz in coms[1:]:
 		test_mult = (xyz-coms[0]).dot(axis) / unit_trans
-		if abs( test_mult - round( test_mult ) ) > 0.01:
+		if abs( test_mult - round( test_mult ) ) > 0.03: # * test_mult:
 			print "(xyz-coms[0]).dot(axis) / unit_trans == ", test_mult
 			assert False
 	unit_ang1 = ang1 / (sub2_trans/unit_trans)
@@ -122,6 +213,7 @@ delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C1_DR04_0
 	# now recompute rotation angle based on last subunit
 	# this corrects small errors from pdb coordinates or whatever...
 	# or maybe unit_xform1.t += unit_trans*axis is somehow wrong and I'm dumb...
+	print "========== TEST PRIMARY ROTATION",unit_ang1, "=========="
 	correction_ang, nturns, error = get_correction_angle( axis, cen, coms, unit_xform1, error )
 	if not correction_ang and not error:
 		error = "correction_ang is None"
@@ -141,6 +233,7 @@ delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C1_DR04_0
 		unit_ang2 = ang2 / (sub2_trans/unit_trans)
 		unit_xform2 = rotation_around( axis, unit_ang2, cen )
 		unit_xform2.t += unit_trans*axis
+		print "========== GET GEOMETRY FOR PRIMARY ROTATION", unit_ang2, "=========="
 		correction_ang2, nturns2, error2 = get_correction_angle( axis, cen, coms, unit_xform2, error )
 		if not correction_ang2 and not error2:
 			error = "correction_ang2 is None"
@@ -162,8 +255,9 @@ delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C1_DR04_0
 		error = "error determining helix symmetry (and check for ang errors)"
 
 	# check up to nfold 10
-	for nfold in range(1,11):
+	for nfold in range( 1, 7 ):
 		for i in range( len(unit_xforms) ):
+			print "========== TEST COM COVERAGE FOR NFOLD", nfold, ", NANG", i
 			unit_xform = unit_xforms[i]
 			unit_ang   = unit_angs[i]
 			# ang = angs[i]
@@ -211,6 +305,10 @@ delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C4_DR04_0
 delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C3_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
 delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N5_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
 delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
+ 
+
+delete all; load /Users/sheffler/tmp/waiting_list/N2_C1_DR05_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
+
 	"""
 	cgo = []
 
@@ -280,7 +378,41 @@ def makeh(sele='vis',n=30):
 cmd.extend('makeh',makeh)
 
 
+TEST_LIST = []
+TEST_POS = -1
+def helix_test( loc, advance=True ):
+	global TEST_LIST
+	global TEST_POS
+	if not TEST_LIST:
+		assert loc
+		for fn in glob.glob(loc):
+			TEST_LIST.append( fn )
+		TEST_POS = -1
+	TEST_POS += 1
+	current_fn = TEST_LIST[ TEST_POS ]
 
+	print "============================================================================================================================="
+	print "START"
+	print TEST_POS
+	print current_fn
+	print "============================================================================================================================="	
+
+	cmd.delete( "all" )
+	cmd.load( current_fn )
+	cmd.hide( "all" )
+	cmd.show( "rib" )
+	util.cbc()
+	make_helix_symdef( show=50 )
+
+	print "============================================================================================================================="
+	print "FINISH"
+	print TEST_POS
+	print current_fn
+	print "============================================================================================================================="	
+
+# def nexttest():
+# 	helix_test(None,True)
+# cmd.extend("nexttest","nexttest")
 
 def load_tests(loader, tests, ignore):
 	tests.addTests(doctest.DocTestSuite())

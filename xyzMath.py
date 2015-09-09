@@ -644,7 +644,10 @@ class Xform(object):
 		if( d < 0.000001 ):
 			return axis, ang, Vec(0,0,0)
 
-		l = d / ( 2.0 * math.tan(ang/2.0) );
+		if abs( 2.0 * math.tan(ang/2.0) ) < 0.001:
+			return axis, ang, None
+
+		l = d / ( 2.0 * math.tan(ang/2.0) )
 
 		tocen = p1.normalized().cross(axis) * l;
 		assert( abs(tocen.length()-l) < 0.0001 );
