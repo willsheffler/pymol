@@ -8,24 +8,29 @@ from sym_util import *
 import operator as op
 from xyzMath import *
 from itertools import product,ifilter
-
+import cProfile
 
 def xform_covers_all_coms( axis, cen, coms, xform, nfold, show=False ):
 	#TODO: add NFOLD!!!!!!!!!!!!!!
 	syms = [ RAD( axis, i*360.0/nfold, cen ) for i in range(nfold) ]
 	seenit = [False] * len(coms)
+	error2 = 0.0
 	for i,in_com in enumerate(coms):
 		hcom = coms[0]
 		for j in range(222):
 			for sym in syms:
 				testcom = sym*hcom
 				if show: showsphere( testcom )
-				if in_com.distance(testcom) < 0.1:
+				if in_com.distance_squared(testcom) < 0.1:
 					# print in_com.distance(hcom)
 					seenit[i] = True
+					error2 += in_com.distance_squared(testcom)
 					break
 			hcom = xform * hcom
-	return all(seenit)
+	if all(seenit):
+		return sqrt( error2 / len(coms) )
+	else:
+		return None
 
 def get_correction_angle( axis, cen, coms, unit_xform, error ):
 	correction_ang = None
@@ -62,73 +67,106 @@ def get_correction_angle( axis, cen, coms, unit_xform, error ):
 
 def determine_helix_geometry( sele='vis', show=0 ):
 	"""
-delete all; load /Users/sheffler/Downloads/N4_C1_DR53_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=40)
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N2_C1_DR04_065.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N2_C3_DR04_003.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C2_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C4_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C3_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N5_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
+	# delete all; load /Users/sheffler/Downloads/N4_C1_DR53_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=40)
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N2_C1_DR04_065.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N2_C3_DR04_003.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C2_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C4_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C3_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N5_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
 
 
-STILL A PROBLEM: 
-N2_C1_DR14_001
-N2_C3_DR14_001
-N2_C3_DR14_008
-N2_C3_DR64_004
-N3_C1_DR05_008
-N3_C1_DR10_006
-N3_C1_DR14_003
-N3_C1_DR14_004
-N3_C2_DR14_004
-35
-/Users/sheffler/tmp/waiting_list/N2_C3_DR08_001.pdb
-delete all; load /Users/sheffler/tmp/waiting_list/N2_C3_DR08_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
+	# STILL A PROBLEM: 
+	# N2_C1_DR14_001
+	# N2_C3_DR14_001
+	# N2_C3_DR14_008
+	# N2_C3_DR64_004
+	# N3_C1_DR05_008
+	# N3_C1_DR10_006
+	# N3_C1_DR14_003
+	# N3_C1_DR14_004
+	# N3_C2_DR14_004
+	# N3_C4_DR10_003
+	# N3_C4_DR10_006
+	# N3_C4_DR14_002
+	# N3_C4_DR14_003
+	# N3_C4_DR14_004
+	# N3_C4_DR14_007
+	# N3_C4_DR49_002
+	# N3_C4_DR49_008
+	# N3_C4_DR54_002
+	# N3_C4_DR54_004
+	# N3_C4_DR54_005
+	# N3_C4_DR54_006
+	# N3_C4_DR54_007
+	# N3_C4_DR76_005
+	# N3_C4_DR76_006
+	# N4_C1_DR10_005
+	# N4_C1_DR14_004
+	# N4_C1_DR14_008
+	# N5_C1_DR14_001 -- div by zero
+	# N5_C1_DR14_003 -- 
+	# 35
+	# /Users/sheffler/tmp/waiting_list/N2_C3_DR08_001.pdb
+	# delete all; load /Users/sheffler/tmp/waiting_list/N2_C1_DR05_006.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
 
-"""
+	"""
 
 	error = None
 
 	chains = cmd.get_chains(sele)
 
-	axis, ang1, cen = getrelframe( '((%s) and name ca and chain %s)'%(sele,chains[0]), '((%s) and name ca and chain %s)'%(sele,chains[1]) ).rotation_axis_center()
-	print "AXIS0:", axis
-	print "CEN0:", cen
-	# try to get better estimate of axis and cen by checking all chains vs. A
-	# probably not necessary?
-	ncen = 1
-	for c in chains[2:]:
-		axisB, ang1B, cenB = getrelframe( '((%s) and name ca and chain %s)'%(sele,'A'), '((%s) and name ca and chain %s)'%(sele,c) ).rotation_axis_center()
-		if not cenB:
-			continue
-		if axis.dot(axisB) < 0:
-			axisB = -axisB
-		if cen.distance( cenB ) < 0.1:
-			cen += cenB
-			ncen += 1
-		axis += axisB
-	axis = axis / float( len(chains)-1 )
-	cen = cen / float( ncen )
-	print "AXIS:", axis
-	print "CEN:", cen
-
-	axis, ang1, cen = getrelframe('((%s) and name ca and chain B)'%sele,'((%s) and name ca and chain A)'%sele
-		).rotation_axis_center()
-	com_all = com( "((%s) and name ca)"%sele )
-	if axis.dot(com_all-cen) < 0:
-		axis = Vec(0,0,0)-axis
-		ang1 = 2.0*math.pi - ang1
-
 	# make sure all chains have same len
 	nres = [ len( getres( "((%s) and name ca and chain %s)"%(sele,c) ) ) for c in chains ]
-	assert min( nres ) == max( nres )
+	if min( nres ) != max( nres ): raise Exception( "all chains must be same length" )
 
+	# get centers-of-mass of all chains
 	coms = [ com( "((%s) and name ca and chain %s)"%(sele,c) ) for c in chains ]	
 		# make sure sorted along axis
 		# coms_tosort = [ ( axis.dot(xyz-cen),xyz) for xyz in coms ]
 		# coms = [ xyz for t,xyz in sorted( coms_tosort ) ]
+
+	axis, ang1, cen = None, None, None
+	if True: # this is just to limit scope
+		# get initial gusss at helix axis, rotation angle, center
+		axis, ang1, cen = getrelframe( '((%s) and name ca and chain %s)'%(sele,chains[1]), '((%s) and name ca and chain %s)'%(sele,chains[0]) ).rotation_axis_center()
+		# make sure axis points toward bulk of helix
+		com_all = com( "((%s) and name ca)"%sele )
+		if axis.dot(com_all-cen) < 0:
+			axis = Vec(0,0,0)-axis
+			ang1 = 2.0*math.pi - ang1
+
+		# this causes some problem I can't figure out...
+		# # try to get better estimate of axis and cen by checking all chains vs. A
+		# # probably not necessary?
+		# print "AXIS0:", axis
+		# print "CEN0:", cen
+		# print "ANG0:", ang1
+		# axis0 = axis
+		# cen0 = cen
+		# ang1_0 = ang1
+		# ncen = 1
+		# for c in chains[2:]:
+		# 	axisB, ang1B, cenB = getrelframe( '((%s) and name ca and chain %s)'%(sele,c), '((%s) and name ca and chain %s)'%(sele,chains[0]) ).rotation_axis_center()
+		# 	if not cenB: continue
+		# 	if   axis.dot(axisB) >  0.9: axis += axisB			
+		# 	elif axis.dot(axisB) < -0.9: axis -= axisB
+		# 	if cen.distance( cenB ) < 0.1:
+		# 		cen += cenB
+		# 		ncen += 1
+		# axis.normalize()
+		# cen = cen / float( ncen )
+		# ang1 = dihedral( coms[0], cen, cen+axis, coms[1] )
+		# if abs( ang1 - ang1_0 ) > 0.01:	ang1 = 2.0*math.pi + ang1
+		# if axis.dot( axis0 ) < 0.999: raise Exception("axis and axis0 are too far apart for sanity")
+		# if cen.distance( cen0 ) > 0.01: raise Exception("axis and axis0 are too far apart for sanity")	
+		# if abs( ang1 - ang1_0 ) > 0.01: raise Exception("ang1 and ang1_0 are too far apart for sanity")		
+
+	print "AXIS:", axis
+	print "CEN:", cen
+	print "ANG:", ang1
 
 	print "axis",axis, "sub2 angle",ang1*180.0/math.pi
 
@@ -152,6 +190,7 @@ delete all; load /Users/sheffler/tmp/waiting_list/N2_C3_DR08_001.pdb; hide lin; 
 	# 				numtrans += 1
 	# mintrans = tmptrans / numtrans
 
+	# refine esimate min translation along axis by looking at all translations
 	for i in range(4):
 		tmptrans = 0
 		numtrans = 0
@@ -172,6 +211,7 @@ delete all; load /Users/sheffler/tmp/waiting_list/N2_C3_DR08_001.pdb; hide lin; 
 
 	print "mintrans along axis is", mintrans
 
+	# check if min translation along axis is "unitary" translation, or a multiple...
 	unit_trans = 0
 	for div in range(1,4):
 		allok = True
@@ -183,8 +223,7 @@ delete all; load /Users/sheffler/tmp/waiting_list/N2_C3_DR08_001.pdb; hide lin; 
 				allok = False
 		if allok: break
 	if not allok:
-		print "TROUBLE DETERMINING HELIX SPACING FROM COMs"
-		assert allok
+		if not allok: raise Exception( "TROUBLE DETERMINING HELIX SPACING FROM COMs" )
 	mintrans /= div
 
 	unit_trans = 0
@@ -204,8 +243,8 @@ delete all; load /Users/sheffler/tmp/waiting_list/N2_C3_DR08_001.pdb; hide lin; 
 	for xyz in coms[1:]:
 		test_mult = (xyz-coms[0]).dot(axis) / unit_trans
 		if abs( test_mult - round( test_mult ) ) > 0.03: # * test_mult:
-			print "(xyz-coms[0]).dot(axis) / unit_trans == ", test_mult
-			assert False
+			raise Exception( "(xyz-coms[0]).dot(axis) / unit_trans == %f" % test_mult )
+
 	unit_ang1 = ang1 / (sub2_trans/unit_trans)
 	unit_xform1 = rotation_around( axis, unit_ang1, cen )
 	unit_xform1.t += unit_trans*axis
@@ -254,7 +293,9 @@ delete all; load /Users/sheffler/tmp/waiting_list/N2_C3_DR08_001.pdb; hide lin; 
 	if not error:
 		error = "error determining helix symmetry (and check for ang errors)"
 
-	# check up to nfold 10
+	# loop over nfolds, then over the unit_xform possibilities
+	# accept first that covers all actual COMs from input structure
+	# check up to nfold 6
 	for nfold in range( 1, 7 ):
 		for i in range( len(unit_xforms) ):
 			print "========== TEST COM COVERAGE FOR NFOLD", nfold, ", NANG", i
@@ -262,8 +303,10 @@ delete all; load /Users/sheffler/tmp/waiting_list/N2_C3_DR08_001.pdb; hide lin; 
 			unit_ang   = unit_angs[i]
 			# ang = angs[i]
 			print "checking symmetry Nfold",nfold,"ang_option",i
-			if xform_covers_all_coms( axis, cen, coms, unit_xform, nfold ):
+			rms = xform_covers_all_coms( axis, cen, coms, unit_xform, nfold )
+			if rms:
 				error = None
+				print "RMS error to input coms is", rms
 				break
 		if not error:
 			break
@@ -285,29 +328,28 @@ delete all; load /Users/sheffler/tmp/waiting_list/N2_C3_DR08_001.pdb; hide lin; 
 		cmd.load_cgo(cgo,"determine_helix_geometry")
 		cmd.load_cgo(cgo2,"existing_coms")		
 
-	print "unitary rotation angle", unit_ang*180.0/math.pi
+	# print "unitary rotation angle", unit_ang*180.0/math.pi
 
 	if error:
-		print error
-		return None
+		raise Exception( error )
 
 	return axis, cen, unit_ang, nfold, unit_trans, unit_xform
 
 
 def make_helix_symdef( sele='vis', show=0 ):
 	"""
-delete all; load /Users/sheffler/Downloads/N4_C1_DR53_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=40)
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N2_C1_DR04_065.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N2_C3_DR04_003.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C2_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C4_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C3_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N5_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
-delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
- 
+	# delete all; load /Users/sheffler/Downloads/N4_C1_DR53_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=40)
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N2_C1_DR04_065.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N2_C3_DR04_003.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C2_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N3_C4_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C3_DR04_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N5_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
+	 
 
-delete all; load /Users/sheffler/tmp/waiting_list/N2_C1_DR05_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
+	# delete all; load /Users/sheffler/tmp/waiting_list/N2_C1_DR05_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; make_helix_symdef(show=50)	
 
 	"""
 	cgo = []
@@ -334,14 +376,13 @@ delete all; load /Users/sheffler/tmp/waiting_list/N2_C1_DR05_001.pdb; hide lin; 
 			if j > 0: cgo.extend( cgo_sphere( a2 ) )
 			for i,in_com in enumerate(coms):
 				if in_com.distance(sym*hcom) < 0.1:
-					cgo.extend( cgo_sphere( sym*hcom ) )
-					y = sym*hcom - a
-					y2 = hcom2 - a2
+					y  =  sym*hcom  - a
+					y2 = ~sym*hcom2 - a2
 					# print "xyz", 
+					cgo.extend( cgo_sphere (    a+y ) )
 					cgo.extend( cgo_segment( a, a+y ) )				
-					if j > 0:
-						cgo.extend( cgo_segment( a2, a2+y2 ) )								
-						cgo.extend( cgo_sphere( a2+y2 ) )
+					if j > 0: cgo.extend( cgo_sphere (     a2+y2 ) )
+					if j > 0: cgo.extend( cgo_segment( a2, a2+y2 ) )							
 					break
 		hcom = unit_xform * hcom
 		hcom2 = unit_xform.inverse() * hcom2		
@@ -377,6 +418,40 @@ def makeh(sele='vis',n=30):
 	cmd.set_view(v)
 cmd.extend('makeh',makeh)
 
+def do_cprofile(func):
+    def profiled_func(*args, **kwargs):
+        profile = cProfile.Profile()
+        try:
+            profile.enable()
+            result = func(*args, **kwargs)
+            profile.disable()
+            return result
+        finally:
+            profile.print_stats()
+    return profiled_func
+
+#@do_cprofile
+def test_all( loc, maxnum=99999999 ):
+	failures = []
+	with open("pymol_helix_test.log",'w') as out:
+		for fn in glob.glob(loc)[:maxnum]:
+			try:
+				cmd.delete( "all" )
+				cmd.load( fn )
+				cmd.hide( "all" )
+				cmd.show( "rib" )
+				util.cbc()
+				make_helix_symdef( show=0 )
+				out.write( fn + "\n" )
+				out.flush()
+			except Exception as e:
+				out.write( fn +" / " + str(e) + "\n" )
+				out.flush()
+				failures.append( (fn,e ) )
+		print "=================================== test_all DONE ==================================="
+		for f,e in failures:
+			print f, e
+
 
 TEST_LIST = []
 TEST_POS = -1
@@ -410,9 +485,9 @@ def helix_test( loc, advance=True ):
 	print current_fn
 	print "============================================================================================================================="	
 
-# def nexttest():
-# 	helix_test(None,True)
-# cmd.extend("nexttest","nexttest")
+
+
+
 
 def load_tests(loader, tests, ignore):
 	tests.addTests(doctest.DocTestSuite())
