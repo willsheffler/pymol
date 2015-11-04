@@ -77,6 +77,10 @@ def determine_helix_geometry( sele='vis', show=0 ):
 	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N5_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
 	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N4_C1_DR04_002.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
 
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test2/N1_C2_DR18_001_0023.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test2/N1_C5_DR04_035_0769.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test2/N3_C1_DR54_151_0104.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test2/N5_C1_DR10_029_0419.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
 
 	# STILL A PROBLEM: 
 	# N2_C1_DR14_001
@@ -124,9 +128,16 @@ def determine_helix_geometry( sele='vis', show=0 ):
 
 	# get centers-of-mass of all chains
 	coms = [ com( "((%s) and name ca and chain %s)"%(sele,c) ) for c in chains ]	
-		# make sure sorted along axis
-		# coms_tosort = [ ( axis.dot(xyz-cen),xyz) for xyz in coms ]
-		# coms = [ xyz for t,xyz in sorted( coms_tosort ) ]
+
+	# make sure sorted along axis
+	if True:
+		axis_tmp, ang1_tmp, cen_tmp = getrelframe( '((%s) and name ca and chain %s)'%(sele,chains[1]), '((%s) and name ca and chain %s)'%(sele,chains[0]) ).rotation_axis_center()
+		com_all = com( "((%s) and name ca)"%sele )
+		if axis_tmp.dot(com_all-cen_tmp) < 0:
+			axis_tmp = Vec(0,0,0)-axis_tmp
+		coms_tosort = [ ( axis_tmp.dot(coms[i]-cen_tmp),coms[i],chains[i]) for i in range(len(coms)) ]
+		coms   = [ xyz for t,xyz,c in sorted( coms_tosort ) ]
+		chains = [ c   for t,xyz,c in sorted( coms_tosort ) ]			
 
 	axis, ang1, cen = None, None, None
 	if True: # this is just to limit scope

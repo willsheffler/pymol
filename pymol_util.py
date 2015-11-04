@@ -284,6 +284,10 @@ def getres(sele,withchain=True):
 	except:
 		return []
 
+
+def getrestypes(sele):
+	return sorted(list(sets.Set([x.resn for x in cmd.get_model(sele).atom])))
+
 def com(sel="all", state=1):
 	## assumes equal weights (best called with "and name ca" suffix)
 	model = cmd.get_model(sel, state)
