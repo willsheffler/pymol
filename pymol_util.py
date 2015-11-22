@@ -2158,6 +2158,31 @@ def tmpvis(s):
 	showvecfrompoint(100*a,c)
 	return a,c
 
+def show_res_frames(sele):
+	for c,i in getres(sele):
+		N  = com( "(%s) and chain %s and resi %i and name N " % (sele,c,i) )
+		CA = com( "(%s) and chain %s and resi %i and name CA" % (sele,c,i) )
+		C  = com( "(%s) and chain %s and resi %i and name C " % (sele,c,i) )
+		print "N", N
+		print "CA", CA
+		print "C", C
+		e1 = xyz.Vec(C+N)/2.0 - CA
+		e1.normalize()
+		e3 = e1.cross( C - CA )
+		e3.normalize()
+		e2 = e3.cross( e1 )
+		m = Mat( e1, e2, e3 )
+		# m[0,0] = e1[0];   m[0,1] = e2[0];   m[0,2] = e3[0]
+		# m[1,0] = e1[1];   m[1,1] = e2[1];   m[1,2] = e3[1]
+		# m[2,0] = e1[2];   m[2,1] = e2[2];   m[2,2] = e3[2]
+		cen = m * xyz.Vec( -1.952799123558066, -0.2200069625712990, 1.524857 ) + CA
+		cgo = []
+		cgo.extend( cgo_cyl( cen, cen+e1*2.0, 0.1, col=(1,0,0) ) )
+		cgo.extend( cgo_cyl( cen, cen+e2*2.0, 0.1, col=(0,1,0) ) )
+		cgo.extend( cgo_cyl( cen, cen+e3*2.0, 0.1, col=(0,0,1) ) )
+		cmd.load_cgo( cgo, "frame "+c+str(i) )
+
+
 if __name__ == '__main__':
    import doctest
    r = doctest.testmod()

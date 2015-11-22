@@ -65,7 +65,7 @@ def get_correction_angle( axis, cen, coms, unit_xform, error ):
 	return correction_ang, nturns, error
 
 
-def determine_helix_geometry( sele='vis', show=0 ):
+def determine_helix_geometry( sele='vis', show=0, verbose=True ):
 	"""
 	# delete all; load /Users/sheffler/Downloads/N4_C1_DR53_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=40)
 	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N2_C1_DR04_065.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
@@ -81,6 +81,8 @@ def determine_helix_geometry( sele='vis', show=0 ):
 	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test2/N1_C5_DR04_035_0769.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
 	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test2/N3_C1_DR54_151_0104.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
 	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test2/N5_C1_DR10_029_0419.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
+
+	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_chainAB/N1_C2_DR79_078_0275.pose.pdb.gz; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
 
 	# STILL A PROBLEM: 
 	# N2_C1_DR14_001
@@ -175,11 +177,11 @@ def determine_helix_geometry( sele='vis', show=0 ):
 		# if cen.distance( cen0 ) > 0.01: raise Exception("axis and axis0 are too far apart for sanity")	
 		# if abs( ang1 - ang1_0 ) > 0.01: raise Exception("ang1 and ang1_0 are too far apart for sanity")		
 
-	print "AXIS:", axis
-	print "CEN:", cen
-	print "ANG:", ang1
+	if verbose: print "AXIS:", axis
+	if verbose: print "CEN:", cen
+	if verbose: print "ANG:", ang1
 
-	print "axis",axis, "sub2 angle",ang1*180.0/math.pi
+	if verbose: print "axis",axis, "sub2 angle",ang1*180.0/math.pi
 
 	# get unitary translation along axix
 	mintrans = 9e9
@@ -196,7 +198,7 @@ def determine_helix_geometry( sele='vis', show=0 ):
 	# 		if c1 is not c2:
 	# 			trans = abs( axis.dot(c2-c1) )
 	# 			if trans - mintrans < 0.5:
-	# 				print "trans",trans
+	# 				if verbose: print "trans",trans
 	# 				tmptrans += trans
 	# 				numtrans += 1
 	# mintrans = tmptrans / numtrans
@@ -208,28 +210,28 @@ def determine_helix_geometry( sele='vis', show=0 ):
 		for xyz in coms[1:]:
 			mult_actual = (xyz-coms[0]).dot(axis) / mintrans
 			if abs(mult_actual-round(mult_actual)) < 0.1 and mult_actual > 0.5:
-				# print "ARST", mult_actual
+				# if verbose: print "ARST", mult_actual
 				tmptrans += mintrans * mult_actual / round( mult_actual )
 				numtrans += 1
 			# elif abs(mult_actual-round(mult_actual))-0.5 < 0.1:
-			# 	# print "ASDF", mult_actual
+			# 	# if verbose: print "ASDF", mult_actual
 			# 	tmptrans += mintrans * ( (mult_actual+0.5) / round( mult_actual+0.5 ) )
 			# 	numtrans += 1
-				# print mintrans * mult_actual / round( mult_actual )
-		print "old mintrans", mintrans
+				# if verbose: print mintrans * mult_actual / round( mult_actual )
+		if verbose: print "old mintrans", mintrans
 		mintrans = tmptrans / numtrans
-		print "new mintrans", mintrans
+		if verbose: print "new mintrans", mintrans
 
-	print "mintrans along axis is", mintrans
+	if verbose: print "mintrans along axis is", mintrans
 
 	# check if min translation along axis is "unitary" translation, or a multiple...
 	unit_trans = 0
 	for div in range(1,4):
 		allok = True
-		print "======",div,"======"
+		if verbose: print "======",div,"======"
 		for xyz in coms[1:]:
 			mult_actual = (xyz-coms[0]).dot(axis) / mintrans
-			print mult_actual * div
+			if verbose: print mult_actual * div
 			if abs( round( mult_actual * div ) - mult_actual * div ) > 0.05:
 				allok = False
 		if allok: break
@@ -245,10 +247,10 @@ def determine_helix_geometry( sele='vis', show=0 ):
 		if mult > 0:
 			unit_trans += (xyz-coms[0]).dot(axis) / mult
 			num_unit_trans += 1
-			print mult_actual, mult, (xyz-coms[0]).dot(axis), unit_trans, (xyz-coms[0]).dot(axis) / mult
+			if verbose: print mult_actual, mult, (xyz-coms[0]).dot(axis), unit_trans, (xyz-coms[0]).dot(axis) / mult
 	unit_trans /= num_unit_trans
 	sub2_trans = (coms[1]-coms[0]).dot(axis)
-	print mintrans, unit_trans, sub2_trans, sub2_trans/unit_trans
+	if verbose: print mintrans, unit_trans, sub2_trans, sub2_trans/unit_trans
 
 	# check that each translation is even multiple of unit_trans
 	for xyz in coms[1:]:
@@ -263,12 +265,12 @@ def determine_helix_geometry( sele='vis', show=0 ):
 	# now recompute rotation angle based on last subunit
 	# this corrects small errors from pdb coordinates or whatever...
 	# or maybe unit_xform1.t += unit_trans*axis is somehow wrong and I'm dumb...
-	print "========== TEST PRIMARY ROTATION",unit_ang1, "=========="
+	if verbose: print "========== TEST PRIMARY ROTATION",unit_ang1, "=========="
 	correction_ang, nturns, error = get_correction_angle( axis, cen, coms, unit_xform1, error )
 	if not correction_ang and not error:
 		error = "correction_ang is None"
 	if correction_ang:
-		print "correcting unit_ang1 and ang1"
+		if verbose: print "correcting unit_ang1 and ang1"
 		unit_ang1 = unit_ang1-correction_ang/nturns
 		ang1 = unit_ang1 * (sub2_trans/unit_trans)
 	unit_xform1 = rotation_around( axis, unit_ang1, cen )
@@ -283,12 +285,12 @@ def determine_helix_geometry( sele='vis', show=0 ):
 		unit_ang2 = ang2 / (sub2_trans/unit_trans)
 		unit_xform2 = rotation_around( axis, unit_ang2, cen )
 		unit_xform2.t += unit_trans*axis
-		print "========== GET GEOMETRY FOR PRIMARY ROTATION", unit_ang2, "=========="
+		if verbose: print "========== GET GEOMETRY FOR PRIMARY ROTATION", unit_ang2, "=========="
 		correction_ang2, nturns2, error2 = get_correction_angle( axis, cen, coms, unit_xform2, error )
 		if not correction_ang2 and not error2:
 			error = "correction_ang2 is None"
 		if correction_ang2:
-			print "correcting unit_ang and ang"
+			if verbose: print "correcting unit_ang and ang"
 			unit_ang2 = unit_ang2-correction_ang2/nturns2
 			ang2 = unit_ang2 * (sub2_trans/unit_trans)
 		unit_xform2 = rotation_around( axis, unit_ang2, cen )
@@ -309,19 +311,19 @@ def determine_helix_geometry( sele='vis', show=0 ):
 	# check up to nfold 6
 	for nfold in range( 1, 7 ):
 		for i in range( len(unit_xforms) ):
-			print "========== TEST COM COVERAGE FOR NFOLD", nfold, ", NANG", i
+			if verbose: print "========== TEST COM COVERAGE FOR NFOLD", nfold, ", NANG", i
 			unit_xform = unit_xforms[i]
 			unit_ang   = unit_angs[i]
 			# ang = angs[i]
-			print "checking symmetry Nfold",nfold,"ang_option",i
+			if verbose: print "checking symmetry Nfold",nfold,"ang_option",i
 			rms = xform_covers_all_coms( axis, cen, coms, unit_xform, nfold )
 			if rms:
 				error = None
-				print "RMS error to input coms is", rms
+				if verbose: print "RMS to input coms is", rms
 				break
 		if not error:
 			break
-	if not error: print "nfold is",nfold
+	if not error and verbose: print "nfold is",nfold
 
 	# optional graphics
 	if show > 0:
@@ -339,12 +341,40 @@ def determine_helix_geometry( sele='vis', show=0 ):
 		cmd.load_cgo(cgo,"determine_helix_geometry")
 		cmd.load_cgo(cgo2,"existing_coms")		
 
-	# print "unitary rotation angle", unit_ang*180.0/math.pi
+	# if verbose: print "unitary rotation angle", unit_ang*180.0/math.pi
 
 	if error:
 		raise Exception( error )
 
 	return axis, cen, unit_ang, nfold, unit_trans, unit_xform
+
+
+def make_chainAB( sele='vis', show=0, **args ):
+	axis, cen, unit_ang, nfold, unit_trans, unit_xform = determine_helix_geometry( sele, show=show, *args )
+	cmd.remove( 'not chain A' )
+	cmd.create( "chainB", "chain A" )
+	xform( "chainB", unit_xform )
+	cmd.alter( 'chainB', "chain='B'" )
+
+def make_chainAB_all_in_dir( pattern ):
+	cmd.delete( "all" )
+	path = os.path.split( pattern )[0]
+	for fn in glob.glob( pattern ):
+		newfn = fn
+		while newfn.endswith(".gz" ): newfn = newfn[:-3]		
+		while newfn.endswith(".pdb"): newfn = newfn[:-4]
+		newfn += "_chainAB.pdb"
+		if not os.path.exists( newfn ):
+			try:
+				cmd.load( fn )
+				make_chainAB( verbose=False )
+				cmd.save( newfn )
+			except Exception as e:
+				print "========================= ERROR ============================"
+				print fn
+				print e
+				print "================================++++========================"				
+			cmd.delete( "all" )
 
 
 def make_helix_symdef( sele='vis', show=0 ):
