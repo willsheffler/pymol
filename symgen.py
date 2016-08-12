@@ -114,7 +114,7 @@ class SymElem(object):
 			a = self.axis * length/2.0
 			c = self.cen
 			c1, c2 = self.cen - a, self.cen + a
-			c  = x*c; c1 = x*c1; c2 = x*c2	
+			c  = x*c; c1 = x*c1; c2 = x*c2
 			c.round0(); c1.round0(); c2.round0()
 			CGO.extend([
 				#pymol.cgo.BEGIN, pymol.cgo.LINES,
@@ -127,7 +127,7 @@ class SymElem(object):
 				col[0], col[1], col[2],
 				col[0], col[1], col[2],
 				pymol.cgo.SPHERE,
-				c.x, c.y, c.z, sphereradius 
+				c.x, c.y, c.z, sphereradius
 			])
 			if self.kind.startswith("D"):
 				for i in range(self.nfold):
@@ -139,7 +139,7 @@ class SymElem(object):
 					c1, c2 = self.cen - a, self.cen + a
 					if "xform" in kwargs:
 						x = kwargs["xform"]
-						c  = x*c; c1 = x*c1; c2 = x*c2	
+						c  = x*c; c1 = x*c1; c2 = x*c2
 					c.round0(); c1.round0(); c2.round0()
 					r = radius if self.nfold==2 else radius
 					CGO.extend( [
@@ -149,7 +149,7 @@ class SymElem(object):
 					] )
 		elif self.kind == "T":
 			cen = x*self.cen
-			cen.round0(); 
+			cen.round0();
 			CGO.extend( cgo_sphere(cen,1.6*sphereradius,col=(0.5,0.5,1)) )
 			seen2,seen3 = list(),list()
 			for f in self.frames:
@@ -163,10 +163,10 @@ class SymElem(object):
 				if not c3a in seen3:
 					CGO.extend( cgo_cyl(cen+c3a,cen+c3b,radius,col=(0,1,0)) )
 					seen3.append(c3a)
-					seen3.append(c3b)					
+					seen3.append(c3b)
 		elif self.kind == "O":
 			cen = x*self.cen
-			cen.round0(); 
+			cen.round0();
 			CGO.extend( cgo_sphere(cen,1.6*sphereradius,col=(0.5,0.5,1)) )
 			seen2,seen3,seen4 = list(),list(),list()
 			for f in self.frames:
@@ -184,7 +184,7 @@ class SymElem(object):
 				if not c3a in seen3:
 					CGO.extend( cgo_cyl(cen+c3a,cen+c3b,radius,col=(0,1,0)) )
 					seen3.append(c3a)
-					seen3.append(c3b)					
+					seen3.append(c3b)
 				if not c4a in seen4:
 					CGO.extend( cgo_cyl(cen+c4a,cen+c4b,radius,col=(0,0,1)) )
 					seen4.append(c4a)
@@ -205,14 +205,14 @@ class SymElem(object):
 						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p1.x+axs.x/10.0, p1.y+axs.y/10.0, p1.z+axs.z/10.0,
 						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p2.x+axs.x/10.0, p2.y+axs.y/10.0, p2.z+axs.z/10.0,
 						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p3.x+axs.x/10.0, p3.y+axs.y/10.0, p3.z+axs.z/10.0,
-						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p1.x+axs.x/10.0, p1.y+axs.y/10.0, p1.z+axs.z/10.0, 
+						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p1.x+axs.x/10.0, p1.y+axs.y/10.0, p1.z+axs.z/10.0,
 						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p2.x+axs.x/10.0, p2.y+axs.y/10.0, p2.z+axs.z/10.0,
 						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p4.x+axs.x/10.0, p4.y+axs.y/10.0, p4.z+axs.z/10.0,
-						 pymol.cgo.COLOR, 1-col[0], 1-col[1], 1-col[2], 
+						 pymol.cgo.COLOR, 1-col[0], 1-col[1], 1-col[2],
 						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p1.x-axs.x/10.0, p1.y-axs.y/10.0, p1.z-axs.z/10.0,
 						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p2.x-axs.x/10.0, p2.y-axs.y/10.0, p2.z-axs.z/10.0,
 						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p3.x-axs.x/10.0, p3.y-axs.y/10.0, p3.z-axs.z/10.0,
-						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p1.x-axs.x/10.0, p1.y-axs.y/10.0, p1.z-axs.z/10.0, 
+						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p1.x-axs.x/10.0, p1.y-axs.y/10.0, p1.z-axs.z/10.0,
 						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p2.x-axs.x/10.0, p2.y-axs.y/10.0, p2.z-axs.z/10.0,
 						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p4.x-axs.x/10.0, p4.y-axs.y/10.0, p4.z-axs.z/10.0,
 					pymol.cgo.END,
@@ -226,11 +226,11 @@ class SymElem(object):
 				p1 = cen + p1; p2 = cen + p2; p3 = cen + p3;
 				CGO.extend([
 					pymol.cgo.BEGIN, pymol.cgo.TRIANGLES, pymol.cgo.COLOR, col[0], col[1], col[2], pymol.cgo.ALPHA, 1,
-						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p1.x+axs.x/10.0, p1.y+axs.y/10.0, p1.z+axs.z/10.0, 
+						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p1.x+axs.x/10.0, p1.y+axs.y/10.0, p1.z+axs.z/10.0,
 						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p2.x+axs.x/10.0, p2.y+axs.y/10.0, p2.z+axs.z/10.0,
 						pymol.cgo.NORMAL, axs.x, axs.y, axs.z, pymol.cgo.VERTEX,  p3.x+axs.x/10.0, p3.y+axs.y/10.0, p3.z+axs.z/10.0,
-						 pymol.cgo.COLOR, 1-col[0], 1-col[1], 1-col[2], 
-						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p1.x-axs.x/10.0, p1.y-axs.y/10.0, p1.z-axs.z/10.0, 
+						 pymol.cgo.COLOR, 1-col[0], 1-col[1], 1-col[2],
+						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p1.x-axs.x/10.0, p1.y-axs.y/10.0, p1.z-axs.z/10.0,
 						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p2.x-axs.x/10.0, p2.y-axs.y/10.0, p2.z-axs.z/10.0,
 						pymol.cgo.NORMAL, -axs.x, -axs.y, -axs.z, pymol.cgo.VERTEX,  p3.x-axs.x/10.0, p3.y-axs.y/10.0, p3.z-axs.z/10.0,
 					pymol.cgo.END,
@@ -249,7 +249,7 @@ class SymElemPosition(object):
 		self.xform = xform
 	def __eq__(self,other):
 		return self.symelem==other.symelem and self.xform==other.xform
-		
+
 
 class SymElemGroupManager(object):
 	"""docstring for SymElemGroupManager"""
@@ -339,7 +339,7 @@ def generate_sym_trie_recurse(generators,depth,opts,body,heads,newheads,igen):
 				# print "NEWHEAD",candidate
 
 	newheads.extend(newnewheads)
-	
+
 	if igen+1 == len(generators):
 		body.extend(heads)
 		heads = newheads
@@ -361,7 +361,7 @@ def generate_sym_trie(generators,depth=10,opts=None):
 	root.visit(sanity_check)
 	return root
 
-	
+
 
 ################################################################################################################
 ################################################################################################################
@@ -543,7 +543,7 @@ class BuildCGO(object):
 		if self.origin.distance(v) > self.maxrad:	return False
 		if not self.bbox[0].x <= v.x <= self.bbox[1].x: return False
 		if not self.bbox[0].y <= v.y <= self.bbox[1].y: return False
-		if not self.bbox[0].z <= v.z <= self.bbox[1].z: return False				
+		if not self.bbox[0].z <= v.z <= self.bbox[1].z: return False
 		return True
 	def __call__(self,node,**kwargs):
 		x = kwargs["xform"]
@@ -552,7 +552,7 @@ class BuildCGO(object):
 		px = kwargs["parentxform"]
 		if self.nodes:
 			pcen = px*self.nodes[-1]
-			# pcen = px*self.nodes[0]			
+			# pcen = px*self.nodes[0]
 
 		# show "nodes"
 		for icen,cen in enumerate(self.nodes):
@@ -580,7 +580,7 @@ class BuildCGO(object):
 		# should add duplicate checks here
 		self.CGO.extend(elem.cgo(**kwargs))
 	def add_sphere(self,cen,rad,text="",icol=0):
-		# should add duplicate checks here		
+		# should add duplicate checks here
 		cen.round0()
 		if text:
 			pos = [cen.x+1.0,cen.y+1.0,cen.z+1.0]
@@ -628,7 +628,7 @@ class VecDict(object):
 
 class ComponentCenterVisitor(object):
 	"""docstring for ComponentCenterVisitor"""
-	def __init__(self, symelems, extranodes=[], label="NODES", colors=list(),**kwargs):
+	def __init__(self, symelems, extranodes=[], label="NODES", colors=list(),showlinks=1,**kwargs):
 		super(ComponentCenterVisitor, self).__init__()
 		# if len(symelems) > 2:
 		# 	raise NotImplementedError("num components > 2 not working yet... BFS fails")
@@ -644,9 +644,10 @@ class ComponentCenterVisitor(object):
 			self.priCCtoCClist[n] = [n]
 			self.priCCtoCCframes[n] = VecDict()
 		self.parentmap = None
-		self.childmap = None		
+		self.childmap = None
 		self.colors = colors
 		self.colors.extend( ( (1,1,0), (0,1,1), (1,0,1), (0.7,0.7,0.7) ) )
+		self.showlinks = showlinks
 	def __call__(self,sym_trie_node,xform,parentxform,**kwargs):
 		assert self.priCCtoCCframes.keys() == self.priCCtoCClist.keys()
 		for priCC in self.priCCtoCClist.keys():
@@ -728,7 +729,7 @@ class ComponentCenterVisitor(object):
 			pn,CClist = itms
 			for n in CClist:
 				CGO.extend( cgo_sphere(n, r=2.2, col=self.colors[ipn] ) )
-				if n in self.parentmap.keys() and self.parentmap[n]:
+				if n in self.parentmap.keys() and self.parentmap[n] and self.showlinks:
 					CGO.extend( cgo_cyl_arrow( self.parentmap[n], n, r=0.8, col=self.colors[ipn] ) )
 				if showframes and ipn < len(component_pos):
 					for stn in self.priCCtoCCframes[pn][n]:
@@ -738,7 +739,8 @@ class ComponentCenterVisitor(object):
 						CGO.extend( cgo_sphere(cn , r=2.5, col=self.colors[ipn] ) )
 						CGO.extend( cgo_sphere(cnx, r=1.7, col=self.colors[ipn] ) )
 						CGO.extend( cgo_sphere(cny, r=1.2, col=self.colors[ipn] ) )
-						CGO.extend( cgo_cyl_arrow(n,cn, r=0.3, col=self.colors[ipn], arrowlen=2.0 ) )
+						if self.showlinks or True:
+							CGO.extend( cgo_cyl_arrow(n,cn, r=0.3, col=self.colors[ipn], arrowlen=2.0 ) )
 		v = cmd.get_view()
 		cmd.delete(self.label)
 		cmd.load_cgo(CGO,self.label)
@@ -785,17 +787,17 @@ class ComponentCenterVisitor(object):
 				if True: Sxyz += (XYZ_TEMPLATE % ( CCDofEndName, ELEMDIR.x,ELEMDIR.y,ELEMDIR.z, ELEMDIR2.x,ELEMDIR2.y,ELEMDIR2.z, CC.x*scale, CC.y*scale, CC.z*scale ) )
 				if  PCC: edges.append( (PCCName      ,PCCDofBegName) )
 				if  PCC: edges.append( (PCCDofBegName,PCCDofEndName) )
-				if  PCC: edges.append( (PCCDofEndName, CCDofBegName) )				
-				if True: edges.append( (CCDofBegName, CCDofEndName) )								
-				# if True: edges.append( (CCDofEndName, CCDOFName) )					
+				if  PCC: edges.append( (PCCDofEndName, CCDofBegName) )
+				if True: edges.append( (CCDofBegName, CCDofEndName) )
+				# if True: edges.append( (CCDofEndName, CCDOFName) )
 				if  PCC: celldofjumps.append( (PCCDofBegName, PCCDofEndName) )
-				if True: compdofjumps[ip].append( (CCDofBegName, CCDofEndName) )					
+				if True: compdofjumps[ip].append( (CCDofBegName, CCDofEndName) )
 				for isub,stn in enumerate(STNs):
 					SUBName = "CMP%02i_CEN%03i_SUB%03i" %(ip,icc,isub)
 					if ip==0: SUBAs.append(SUBName)
 					SUBs[ip].append((SUBName,stn.position))
 					# edges.append( (CCDOFName , SUBName) )
-					edges.append( (CCDofEndName , SUBName) )					
+					edges.append( (CCDofEndName , SUBName) )
 					# edges.append( (SUBName, "SUBUNIT %s"%("ABCDEFG"[ip]) ) )
 					SX = stn.position.R * Vec(1,0,0)
 					SY = stn.position.R * Vec(0,1,0)
@@ -845,7 +847,7 @@ class ComponentCenterVisitor(object):
 		for icomp,subs in enumerate(SUBs):
 			if icomp==0: continue
 			for SUBname0,x0 in SUBs[0]:
-				for SUBname,x in subs:				
+				for SUBname,x in subs:
 					if x != x0: continue
 					p = SUBname
 					chain = "ABCDEFG"[icomp]
@@ -952,7 +954,7 @@ class RosettaSymDef(object):
 				dummy,name,v1name,v2name = splt[:4]
 				self.add_edge(name,v1name,v2name)
 	def displaycen(self,name,virt,offset=5.0):
-		if   re.match(".*DofBeg.*",name): return virt[2] + offset*virt[0] # shift +X only 
+		if   re.match(".*DofBeg.*",name): return virt[2] + offset*virt[0] # shift +X only
 		elif re.match(".*DofEnd.*",name): return virt[2] - offset*virt[0] # shift -X only
 		return virt[2]+offset*virt[0]+offset*virt[1]
 	def sanity_check(self):
@@ -991,7 +993,7 @@ class RosettaSymDef(object):
 			if not v2name.startswith("SUBUNIT"):
 				v2 = self.virtuals[v2name]
 			cen1 = self.displaycen(name,v1,offset=XYlen)
-			cen2 = self.displaycen(name,v2,offset=XYlen)			
+			cen2 = self.displaycen(name,v2,offset=XYlen)
 			CGO.extend( cgo_lineabs( cen1, cen2, (1,1,1) ) )
 			upmid = (cen1 + 3.0*cen2)/4.0
 			CGO.extend( cgo_sphere( upmid ))
@@ -1000,15 +1002,15 @@ class RosettaSymDef(object):
 			# pymol.cgo.wire_text(CGO,pymol.vfont.plain,[upmid[0],upmid[1],upmid[2]],name)
 
 		cmd.load_cgo(CGO,tag)
-		
+
 
 
 def test_D2TET(depth=6,cell=60, **kwargs):
 	G = [
-		# SymElem("C2",axis=Vec( 1,0,0),cen=Vec(    0    ,cell/2.0, cell/4.0)),	
+		# SymElem("C2",axis=Vec( 1,0,0),cen=Vec(    0    ,cell/2.0, cell/4.0)),
 		# SymElem("C3",axis=Vec(-1,1,1),cen=Vec(-cell/6.0,cell/6.0,-cell/3.0)),
-		# SymElem("C2",axis=Vec(1,1,0),cen=cell*Vec(0,0.0,0.0)),	
-		# SymElem("C3",axis=Vec(-1,1,1),cen=Vec(0,0,0)),	
+		# SymElem("C2",axis=Vec(1,1,0),cen=cell*Vec(0,0.0,0.0)),
+		# SymElem("C3",axis=Vec(-1,1,1),cen=Vec(0,0,0)),
 		# SymElem("C2",axis=Vec(0,1,0)),
 		SymElem("C3",axis=Vec(1,1,1)),
 		# SymElem("C2",axis=Vec(0,1,0),cen=Vec(1,1,1)*cell/2.0), # other T
@@ -1030,22 +1032,22 @@ def test_D2TET(depth=6,cell=60, **kwargs):
 def test_D4OCT(depth=4):
 	CELL = 30
 	G = [
-		# SymElem("C2",axis=Vec( 1,0,0),cen=Vec(    0    ,CELL/2.0, CELL/4.0)),	
+		# SymElem("C2",axis=Vec( 1,0,0),cen=Vec(    0    ,CELL/2.0, CELL/4.0)),
 		# SymElem("C3",axis=Vec(-1,1,1),cen=Vec(-CELL/6.0,CELL/6.0,-CELL/3.0)),
-		# SymElem("C2",axis=Vec(1,1,0),cen=CELL*Vec(0,0.0,0.0)),	
-		# SymElem("C3",axis=Vec(-1,1,1),cen=Vec(0,0,0)),	
+		# SymElem("C2",axis=Vec(1,1,0),cen=CELL*Vec(0,0.0,0.0)),
+		# SymElem("C3",axis=Vec(-1,1,1),cen=Vec(0,0,0)),
 		SymElem("C2",axis=Vec(1,1,0),cen=Vec(0,0,CELL)),
 		SymElem("C3",axis=Vec(1,1,1),cen=Vec(0,0,CELL)),
-		SymElem("C4",axis=Vec(1,0,0),cen=Vec(0,0,CELL)),		
+		SymElem("C4",axis=Vec(1,0,0),cen=Vec(0,0,CELL)),
 		SymElem("C4",axis=Vec(0,0,1)),
 		SymElem("C2",axis=Vec(1,0,0)),
-		SymElem("C2",axis=Vec(0,1,0)),				
+		SymElem("C2",axis=Vec(0,1,0)),
 	]
 	# for elem in G: print elem
 	symtrie = generate_sym_trie(G,depth=depth)
 	# buildcgo = BuildCGO( nodes=[ Vec(2,4,3), Vec(-6,-2,35), ] )
-	buildcgo = BuildCGO( nodes=[ Vec(-6,-2,CELL+5), Vec(2,4,3), ] )	
-	# buildcgo = BuildCGO( nodes=[ Vec(-6,-2,35), ] )	
+	buildcgo = BuildCGO( nodes=[ Vec(-6,-2,CELL+5), Vec(2,4,3), ] )
+	# buildcgo = BuildCGO( nodes=[ Vec(-6,-2,35), ] )
 	# buildcgo = BuildCGO( nodes=[ Vec(2,4,3), ] )
 	symtrie.visit(buildcgo)
 	buildcgo.show()
@@ -1057,7 +1059,7 @@ def test_xtal(G,cell,depth=4,mindepth=0,symdef=1,shownodes=1,**kwargs):
 	tag = "test" if not "tag" in kwargs else kwargs['tag']
 	for d in range(mindepth,depth+1):
 		symtrie = generate_sym_trie(G,depth=d)
-		# buildcgo = BuildCGO( nodes=[ CEN1+Vec(2,3,4), CEN2+Vec(2,4,3), ] )	
+		# buildcgo = BuildCGO( nodes=[ CEN1+Vec(2,3,4), CEN2+Vec(2,4,3), ] )
 		nodes = []
 		if "component_pos" in kwargs.keys():
 			raise NotImplementedError("component_pos is no longer used")
@@ -1081,7 +1083,7 @@ def test_xtal(G,cell,depth=4,mindepth=0,symdef=1,shownodes=1,**kwargs):
 					sdef.parse(sdef_string)
 					sdef.show("SYMDEF_"+tag)
 	for fn in FN:
-		fn.show(**kwargs) # dumb order hack for pymol up/dn	
+		fn.show(**kwargs) # dumb order hack for pymol up/dn
 	cmd.disable("all")
 	cmd.enable(tag+"_DEPTH%i"%(depth))
 	cmd.enable(tag+"_NODES%i"%(depth))
@@ -1092,7 +1094,7 @@ def test_xtal(G,cell,depth=4,mindepth=0,symdef=1,shownodes=1,**kwargs):
 
 
 def test_I432_OD3(cell=120,**kwargs):
-	X = alignvectors(Vec(1,1,1),Vec(1,0,-1),Vec(0,0,1),Vec(1,0,0))	
+	X = alignvectors(Vec(1,1,1),Vec(1,0,-1),Vec(0,0,1),Vec(1,0,0))
 	# G = [ SymElem( "O" , cen=cell*Vec(0.0,0.0,0.0) ),
 		  # SymElem( "D3", cen=cell*Vec(0.25,0.25,0.25), axis=Vec(1,1,1), axis2=Vec(1,-1,0) ), ]
 	# cube( cell*Vec(-0.5,-0.5,-0.5), cell*Vec(0.5,0.5,0.5) )
@@ -1103,16 +1105,22 @@ def test_I432_OD3(cell=120,**kwargs):
 
 def test_P23_TT(cell=100,**kwargs):
 	# delete all; run ~/pymol/symgen.py; test_P23_TD2B( depth=2, cell=200, symdef_scale=0.000001, generic_names=1 )
-	G = [ SymElem( "C3" , axis=Vec(1,1, 1), cen=cell*Vec(0.0, 0.0,0.0) ),
-	      SymElem( "C3" , axis=Vec(1,1,-1), cen=cell*Vec(0.5,-0.5,0.0) ),	]
-	component_pos=[ Vec(-8,-7,6), Vec(-7,0,-11), ]
-	test_xtal(G,cell,component_pos=component_pos,tag="P23_TT",**kwargs)
-	cube( cell*Vec(0,0,-0.5), cell*Vec(1,1,0.5) )
+	G = [ SymElem( "C3" , axis=Vec( 1,-1,-1), cen=cell*Vec(0.0 , 0.0 ,0.0 ) ),
+	      SymElem( "C3" , axis=Vec( 1,-1, 1), cen=cell*Vec(0.25, 0.25,0.0 ) ),
+   	      # SymElem( "T" , cen=cell*Vec(0.25,0.25,0.0) ),
+   	      ]
+	test_xtal(G,cell,tag="P23_TT",**kwargs)
+	cube( cell*Vec(1,1,1)*-0.5, cell*Vec(1,1,1)*0.5 )
 
 
 def test_P432_OD4(cell=80,**kwargs):
 	G = [ SymElem( "D4", cen=cell*Vec(0.0,0.0,0.0) ),
 	      SymElem( "O" , cen=cell*Vec(0.0,0.0,0.5) ),	]
+	test_xtal(G,cell,tag="P432_OD4",**kwargs)
+
+def test_P4m_44(cell=80,**kwargs):
+	G = [ SymElem( "D4", cen=cell*Vec(0.0,0.0,0.0) ),
+	      SymElem( "D4", cen=cell*Vec(0.5,0.0,0.0) ),	]
 	test_xtal(G,cell,tag="P432_OD4",**kwargs)
 
 def test_P23_TD2A(cell=200,**kwargs):
@@ -1123,21 +1131,28 @@ def test_P23_TD2A(cell=200,**kwargs):
 	test_xtal(G,cell,component_pos=component_pos,tag="P23_TD2A",**kwargs)
 	cube( cell*Vec(0,0,-0.5), cell*Vec(1,1,0.5) )
 
+def test_P23_TC3(cell=200,**kwargs):
+	# delete all; run ~/pymol/symgen.py; test_P23_TD2B( depth=2, cell=200, symdef_scale=0.000001, generic_names=1 )
+	G = [ SymElem( "C3" , cen=cell*Vec(0.0,0.0,0.0) ),
+	      SymElem( "T" , cen=cell*Vec(0.5,0.5,0.5) ),	]
+	test_xtal(G,cell,tag="P23_TC3",**kwargs)
+	cube( cell*Vec(0,0,0), cell*Vec(1,1,1) )
+
+# run /Users/sheffler/pymol/symgen.py; delete all; test_P23_TD2B( depth=4 )
 def test_P23_TD2B(depth=3,cell=150,**kwargs):
 	# delete all; run ~/pymol/symgen.py; test_P23_TD2B( depth=2, cell=200, symdef_scale=0.000001, generic_names=1 )
 	G = [
 		SymElem( "D2", cen=cell*Vec(0.0,0.0,0.0) ),
 	    SymElem( "T" , cen=cell*Vec(0.0,0.5,0.5) ),
 	]
-	component_pos=[ Vec(3,7,6), Vec(0,-7,-11), ]
-	test_xtal(G,cell,component_pos=component_pos,tag="P23_TD2B",**kwargs)
+	test_xtal(G,cell,tag="P23_TD2B",**kwargs)
 	cube( cell*Vec(0,-0.5,-0.5), cell*Vec(1,0.5,0.5) )
 
 def test_F432_TD2(cell=150,**kwargs):
 	# delete all; run ~/pymol/symgen.py; test_F432_TD2( depth=2, cell=200, symdef_scale=0.000001, generic_names=1 )
 	G = [ SymElem( "D2", cen=cell*Vec(0.0,0.0,0.0) ), # , axis2=Vec(1,1,0) ),
-	      SymElem( "T" , cen=cell*Vec(0.0,0.0,0.25), input_xform=RAD(Uz,45) ),	
-	      # SymElem( "O" , cen=cell*Vec(0.5,0.5,0.0) ),	
+	      SymElem( "T" , cen=cell*Vec(0.0,0.0,0.25), input_xform=RAD(Uz,45) ),
+	      # SymElem( "O" , cen=cell*Vec(0.5,0.5,0.0) ),
     ]
 	component_pos=[ Vec(2,4,8), Vec(2,5,-12), Vec(4,6,8) ]
 	test_xtal(G,cell,component_pos=component_pos,tag="F432_TD2",**kwargs)
@@ -1147,10 +1162,10 @@ def test_F432_OTD2(depth=3,cell=80,**kwargs):
 	# delete all; run /Users/sheffler/pymol/symgen.py; test_P23(depth=1,mindepth=1)
 	# ODT 96
 	# TDO 96
-	G = [ 
-	      SymElem( "O" , cen=cell*Vec(0.5,0.5,0.0) ),	
+	G = [
+	      SymElem( "O" , cen=cell*Vec(0.5,0.5,0.0) ),
 		  SymElem( "D2", cen=cell*Vec(0.0,0.0,0.0), axis2=Vec(1,1,0) ),
-	      SymElem( "T" , cen=cell*Vec(0.0,0.0,-0.5) ),	
+	      SymElem( "T" , cen=cell*Vec(0.0,0.0,-0.5) ),
 	    ]
 	component_pos=[ Vec(2,4,8), Vec(2,5,-12), Vec(4,6,8) ]
 	extranodes = [ cell*Vec(0.0,0.5,0.0)]
@@ -1160,12 +1175,12 @@ def test_F432_OTD2(depth=3,cell=80,**kwargs):
 def test_I432_OD4(cell=80,**kwargs):
 	# delete all; run /Users/sheffler/pymol/symgen.py; test_F432_OD4( depth=3, cell=200, symdef_scale=0.000001, generic_names=1 )
 	# G = [ SymElem( "D2", cen=cell*Vec(0.0,0.0,0.0), axis2=Vec(1,1,0) ),
-	#       # SymElem( "T" , cen=cell*Vec(0.0,0.0,-0.5) ),	
-	#       SymElem( "O" , cen=cell*Vec(0.5,0.5,0.0) ),	
+	#       # SymElem( "T" , cen=cell*Vec(0.0,0.0,-0.5) ),
+	#       SymElem( "O" , cen=cell*Vec(0.5,0.5,0.0) ),
 	#     ]
-	G = [ SymElem( "D4", cen=cell*Vec(0.0,0.0,0.0)) , 
-	      # SymElem( "T" , cen=cell*Vec(0.0,0.0,-0.5) ),	
-	      SymElem( "O" , cen=cell*Vec(0.0,0.0,0.5), input_xform=RAD(Uz,45) ),	
+	G = [ SymElem( "D4", cen=cell*Vec(0.0,0.0,0.0)) ,
+	      # SymElem( "T" , cen=cell*Vec(0.0,0.0,-0.5) ),
+	      SymElem( "O" , cen=cell*Vec(0.0,0.0,0.5), input_xform=RAD(Uz,45) ),
 	    ]
 	component_pos=[ Vec(2,4,8), Vec(2,5,-12), Vec(4,6,8) ]
 	test_xtal(G,cell,component_pos=component_pos,tag="I432_OD4",**kwargs)
@@ -1175,7 +1190,7 @@ def test_I432_OD4(cell=80,**kwargs):
 def test_P442(cell=80,**kwargs):
 	# delete all; run ~/pymol/symgen.py; test_P4( depth=4, cell=100, symdef_scale=0.000001, generic_names=1 )
 	G = [ SymElem( "C4", cen=cell*Vec(0.0,0.0,0.0) ),
-	      SymElem( "C2", cen=cell*Vec(0.5,0.0,0.0) ),	
+	      SymElem( "C2", cen=cell*Vec(0.5,0.0,0.0) ),
 	     ]
 	test_xtal(G,cell,tag='test_P4_42',**kwargs)
 def test_P444(cell=100,**kwargs):
@@ -1194,7 +1209,7 @@ def test_I4132(cell=100,**kwargs):
 	# delete all; test_I4132(depth=7,shownodes=0,cell=200,maxrad=180); run /Users/sheffler/pymol/misc/G222.py; gyroid(200,r=180)
 	# delete all; run /Users/sheffler/pymol/symgen.py; test_I4132( cell=150, depth=7, shownodes=0, maxrad=150 );  gyroid(150,r=150,c=Vec(75,75,75))
 	r = random.random
-	G = [ 
+	G = [
 		SymElem( "D3", cen=cell*Vec(0.625,0.625,0.625), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(0,1,0) ),
 		SymElem( "D2", cen=cell*Vec(0.625,0.500,0.750), axis=Vec(1,0,0), axis2=Vec(0,-1,1), col=(0,1,1) ),
 		SymElem( "D3", cen=cell*Vec(0.375,0.375,0.375), axis=Vec(1,1,1), axis2=Vec(1,-1,0), col=(1,0,0) ),
@@ -1231,7 +1246,7 @@ def test_P213(cell=100,**kwargs):
 
 def test_T32(cell=100,**kwargs):
 	print "========================================== T32 =========================================="
-	G = [ 
+	G = [
 		SymElem( "C3", axis=Vec(1,1,1) ),
 		SymElem( "C2", axis=Vec(1,0,0), cen=Vec(0.00001,0,0) ),
 	]
@@ -1256,12 +1271,12 @@ def test_I213(depth=16,cell=100,maxrad=9e9):
 		SymElem( "C2", axis=AXS[1], cen=CEN[1] )
 	]
 	symtrie = generate_sym_trie(G,depth=depth)
-	# buildcgo = BuildCGO( nodes=[ CEN1+Vec(2,3,4), CEN2+Vec(2,4,3), ] )	
+	# buildcgo = BuildCGO( nodes=[ CEN1+Vec(2,3,4), CEN2+Vec(2,4,3), ] )
 	nodes = [
 		CEN[0]+projperp(AXS[0],randnorm())*8.0,
 		CEN[1]+projperp(AXS[1],randnorm())*8.0
 		]
-	buildcgo = BuildCGO( nodes=nodes, maxrad=maxrad, origin=cell*Vec(0.5,0.5,0.5), showlinks=True )		
+	buildcgo = BuildCGO( nodes=nodes, maxrad=maxrad, origin=cell*Vec(0.5,0.5,0.5), showlinks=True )
 	symtrie.visit(buildcgo)
 	buildcgo.show()
 	cube( Vec(0,0,0), cell*Vec(1,1,1) )
@@ -1288,9 +1303,9 @@ def test_P4132(depth=8,cell=50,maxrad=80):
 		SymElem( "C3", axis=AXS[1], cen=CEN[1] ),
 	]
 	symtrie = generate_sym_trie(G,depth=depth)
-	# buildcgo = BuildCGO( nodes=[ CEN1+Vec(2,3,4), CEN2+Vec(2,4,3), ] )	
+	# buildcgo = BuildCGO( nodes=[ CEN1+Vec(2,3,4), CEN2+Vec(2,4,3), ] )
 	cencell = cell/2.0 * Vec(1,1,1)
-	buildcgo = BuildCGO( nodes=[ CEN[1]+randnorm()*5.0, CEN[0]+randnorm()*8.0 ], origin=cencell, maxrad=maxrad, showlinks=False, showelems=True )		
+	buildcgo = BuildCGO( nodes=[ CEN[1]+randnorm()*5.0, CEN[0]+randnorm()*8.0 ], origin=cencell, maxrad=maxrad, showlinks=False, showelems=True )
 	symtrie.visit(buildcgo)
 	buildcgo.show()
 
@@ -1314,12 +1329,12 @@ def test_F432(depth=6,cell=100,maxrad=90):
 		SymElem( "D2", axis=AXS[1], axis2=Vec(0,-1,1), cen=CEN[1] )
 	]
 	symtrie = generate_sym_trie(G,depth=depth)
-	# buildcgo = BuildCGO( nodes=[ CEN1+Vec(2,3,4), CEN2+Vec(2,4,3), ] )	
+	# buildcgo = BuildCGO( nodes=[ CEN1+Vec(2,3,4), CEN2+Vec(2,4,3), ] )
 	nodes = [
 		CEN[0]+projperp(AXS[0],randnorm())*8.0,
 		CEN[1]+projperp(AXS[1],randnorm())*8.0
 		]
-	buildcgo = BuildCGO( nodes=nodes, maxrad=maxrad, origin=cell*Vec(0.5,0.5,0.5), showlinks=False )		
+	buildcgo = BuildCGO( nodes=nodes, maxrad=maxrad, origin=cell*Vec(0.5,0.5,0.5), showlinks=False )
 	symtrie.visit(buildcgo)
 	buildcgo.show()
 	cube( Vec(0,0,0), cell*Vec(1,1,1) )
@@ -1328,7 +1343,7 @@ def test_F432(depth=6,cell=100,maxrad=90):
 		g.show(radius=2.0,sphereradius=4.0)
 	return AXS,CEN
 def test_quasi( depth=8, cell=20.0, maxrad=9e9 ):
-	G = [ 
+	G = [
 		SymElem( "C2", axis=Vec(1,0,0) ),
 		SymElem( "C2", axis=Vec(0,1,0) ),
 		SymElem( "C2", axis=Vec(0,0,1) ),
@@ -1342,7 +1357,7 @@ def test_quasi( depth=8, cell=20.0, maxrad=9e9 ):
 	symtrie = generate_sym_trie(G,depth=depth)
 	symtrie.visit(print_node)
 	print symtrie
-	buildcgo = BuildCGO( nodes=nodes, maxrad=maxrad, origin=cell*Vec(0.5,0.5,0.5), showlinks=False, showelems=True )		
+	buildcgo = BuildCGO( nodes=nodes, maxrad=maxrad, origin=cell*Vec(0.5,0.5,0.5), showlinks=False, showelems=True )
 	symtrie.visit(buildcgo)
 	buildcgo.show()
 def test_I432( depth=6, cell=50, **kwargs ):
@@ -1355,9 +1370,9 @@ def test_I432( depth=6, cell=50, **kwargs ):
 		SymElem( "D3", axis=Vec(-1,1,1), axis2=Vec(1,1,0) )
 	]
 	symtrie = generate_sym_trie(G,depth=depth)
-	# buildcgo = BuildCGO( nodes=[ CEN1+Vec(2,3,4), CEN2+Vec(2,4,3), ] )	
+	# buildcgo = BuildCGO( nodes=[ CEN1+Vec(2,3,4), CEN2+Vec(2,4,3), ] )
 	nodes = []
-	buildcgo = BuildCGO( nodes=nodes, origin=cell*Vec(0.5,0.5,0.5), showlinks=False, **kwargs )		
+	buildcgo = BuildCGO( nodes=nodes, origin=cell*Vec(0.5,0.5,0.5), showlinks=False, **kwargs )
 	symtrie.visit(buildcgo)
 	buildcgo.show()
 	cube( Vec(0,0,0), cell*Vec(1,1,1) )
@@ -1420,7 +1435,7 @@ def test_icos( depth=3, cell=30, **kwargs ):
 	symtrie = generate_sym_trie(G,depth=depth)
 	# symtrie.visit(print_node)
 	nodes = [ ]
-	buildcgo = BuildCGO( nodes=nodes, origin=cell*Vec(0.5,0.5,0.5), showelems=True, **kwargs )		
+	buildcgo = BuildCGO( nodes=nodes, origin=cell*Vec(0.5,0.5,0.5), showelems=True, **kwargs )
 	symtrie.visit(buildcgo)
 	buildcgo.show()
 
@@ -1435,27 +1450,33 @@ def test_icos( depth=3, cell=30, **kwargs ):
 
 
 
+#def test_F23_C2_T(cell=100,**kwargs):
+#	#delete all ; run ~/pymolscripts/symgen.py; test_F23_C2_T(cell=100, depth=2)
+#	G = [   SymElem( 'C2', cen=cell* Vec ( 0.0,0.0,0.0 ) , axis=Vec(0,0,1), #axis2=Vec(-,-,-)
+#			),
+#			SymElem( 'T', cen=cell*Vec(0.25,0.25,0.0), axis=Vec(0.57735,-0.57735,0.57735), #axis2=Vec(,,)
+#		    ),
+#
+#	       ]
+#	test_xtal(G,cell,tag='test_F23_C2_T',**kwargs)
+#
+#
+
+
+
+
+
+
+
+
+
+# from una
 def test_F23_C2_T(cell=100,**kwargs):
-	#delete all ; run ~/pymolscripts/symgen.py; test_F23_C2_T(cell=100, depth=2)
-	G = [   SymElem( 'C2', cen=cell* Vec ( 0.0,0.0,0.0 ) , axis=Vec(0,0,1), #axis2=Vec(-,-,-) 
-			),
-			SymElem( 'T', cen=cell*Vec(0.25,0.25,0.0), axis=Vec(0.57735,-0.57735,0.57735), #axis2=Vec(,,) 
-		    ),
-			
-	       ]
+	# delete all; run ~/pymol/symgen.py; test_P4( depth=4, cell=100, symdef_scale=0.000001, generic_names=1 )
+	G = [ SymElem( 'T' , cen=cell*Vec( 0.0 , 0.0 , 0.0 ), axis=Vec(-1,1,1) ),
+	      SymElem( 'C2', cen=cell*Vec( 0.25, 0.25, 0.0 ), axis=Vec(0,0,1) )
+	      	]
 	test_xtal(G,cell,tag='test_F23_C2_T',**kwargs)
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

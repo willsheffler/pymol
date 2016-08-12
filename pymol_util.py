@@ -657,12 +657,12 @@ def rotview(axis,ang,cen=xyz.Vec(0,0,0)):
 	v = list(cmd.get_view())
 	x = Xform(xyz.Mat(*v[:9]),xyz.Vec(*v[12:15]))
 	x = RAD(axis,ang,cen) * x
-	v[0] = x.R.xx; v[1] = x.R.xy; v[2] = x.R.xz; 
-	v[3] = x.R.yx; v[4] = x.R.yy; v[5] = x.R.yz; 	
+	v[0] = x.R.xx; v[1] = x.R.xy; v[2] = x.R.xz;
+	v[3] = x.R.yx; v[4] = x.R.yy; v[5] = x.R.yz;
 	v[6] = x.R.zx; v[7] = x.R.zy; v[8] = x.R.zz;
 	v[12] = x.t.x
 	v[13] = x.t.y
-	v[14] = x.t.z		
+	v[14] = x.t.z
 	cmd.set_view( v )
 
 def pointaxis(sel):
@@ -1804,7 +1804,7 @@ def move_up():
 				if i-1 < 0:
 					cmd.enable( all_objs[-1] )
 				else:
-					cmd.enable( all_objs[i-1] ) 
+					cmd.enable( all_objs[i-1] )
 	# cmd.zoom( " or ".join(my_get_obj(enabled_only=True)), complete=True, buffer=3.0 )
 	# cmd.orient
 
@@ -2072,7 +2072,7 @@ def get_closest_atom_pair(selpairs_or_sel1,sel2=None):
 def get_first_last_resi(sele):
 	model = cmd.get_model(sele)
 	beg = model.atom[ 0].resi
-	end = model.atom[-1].resi	
+	end = model.atom[-1].resi
 	return int(beg),int(end)
 
 def cube(lb=xyz.Vec(-10,-10,-10),ub=xyz.Vec(10,10,10),r=0.5,xform=xyz.Xform()):
@@ -2141,14 +2141,14 @@ def getrelframe(newobj,refobj,Forigin=None):
 def getrelframe_rmsalign(movsel,refsel,Forigin=None):
 	"""get transform between two objects using rmsalign"""
 	tmpref = "TMP__getrelframe_rmsalign_REF"
-	tmpmov = "TMP__getrelframe_rmsalign_MOV"	
+	tmpmov = "TMP__getrelframe_rmsalign_MOV"
 	cmd.create(tmpref,refsel)
 	cmd.create(tmpmov,refsel)
 	# cmd.super(tmpref,refsel) # shouldn't be necessary
-	alignresult = cmd.align(tmpmov,movsel)	
+	alignresult = cmd.align(tmpmov,movsel)
 	result = getrelframe(tmpmov,tmpref,Forigin)
 	cmd.delete(tmpmov)
-	cmd.delete(tmpref)	
+	cmd.delete(tmpref)
 	return result, alignresult[0]
 
 def tmpvis(s):
@@ -2171,7 +2171,7 @@ def show_res_frames(sele):
 		e3 = e1.cross( C - CA )
 		e3.normalize()
 		e2 = e3.cross( e1 )
-		m = Mat( e1, e2, e3 )
+		m = xyz.Mat( e1, e2, e3 )
 		# m[0,0] = e1[0];   m[0,1] = e2[0];   m[0,2] = e3[0]
 		# m[1,0] = e1[1];   m[1,1] = e2[1];   m[1,2] = e3[1]
 		# m[2,0] = e1[2];   m[2,1] = e2[2];   m[2,2] = e3[2]

@@ -65,7 +65,7 @@ def get_correction_angle( axis, cen, coms, unit_xform, error ):
 	return correction_ang, nturns, error
 
 
-def determine_helix_geometry( sele='vis', show=0, verbose=True ):
+def determine_helix_geometry( sele='vis', show=0, verbose=True, nfolds=None, n_to_contacts=None ):
 	"""
 	# delete all; load /Users/sheffler/Downloads/N4_C1_DR53_001.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=40)
 	# delete all; load /Users/sheffler/Dropbox/project/hao_helix/hao_test/N2_C1_DR04_065.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)	
@@ -119,6 +119,17 @@ def determine_helix_geometry( sele='vis', show=0, verbose=True ):
 	# delete all; load /Users/sheffler/tmp/waiting_list/N2_C1_DR05_006.pdb; hide lin; show rib; util.cbc; run /Users/sheffler/pymol/helix_util.py; determine_helix_geometry(show=50)
 
 	"""
+
+	if nfolds is None:
+		nfolds = range(1,7)
+	elif isinstance(nfolds,int):
+		nfolds = (nfolds,)
+
+	if n_to_contacts is None:
+		n_to_contacts = range(1,4)
+	elif isinstance(n_to_contacts,int):
+		n_to_contacts = range(1,n_to_contacts)
+
 
 	error = None
 
@@ -279,7 +290,7 @@ def determine_helix_geometry( sele='vis', show=0, verbose=True ):
 	# angs        = [ang1]
 	unit_angs   = [unit_ang1]
 	unit_xforms = [unit_xform1]
-	for i in range(1,4):
+	for i in n_to_contacts:
 		ang2 = 2.0*i*math.pi + ang1
 		# this is crappy duplicated code....
 		unit_ang2 = ang2 / (sub2_trans/unit_trans)
@@ -309,7 +320,7 @@ def determine_helix_geometry( sele='vis', show=0, verbose=True ):
 	# loop over nfolds, then over the unit_xform possibilities
 	# accept first that covers all actual COMs from input structure
 	# check up to nfold 6
-	for nfold in range( 1, 7 ):
+	for nfold in nfolds:
 		for i in range( len(unit_xforms) ):
 			if verbose: print "========== TEST COM COVERAGE FOR NFOLD", nfold, ", NANG", i
 			unit_xform = unit_xforms[i]
@@ -458,6 +469,15 @@ def makeh(sele='vis',n=30):
 	util.cbc('HELIX')
 	cmd.set_view(v)
 cmd.extend('makeh',makeh)
+
+def makeh_from_2chains(n = 10, chain1='A', chain2='B'):
+	x0 = getrelframe( "chain "+chain1, "chain "+chain2 )
+	x = x0
+	for i in range(n):
+		cmd.create( "tmp%i"%i, "not tmp* and chain "+chain2 )
+		xform( "tmp%i"%i , x )
+		x = x0 * x
+		cmd.alter( "tmp%i"%i , "chain='%s'" % "CDEFGHIJKLMNOPQRSTUVWXYZ"[i%24] )
 
 def do_cprofile(func):
     def profiled_func(*args, **kwargs):
