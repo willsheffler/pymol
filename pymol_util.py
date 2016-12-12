@@ -886,6 +886,7 @@ def alignbb(sel="all",obj=None):
 
 def alignall(sel = "all", obj = None):
 	l = cmd.get_object_list()
+	if not l: return
 	if not obj: obj = l[0]
 	if obj not in l:
 		print "ERROR object", obj, "not found!!!"
