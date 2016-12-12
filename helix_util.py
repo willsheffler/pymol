@@ -134,9 +134,10 @@ def determine_helix_geometry( sele='vis', show=0, verbose=True, nfolds=None, n_t
     error = None
 
     chains = cmd.get_chains(sele)
-
+    print "chains:", chains
     # make sure all chains have same len
     nres = [ len( getres( "((%s) and name ca and chain %s)"%(sele,c) ) ) for c in chains ]
+    print "nres foreach chain:", nres
     if min( nres ) != max( nres ): raise Exception( "all chains must be same length" )
 
     # get centers-of-mass of all chains
@@ -442,10 +443,9 @@ def make_helix_symdef( sele='vis', show=0 ):
     if show: cmd.load_cgo( cgo, "make_helix_symdef" )
     print "make_helix_symdef done"
 
-
-
 def makeh(sele='vis',n=30, objname='HELIX', nfolds=None, show=False):
-    axis, cen, unit_ang, nfold, unit_trans, unit_xform = determine_helix_geometry( sele, nfolds=None, show=show )
+    cmd.delete(objname)
+    axis, cen, unit_ang, nfold, unit_trans, unit_xform = determine_helix_geometry( sele, nfolds=nfolds, show=show )
     print "================================== makeh ========================================"
     print "unit_nag:", unit_ang, "unit_trans:", unit_trans, "nfold:", nfold
     if n < 0:
@@ -478,7 +478,20 @@ def makeh(sele='vis',n=30, objname='HELIX', nfolds=None, show=False):
     cmd.show('lines', objname)
     util.cbc(objname)
     cmd.set_view(v)
+    return axis, cen, unit_ang, nfold, unit_trans, unit_xform
 cmd.extend('makeh', makeh)
+
+def determine_pore_size(sele='vis',n=30, objname='HELIX', nfolds=None, show=False):
+    axis, cen, unit_ang, nfold, unit_trans, unit_xform = makeh(sele, n, objname, nfolds, show)
+    min_dis_to_axis = 9e9
+    for a in cmd.get_model(objname+" and name CA").atom:
+        xyz = Vec(a.coord)
+        # project point to zero-plane perp to helix axis
+        xyz = xyz - xyz.dot(axis)*axis
+        dist = xyz.distance(cen)
+        min_dis_to_axis = min(dist, min_dis_to_axis)
+    print "min_dis_to_axis", min_dis_to_axis
+    return min_dis_to_axis
 
 def makeh_from_2chains(n = 10, chain1='A', chain2='B'):
     x0 = getrelframe( "chain "+chain1, "chain "+chain2 )

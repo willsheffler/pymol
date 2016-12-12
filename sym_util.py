@@ -531,7 +531,7 @@ def xtal_frames(tgt=None,skip=tuple(),r=100):
 		else:           showcyl(beg,end,0.2,col=(1.0,0.5,0.2))
 		print round(nf),ctot,o
 
-def makeh(sele='vis',n=30,nfold=1):
+def make_helix_old(sele='vis',n=30,nfold=1):
 	n = n / nfold
 	cmd.delete('helix')
 	v = cmd.get_view()
@@ -557,7 +557,7 @@ def makeh(sele='vis',n=30,nfold=1):
 	util.cbc('HELIX')
 	cmd.set_view(v)
 
-cmd.extend('makeh',makeh)
+cmd.extend('make_helix_old',make_helix_old)
 
 def color_by_2component(col1="green",col2="cyan"):
 	chains = r"""ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz!@#$&.<>?]{}|-_\~=%"""
