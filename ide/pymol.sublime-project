@@ -1,0 +1,52 @@
+{
+	"build_systems":
+	[
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "run_tox",
+			"shell_cmd": "cd $folder && tox 2>&1 | tee log/subl_build.log"
+		},
+		{
+			"name": "build_docs",
+			"shell_cmd": "cd $folder/docs && make html &> ../log/subl_build.log && google-chrome _build/html/index.html &> /dev/null"
+		},
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
+			"selector": "source.python",
+			"shell_cmd": "\"/usr/bin/python\" -u \"$file\""
+		}
+	],
+	"folders":
+	[
+		{
+			"path": "/home/sheffler/pymol",
+			"file_exclude_patterns":
+			["*.pyc", "*.pyo", "*.o", "*.a", "*.lib", "*.so", "*.dylib", ".DS_Store", "*.sublime-workspace", ".tags*", "test.sxhn", "test.sxm", ],
+			"folder_exclude_patterns":
+			[ "build*", "_build*", ".build*", ".git", ".cache", ".idea", "__pycache__", ".hypothesis", ".eggs", ".tox", "external/googletest", "external/include", "external/pybind11", "deps",],
+			"path": ".."
+		}
+	],
+	"settings":
+	{
+		"tab_size": 4,
+		"translate_tabs_to_spaces": true,
+	    "env":
+	    {
+			"Windows":
+			{
+			},
+			"Darwin":
+			{
+			},
+			"Linux":
+			{
+				"CC" : "clang-3.8",
+				"CXX" : "clang++-3.8",
+				// "CXXFLAGS": "-stdlib=libc++ -I/usr/include/libcxxabi",
+
+			}
+	    },
+	},
+}

@@ -1,6 +1,7 @@
+__pycache__
 *.pyc
-.svn
 *~
-
-
 *.pkl
+*.sublime-workspace
+_build
+log/subl_build.log
