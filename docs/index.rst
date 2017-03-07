@@ -18,7 +18,7 @@ Module Documentation
 .. toctree::
    xyzMath
    pymol_util
-   sym_util   
+   sym_util
    sym_comp
 
 Indices and tables

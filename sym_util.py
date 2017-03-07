@@ -11,7 +11,8 @@ from itertools import product,ifilter
 try:
 	from cluster import HierarchicalClustering
 except:
-	print "couldn't import HierarchicalClustering from cluster"
+	pass
+	# print "couldn't import HierarchicalClustering from cluster"
 
 
 nsymmetrizecx = 0
@@ -178,7 +179,7 @@ def aligncx(sele,nfold,alignsele=None,tgtaxis=Uz,chains=list(),extrasel="name CA
 def align_helix( sele, nrepeat, tgt_axis=Vec(1,0,0) ):
 	resi0 = int( cmd.get_model(sele).atom[0].resi )
 	sel1 = "( %s ) and resi %i-%i" % ( sele, resi0+0*nrepeat, resi0+1*nrepeat-1 )
-	sel2 = "( %s ) and resi %i-%i" % ( sele, resi0+1*nrepeat, resi0+2*nrepeat-1 )	
+	sel2 = "( %s ) and resi %i-%i" % ( sele, resi0+1*nrepeat, resi0+2*nrepeat-1 )
 	xform = getrelframe_rmsalign( sel1, sel2 )[0]
 	axis, ang, cen = xform.rotation_axis_center()
 	print axis, ang, cen

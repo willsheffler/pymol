@@ -18,14 +18,15 @@ import os
 
 
 def add_proj_root_to_sys_path():
-  assert __file__.endswith("/docs/conf.py")
-  newpath = __file__[:-13]
-  assert os.path.exists(newpath)
-  if not newpath in sys.path:
-    sys.path.append(newpath)
+    assert __file__.endswith("/docs/conf.py")
+    newpath = __file__[:-13]
+    assert os.path.exists(newpath)
+    if newpath not in sys.path:
+        sys.path.append(newpath)
+
 
 add_proj_root_to_sys_path()
-import xyzMath
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -61,7 +62,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Will\'s PyMOL Scripts'
-copyright = u'2012, Will Sheffler'
+copyright = u'2017, Will Sheffler'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

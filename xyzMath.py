@@ -140,7 +140,7 @@ class Vec(object):
 	def round0(v):
 		if abs(v.x) < EPS: v.x = 0
 		if abs(v.y) < EPS: v.y = 0
-		if abs(v.z) < EPS: v.z = 0				
+		if abs(v.z) < EPS: v.z = 0
 
 Ux = Vec(1,0,0)
 Uy = Vec(0,1,0)
@@ -634,10 +634,10 @@ class Xform(object):
 		p1 = Vec( X * p0 )
 		p2 = Vec( X * p1 )
 		p1 -= axis * (p1-p0).dot(axis);
-		p2 -= axis * (p2-p1).dot(axis);		
+		p2 -= axis * (p2-p1).dot(axis);
 
 		assert( abs( (p1-p0).dot(axis) ) < 0.000001 );
-		assert( abs( (p2-p1).dot(axis) ) < 0.000001 );		
+		assert( abs( (p2-p1).dot(axis) ) < 0.000001 );
 
 		d = p1.length()
 
@@ -1006,8 +1006,8 @@ def alignaroundaxis(axis,u,v):
 	"""
 	>>> axis = randnorm()
 	>>> u = randvec()
-	>>> angle = uniform(-pi,pi)
-	>>> v = rotation_matrix(axis,angle)*u
+	>>> ang = uniform(-pi,pi)
+	>>> v = rotation_matrix(axis,ang)*u
 	>>> uprime = alignaroundaxis(axis,u,v)*u
 	>>> assert v.angle(uprime) < EPS
 	>>> v = randvec()

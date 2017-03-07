@@ -5,3 +5,4 @@ __pycache__
 *.sublime-workspace
 _build
 log/subl_build.log
+.cache
