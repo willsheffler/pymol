@@ -20,7 +20,7 @@ def isiter (x): return hasattr(x,"__iter__")
 def islist (x): return type(x) is list
 def istuple(x): return type(x) is tuple
 
-def isvec  (x): return hasattr(x,"__Vec__")
+def isvec  (x): return hasattr(x,'x') and hasattr(x,'y') and hasattr(x,'z')
 def ismat  (x): return hasattr(x,"__Mat__")
 def isxform(x): return hasattr(x,"__Xform__")
 

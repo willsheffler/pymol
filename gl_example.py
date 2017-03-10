@@ -25,11 +25,11 @@ class myCallback(Callback):
     """Creates a simple vertex shader..."""
 
     def __init__(self):
-        self.rebuild(1000000)
+        self.rebuild(10*1000*1000)
 
     def rebuild(self, nlines):
         self.nlines = nlines
-        mygeom = random_walk(nlines) * 5
+        mygeom = random_walk(nlines) * 10
         self.vbo = vbo.VBO(mygeom)
 
     def __call__(self):
