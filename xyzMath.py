@@ -308,11 +308,12 @@ class Mat(object):
     >>> assert m * ~m == Imat
     """
     def to_rosetta(m):
-        from rosetta.rosetta.numeric import xyzMatxix_double_t
-        return xyzMatrix_double_t(
-            m.xx, m.xy, m.xz,
-            m.yx, m.yy, m.yz,
-            m.zx, m.zy, m.zz)
+        from rosetta.numeric import xyzMatrix_double_t
+        r = xyzMatrix_double_t()
+        r.xx(m.xx); r.xy(m.xy); r.xz(m.xz)
+        r.yx(m.yx); r.yy(m.yy); r.yz(m.yz)
+        r.zx(m.zx); r.zy(m.zy); r.zz(m.zz)
+        return r
 
     def __Mat__(self):
         return True
@@ -323,10 +324,16 @@ class Mat(object):
             self.xx, self.xy, self.xz = 1.0, 0.0, 0.0
             self.yx, self.yy, self.yz = 0.0, 1.0, 0.0
             self.zx, self.zy, self.zz = 0.0, 0.0, 1.0
+            print type(self.xx)
         elif xy is None and ismat(xx):
-            self.xx, self.xy, self.xz = xx.xx, xx.xy, xx.xz
-            self.yx, self.yy, self.yz = xx.yx, xx.yy, xx.yz
-            self.zx, self.zy, self.zz = xx.zx, xx.zy, xx.zz
+            if not isnum(xx.xx):
+                self.xx, self.xy, self.xz = xx.xx(), xx.xy(), xx.xz()
+                self.yx, self.yy, self.yz = xx.yx(), xx.yy(), xx.yz()
+                self.zx, self.zy, self.zz = xx.zx(), xx.zy(), xx.zz()
+            else:
+                self.xx, self.xy, self.xz = xx.xx(), xx.xy(), xx.xz()
+                self.yx, self.yy, self.yz = xx.yx(), xx.yy(), xx.yz()
+                self.zx, self.zy, self.zz = xx.zx(), xx.zy(), xx.zz()
         elif yx is None and isvec(xx) and isvec(xy) and isvec(xz):
             self.xx, self.xy, self.xz = xx.x, xy.x, xz.x
             self.yx, self.yy, self.yz = xx.y, xy.y, xz.y
@@ -337,9 +344,9 @@ class Mat(object):
             self.zx, self.zy, self.zz = float(zx), float(zy), float(zz)
         else:
             raise NotImplementedError
-        assert isfloat(self.xx) and isfloat(self.xy) and isfloat(self.xz)
-        assert isfloat(self.yx) and isfloat(self.yy) and isfloat(self.yz)
-        assert isfloat(self.zx) and isfloat(self.zy) and isfloat(self.zz)
+        # assert isnum(self.xx) and isnum(self.xy) and isnum(self.xz)
+        # assert isnum(self.yx) and isnum(self.yy) and isnum(self.yz)
+        # assert isnum(self.zx) and isnum(self.zy) and isnum(self.zz)
 
     def row(m, i):
         assert isint(i)

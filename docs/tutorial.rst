@@ -35,19 +35,24 @@ to/from rosetta.numeric.xyzVector_double_t
 
 to/from rosetta.numeric.xyzMatrix
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->>> # this doesn't work yet because pyrosetta won't let me make arbitrary xyzMatrix's
->>> # import rosetta
->>> # mros = rosetta.numeric.xyzMatrix_double_t(0)
->>> # mros.xx = 1; mros.yy = 1; mros.zz = 1
->>> # # convert from rosetta xyzMatrix to Mat
->>> # v = Mat(mros)
->>> # print(type(v))
->>> # print(v)
->>> # # convert to rosetta xyzMatrix from Mat
->>> # u = v.to_rosetta()
->>> # print(type(u))
->>> # print(u)
-
+>>> import rosetta
+>>> mros = rosetta.numeric.xyzMatrix_double_t(0)
+>>> mros.xx(1); mros.yy(1); mros.zz(1)
+>>> # convert from rosetta xyzMatrix to Mat
+>>> m = Mat(mros)
+>>> print(type(m))
+<class 'xyzMath.Mat'>
+>>> print(m)
+Mat[ (1.000000,0.000000,0.000000), (0.000000,1.000000,0.000000), (0.000000,0.000000,1.000000) ]
+>>> # convert to rosetta xyzMatrix from Mat
+>>> n = m.to_rosetta()
+>>> print(type(n))
+<class 'rosetta.numeric.xyzMatrix_double_t'>
+>>> print(n)
+      1.000000000000000       0.000000000000000       0.000000000000000
+      0.000000000000000       1.000000000000000       0.000000000000000
+      0.000000000000000       0.000000000000000       1.000000000000000
+<BLANKLINE>
 
 
 
