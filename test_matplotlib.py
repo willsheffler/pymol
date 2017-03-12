@@ -7,5 +7,5 @@ import pylab
 pylab.ion()
 pylab.figure()
 pylab.ioff()
-pylab.plot([1,2],[1,2])
+pylab.plot([1, 2], [1, 2])
 pylab.show()

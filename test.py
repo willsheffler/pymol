@@ -18,13 +18,13 @@ def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(truss))
     return tests
 
-if __name__ == '__main__':
-	import doctest
-	print "testing xyzMath......", doctest.testmod(xyzMath)
-	print "testing pymol_util...", doctest.testmod(pymol_util)
-	print "testing sym_util.....", doctest.testmod(sym_util)
-	print "testing sym_comp.....", doctest.testmod(sym_comp)
-	print "testing truss.py......", doctest.testmod(symgen)
-	print "testing truss.py......", doctest.testmod(truss)
-	print "testing test.py......", doctest.testmod()
 
+if __name__ == '__main__':
+    import doctest
+    print "testing xyzMath......", doctest.testmod(xyzMath)
+    print "testing pymol_util...", doctest.testmod(pymol_util)
+    print "testing sym_util.....", doctest.testmod(sym_util)
+    print "testing sym_comp.....", doctest.testmod(sym_comp)
+    print "testing truss.py......", doctest.testmod(symgen)
+    print "testing truss.py......", doctest.testmod(truss)
+    print "testing test.py......", doctest.testmod()

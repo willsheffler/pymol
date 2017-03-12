@@ -1,4 +1,4 @@
-Tutorial
+1Tutorial
 ============
 
 .. testsetup::
@@ -8,6 +8,47 @@ Tutorial
 .. toctree::
 
     tutorial.rst
+
+
+Compatibility with pyrosetta Vectors/Matrices
+-------------------------------------------------------
+
+use v.to_rosetta() and Vec(rosetta_vec)
+
+to/from rosetta.numeric.xyzVector_double_t
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>>> import rosetta
+>>> vros = rosetta.numeric.xyzVector_double_t(1,2,3)
+>>> # convert from rosetta xyzVector to Vec
+>>> v = Vec(vros)
+>>> print(type(v))
+<class 'xyzMath.Vec'>
+>>> print(v)
+(1.000000,2.000000,3.000000)
+>>> # convert to rosetta xyzVector from Vec
+>>> u = v.to_rosetta()
+>>> print(type(u))
+<class 'rosetta.numeric.xyzVector_double_t'>
+>>> print(u)
+      1.000000000000000       2.000000000000000       3.000000000000000
+
+
+to/from rosetta.numeric.xyzMatrix
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>>> # this doesn't work yet because pyrosetta won't let me make arbitrary xyzMatrix's
+>>> # import rosetta
+>>> # mros = rosetta.numeric.xyzMatrix_double_t(0)
+>>> # mros.xx = 1; mros.yy = 1; mros.zz = 1
+>>> # # convert from rosetta xyzMatrix to Mat
+>>> # v = Mat(mros)
+>>> # print(type(v))
+>>> # print(v)
+>>> # # convert to rosetta xyzMatrix from Mat
+>>> # u = v.to_rosetta()
+>>> # print(type(u))
+>>> # print(u)
+
+
 
 
 
@@ -42,7 +83,7 @@ then use the stub function do get stubs (coordinate frames) from the coords:
 >>> stub1 = stub(N_1, CA_1, C_1)
 >>> stub2 = stub(N_2, CA_2, C_2)
 
-now the transform that takes sub1 to stub2 is the following (approx equal to some_xform in this example):
+now the transform that takes stub1 to stub2 is the following (approx equal to some_xform in this example):
 
 >>> xform = stub2 * ~stub1
 >>> assert xform == some_xform
