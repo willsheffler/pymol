@@ -2,62 +2,93 @@
 	"build_systems":
 	[
 		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "run_tox",
-			"shell_cmd": "cd $folder && tox 2>&1 | tee log/subl_build.log",
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"shell_cmd": "cd $folder && tox 2>&1 | tee log/subl_build.log"
 		},
 		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "build_docs",
-			"shell_cmd": "cd $folder/docs && make doctest &> ../log/subl_build.log && make html &>> ../log/subl_build.log && google-chrome _build/html/tutorial.html &> /dev/null",
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"shell_cmd": "cd $folder/docs && make doctest &> ../log/subl_build.log && make html &>> ../log/subl_build.log && google-chrome _build/html/tutorial.html &> /dev/null"
 		},
 		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "run_pytest",
-			"shell_cmd": "cd $folder && pytest xyzMath.py docs --verbose 2>&1 | tee log/subl_build.log",
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"shell_cmd": "cd $folder && pytest xyzMath.py docs --verbose 2>&1 | tee log/subl_build.log"
 		},
 		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "run_pytest_and_build_docs",
-			"shell_cmd": "cd $folder && pytest xyzMath.py docs --verbose &> log/subl_build.log && cd docs && make html &>> ../log/subl_build.log && google-chrome _build/html/tutorial.html",
-			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"shell_cmd": "cd $folder && pytest xyzMath.py docs --verbose &> log/subl_build.log && cd docs && make html &>> ../log/subl_build.log && google-chrome _build/html/tutorial.html"
 		},
 		{
-			"name": "run_file_py2",
-			"shell_cmd": "cd $folder; python2 -u \"$file\" &> log/subl_build.log",
-			"selector": "source.python",
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "run_file_py2",
+			"selector": "source.python",
+			"shell_cmd": "cd $folder; python2 -u \"$file\" &> log/subl_build.log"
 		},
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
+			"selector": "source.python",
+			"shell_cmd": "\"/usr/bin/python\" -u \"$file\""
+		}
 	],
 	"folders":
 	[
 		{
-			"path": "/home/sheffler/pymol",
 			"file_exclude_patterns":
-			["*.pyc", "*.pyo", "*.o", "*.a", "*.lib", "*.so", "*.dylib", ".DS_Store", "*.sublime-workspace", ".tags*", "test.sxhn", "test.sxm", ],
+			[
+				"*.pyc",
+				"*.pyo",
+				"*.o",
+				"*.a",
+				"*.lib",
+				"*.so",
+				"*.dylib",
+				".DS_Store",
+				"*.sublime-workspace",
+				".tags*",
+				"test.sxhn",
+				"test.sxm"
+			],
 			"folder_exclude_patterns":
-			[ "build*", "_build*", ".build*", ".git", ".cache", ".idea", "__pycache__", ".hypothesis", ".eggs", ".tox", "external/googletest", "external/include", "external/pybind11", "deps",],
+			[
+				"build*",
+				"_build*",
+				".build*",
+				".git",
+				".cache",
+				".idea",
+				"__pycache__",
+				".hypothesis",
+				".eggs",
+				".tox",
+				"external/googletest",
+				"external/include",
+				"external/pybind11",
+				"deps"
+			],
 			"path": ".."
 		}
 	],
 	"settings":
 	{
-		"tab_size": 4,
-		"translate_tabs_to_spaces": true,
-	    "env":
-	    {
-			"Windows":
-			{
-			},
+		"env":
+		{
 			"Darwin":
 			{
 			},
 			"Linux":
 			{
-				"CC" : "clang-3.8",
-				"CXX" : "clang++-3.8",
-				// "CXXFLAGS": "-stdlib=libc++ -I/usr/include/libcxxabi",
-
+				"CC": "clang-3.8",
+				"CXX": "clang++-3.8"
+			},
+			"Windows":
+			{
 			}
-	    },
-	},
+		},
+		"tab_size": 4,
+		"translate_tabs_to_spaces": true
+	}
 }

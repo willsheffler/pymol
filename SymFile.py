@@ -1,9 +1,8 @@
 import sys
 from xyzMath import Vec
 
-
 class VirtXYZ(object):
-    """
+   """
     >>> v1 = VirtXYZ( "test1", Vec(1,0,0), Vec(0,1,0), Vec(0,0,0) )
     >>> v2 = VirtXYZ( "test2", Vec(-1,0,0), Vec(0,1,0), Vec(0,0,0) )
     >>> print v1.symline()
@@ -11,51 +10,47 @@ class VirtXYZ(object):
     >>> print v2.symline()
     xyz test2                -1.000000,+0.000000,+0.000000  +0.000000,+1.000000,+0.000000  +0.000000,+0.000000,+0.000000
     """
+   def __init__(self, name, x, y, cen):
+      super(VirtXYZ, self).__init__()
+      self.name = name
+      self.x = x
+      self.y = y
+      self.cen = cen
 
-    def __init__(self, name, x, y, cen):
-        super(VirtXYZ, self).__init__()
-        self.name = name
-        self.x = x
-        self.y = y
-        self.cen = cen
-
-    def symline(self):
-        s = "xyz %s %+f,%+f,%+f  %+f,%+f,%+f  %+f,%+f,%+f" % (self.name.ljust(
-            20), self.x.x, self.x.y, self.x.z, self.y.x, self.y.y, self.y.z, self.cen.x, self.cen.y, self.cen.z)
-        return s.rstrip()
-
+   def symline(self):
+      s = "xyz %s %+f,%+f,%+f  %+f,%+f,%+f  %+f,%+f,%+f" % (
+         self.name.ljust(20), self.x.x, self.x.y, self.x.z, self.y.x, self.y.y, self.y.z,
+         self.cen.x, self.cen.y, self.cen.z)
+      return s.rstrip()
 
 class ConnectVirtual(object):
-    """
+   """
     >>> v1 = VirtXYZ( "test1", Vec(1,0,0), Vec(0,1,0), Vec(0,0,0) )
     >>> v2 = VirtXYZ( "test2", Vec(-1,0,0), Vec(0,1,0), Vec(0,0,0) )
     >>> print ConnectVirtual( "test_jump", v1, v2 ).symline()
     connect_virtual            test_jump test1                test2
     """
+   def __init__(self, name, virt1, virt2=None, chain=None):
+      super(ConnectVirtual, self).__init__()
+      self.name = name
+      self.virt1 = virt1
+      self.virt2 = virt2
+      self.chain = chain
 
-    def __init__(self, name, virt1, virt2=None, chain=None):
-        super(ConnectVirtual, self).__init__()
-        self.name = name
-        self.virt1 = virt1
-        self.virt2 = virt2
-        self.chain = chain
-
-    def symline(self):
-        if self.chain:
-            s = "connect_virtual %s %s %s" % (self.name.rjust(
-                20), self.virt1.name.ljust(20), "SUBUNIT", chain)
-        else:
-            assert self.virt2
-            s = "connect_virtual %s %s %s" % (self.name.rjust(
-                20), self.virt1.name.ljust(20), self.virt2.name.ljust(20))
-        return s.rstrip()
-
+   def symline(self):
+      if self.chain:
+         s = "connect_virtual %s %s %s" % (self.name.rjust(20), self.virt1.name.ljust(20),
+                                           "SUBUNIT", chain)
+      else:
+         assert self.virt2
+         s = "connect_virtual %s %s %s" % (self.name.rjust(20), self.virt1.name.ljust(20),
+                                           self.virt2.name.ljust(20))
+      return s.rstrip()
 
 if __name__ == '__main__':
-    import doctest
-    r = doctest.testmod()
-    print r
-
+   import doctest
+   r = doctest.testmod()
+   print(r)
 
 # some not-finished work making a symdef parsers
 
@@ -116,7 +111,6 @@ if __name__ == '__main__':
 # s = "\n".join(open("/data/pdb/D3/1WAAA_D3.symm").readlines())
 # for p in symline.searchString(s):
 # 	print p
-
 
 # testData = """
 # +-------+------+------+------+------+------+------+------+------+

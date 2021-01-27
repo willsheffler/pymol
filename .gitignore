@@ -6,3 +6,4 @@ __pycache__
 _build
 log/subl_build.log
 .cache
+*.bak

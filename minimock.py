@@ -41,25 +41,24 @@ implementation is simple because most of the work is done by doctest.
 
 __all__ = ["mock", "restore", "Mock", "TraceTracker", "assert_same_trace"]
 
-import __builtin__
+import builtins
 import sys
 import inspect
 import doctest
 import re
 import textwrap
 try:
-    from cStringIO import StringIO
+   from io import StringIO
 except ImportError:
-    from StringIO import StringIO
+   from io import StringIO
 
 # A list of mocked objects. Each item is a tuple of (original object,
 # namespace dict, object name, and a list of object attributes).
 #
 mocked = []
 
-
 def lookup_by_name(name, nsdicts):
-    """
+   """
     Look up an object by name from a sequence of namespace dictionaries.
     Returns a tuple of (nsdict, obj_name, attrs); nsdict is the namespace
     dictionary the name was found in, obj_name is the name of the base object
@@ -79,30 +78,29 @@ def lookup_by_name(name, nsdicts):
         NameError: name 'os.monkey' is not defined
 
     """
-    for nsdict in nsdicts:
-        attrs = name.split(".")
-        names = []
+   for nsdict in nsdicts:
+      attrs = name.split(".")
+      names = []
 
-        while attrs:
-            names.append(attrs.pop(0))
-            obj_name = ".".join(names)
+      while attrs:
+         names.append(attrs.pop(0))
+         obj_name = ".".join(names)
 
-            if obj_name in nsdict:
-                attr_copy = attrs[:]
-                tmp = nsdict[obj_name]
-                try:
-                    while attr_copy:
-                        tmp = getattr(tmp, attr_copy.pop(0))
-                except AttributeError:
-                    pass
-                else:
-                    return nsdict, obj_name, attrs
+         if obj_name in nsdict:
+            attr_copy = attrs[:]
+            tmp = nsdict[obj_name]
+            try:
+               while attr_copy:
+                  tmp = getattr(tmp, attr_copy.pop(0))
+            except AttributeError:
+               pass
+            else:
+               return nsdict, obj_name, attrs
 
-    raise NameError("name '%s' is not defined" % name)
-
+   raise NameError("name '%s' is not defined" % name)
 
 def mock(name, nsdicts=None, mock_obj=None, **kw):
-    """
+   """
     Mock the named object, placing a Mock instance in the correct namespace
     dictionary. If no iterable of namespace dicts is provided, use
     introspection to get the locals and globals of the caller of this
@@ -187,73 +185,71 @@ def mock(name, nsdicts=None, mock_obj=None, **kw):
         >>> restore()
 
     """
-    if nsdicts is None:
-        stack = inspect.stack()
-        try:
-            # stack[1][0] is the frame object of the caller to this function
-            globals_ = stack[1][0].f_globals
-            locals_ = stack[1][0].f_locals
-            nsdicts = (locals_, globals_, __builtin__.__dict__)
-        finally:
-            del(stack)
+   if nsdicts is None:
+      stack = inspect.stack()
+      try:
+         # stack[1][0] is the frame object of the caller to this function
+         globals_ = stack[1][0].f_globals
+         locals_ = stack[1][0].f_locals
+         nsdicts = (locals_, globals_, builtins.__dict__)
+      finally:
+         del (stack)
 
-    if mock_obj is None:
-        mock_obj = Mock(name, **kw)
+   if mock_obj is None:
+      mock_obj = Mock(name, **kw)
 
-    nsdict, obj_name, attrs = lookup_by_name(name, nsdicts)
+   nsdict, obj_name, attrs = lookup_by_name(name, nsdicts)
 
-    # Get the original object and replace it with the mock object.
-    tmp = nsdict[obj_name]
+   # Get the original object and replace it with the mock object.
+   tmp = nsdict[obj_name]
 
-    # if run from a doctest, nsdict may point to a *copy* of the
-    # global namespace, so instead use tmp.func_globals if present.
-    # we use isinstance(gettattr(...), dict) rather than hasattr
-    # because if tmp is itself a mock object, tmp.func_globals will
-    # return another mock object
-    if isinstance(getattr(tmp, 'func_globals', None), dict):
-        nsdict = tmp.func_globals
-    if not attrs:
-        original = tmp
-        nsdict[obj_name] = mock_obj
-    else:
-        for attr in attrs[:-1]:
-            try:
-                tmp = tmp.__dict__[attr]
-            except KeyError:
-                tmp = getattr(tmp, attr)
-        try:
-            original = tmp.__dict__[attrs[-1]]
-        except KeyError:
-            original = getattr(tmp, attrs[-1])
-        setattr(tmp, attrs[-1], mock_obj)
+   # if run from a doctest, nsdict may point to a *copy* of the
+   # global namespace, so instead use tmp.func_globals if present.
+   # we use isinstance(gettattr(...), dict) rather than hasattr
+   # because if tmp is itself a mock object, tmp.func_globals will
+   # return another mock object
+   if isinstance(getattr(tmp, 'func_globals', None), dict):
+      nsdict = tmp.__globals__
+   if not attrs:
+      original = tmp
+      nsdict[obj_name] = mock_obj
+   else:
+      for attr in attrs[:-1]:
+         try:
+            tmp = tmp.__dict__[attr]
+         except KeyError:
+            tmp = getattr(tmp, attr)
+      try:
+         original = tmp.__dict__[attrs[-1]]
+      except KeyError:
+         original = getattr(tmp, attrs[-1])
+      setattr(tmp, attrs[-1], mock_obj)
 
-    mocked.append((original, nsdict, obj_name, attrs))
-
+   mocked.append((original, nsdict, obj_name, attrs))
 
 def restore():
-    """
+   """
     Restore all mocked objects.
     """
-    global mocked
+   global mocked
 
-    # Restore the objects in the reverse order of their mocking to assure
-    # the original state is retrieved.
-    while mocked:
-        original, nsdict, name, attrs = mocked.pop()
-        if not attrs:
-            nsdict[name] = original
-        else:
-            tmp = nsdict[name]
-            for attr in attrs[:-1]:
-                try:
-                    tmp = tmp.__dict__[attr]
-                except KeyError:
-                    tmp = getattr(tmp, attr)
-            setattr(tmp, attrs[-1], original)
-
+   # Restore the objects in the reverse order of their mocking to assure
+   # the original state is retrieved.
+   while mocked:
+      original, nsdict, name, attrs = mocked.pop()
+      if not attrs:
+         nsdict[name] = original
+      else:
+         tmp = nsdict[name]
+         for attr in attrs[:-1]:
+            try:
+               tmp = tmp.__dict__[attr]
+            except KeyError:
+               tmp = getattr(tmp, attr)
+         setattr(tmp, attrs[-1], original)
 
 def assert_same_trace(tracker, want):
-    r"""
+   r"""
     Check that the mock objects using ``tracker`` have been used as expected.
 
     :param tracker: a :class:`TraceTracker` instance
@@ -274,66 +270,59 @@ def assert_same_trace(tracker, want):
             ...
             AssertionError...
     """
-    assert tracker.check(want), tracker.diff(want)
-
+   assert tracker.check(want), tracker.diff(want)
 
 class AbstractTracker(object):
-    def __init__(self, *args, **kw):
-        raise NotImplementedError
+   def __init__(self, *args, **kw):
+      raise NotImplementedError
 
-    def call(self, *args, **kw):
-        raise NotImplementedError
+   def call(self, *args, **kw):
+      raise NotImplementedError
 
-    def set(self, *args, **kw):
-        raise NotImplementedError
-
+   def set(self, *args, **kw):
+      raise NotImplementedError
 
 class Printer(AbstractTracker):
-    """Prints all calls to the file it's instantiated with.
+   """Prints all calls to the file it's instantiated with.
     Can take any object that implements `write'.
     """
+   def __init__(self, file):
+      self.file = file
 
-    def __init__(self, file):
-        self.file = file
+   def call(self, func_name, *args, **kw):
+      parts = [repr(a) for a in args]
+      parts.extend('%s=%r' % (items) for items in sorted(kw.items()))
+      msg = 'Called %s(%s)' % (func_name, ', '.join(parts))
+      if len(msg) > 80:
+         msg = 'Called %s(\n    %s)' % (func_name, ',\n    '.join(parts))
+      print(msg, file=self.file)
 
-    def call(self, func_name, *args, **kw):
-        parts = [repr(a) for a in args]
-        parts.extend(
-            '%s=%r' % (items) for items in sorted(kw.items()))
-        msg = 'Called %s(%s)' % (func_name, ', '.join(parts))
-        if len(msg) > 80:
-            msg = 'Called %s(\n    %s)' % (
-                func_name, ',\n    '.join(parts))
-        print >> self.file, msg
-
-    def set(self, obj_name, attr, value):
-        """
+   def set(self, obj_name, attr, value):
+      """
         >>> z = Mock('z', show_attrs=True)
         >>> z.a = 2
         Set z.a = 2
         """
-        print >> self.file, 'Set %s.%s = %r' % (obj_name, attr, value)
-
+      print('Set %s.%s = %r' % (obj_name, attr, value), file=self.file)
 
 class TraceTracker(Printer):
-    """
+   """
     :class:`AbstractTracker` implementation for using MiniMock in non-
     :mod:`doctest` tests. Follows the pattern of recording minimocked
     object usage as strings, then using the facilities of :mod:`doctest`
     to assert the correctness of these usage strings.
     """
+   def __init__(self, *args, **kw):
+      self.out = StringIO()
+      super(TraceTracker, self).__init__(self.out, *args, **kw)
+      self.checker = MinimockOutputChecker()
+      self.options = doctest.ELLIPSIS
+      self.options |= doctest.NORMALIZE_INDENTATION
+      self.options |= doctest.NORMALIZE_FUNCTION_PARAMETERS
+      self.options |= doctest.REPORT_UDIFF
 
-    def __init__(self, *args, **kw):
-        self.out = StringIO()
-        super(TraceTracker, self).__init__(self.out, *args, **kw)
-        self.checker = MinimockOutputChecker()
-        self.options = doctest.ELLIPSIS
-        self.options |= doctest.NORMALIZE_INDENTATION
-        self.options |= doctest.NORMALIZE_FUNCTION_PARAMETERS
-        self.options |= doctest.REPORT_UDIFF
-
-    def check(self, want):
-        r"""
+   def check(self, want):
+      r"""
         Compare observed MiniMock usage with that which we expected.
 
         :param want: the :class:`Printer` output that results from expected
@@ -353,11 +342,10 @@ class TraceTracker(Printer):
             >>> tt.check("does not match")
             False
         """
-        return self.checker.check_output(want, self.dump(),
-                                         optionflags=self.options)
+      return self.checker.check_output(want, self.dump(), optionflags=self.options)
 
-    def diff(self, want):
-        r"""
+   def diff(self, want):
+      r"""
         Analyse differences between observed MiniMock usage and that which
         we expected, if any.
 
@@ -377,16 +365,16 @@ class TraceTracker(Printer):
             >>> tt.diff("Called mock_obj.some_meth('dummy argument')")
             ''
         """
-        if self.check(want):
-            # doctest's output_difference always returns a diff, even if
-            # there's no difference: short circuit that feature.
-            return ''
-        else:
-            return self.checker.output_difference(doctest.Example("", want),
-                                                  self.dump(), optionflags=self.options)
+      if self.check(want):
+         # doctest's output_difference always returns a diff, even if
+         # there's no difference: short circuit that feature.
+         return ''
+      else:
+         return self.checker.output_difference(doctest.Example("", want), self.dump(),
+                                               optionflags=self.options)
 
-    def dump(self):
-        r"""
+   def dump(self):
+      r"""
         Return the MiniMock object usage so far.
 
         Example::
@@ -397,16 +385,15 @@ class TraceTracker(Printer):
             >>> tt.dump()
             "Called mock_obj.some_meth('dummy argument')\n"
         """
-        return self.out.getvalue()
+      return self.out.getvalue()
 
-    def clear(self):
-        """Clear the MiniMock object usage that has been tracked so far.
+   def clear(self):
+      """Clear the MiniMock object usage that has been tracked so far.
         """
-        self.out.truncate(0)
-
+      self.out.truncate(0)
 
 def normalize_function_parameters(text):
-    r"""
+   r"""
     Return a version of ``text`` with function parameters normalized.
 
         The normalisations performed are:
@@ -439,125 +426,113 @@ def normalize_function_parameters(text):
         >>> tt.check(expect_mock_output)
         True
     """
-    normalized_text = text
-    normalize_map = {
-        re.compile(r"\(\s+(\S)"): r"(\1",
-        re.compile(r"(\S)\s+\)"): r"\1)",
-        re.compile(r",\s*(\S)"): r", \1",
-    }
-    for search_pattern, replace_pattern in normalize_map.items():
-        normalized_text = re.sub(
-            search_pattern, replace_pattern, normalized_text)
+   normalized_text = text
+   normalize_map = {
+      re.compile(r"\(\s+(\S)"): r"(\1",
+      re.compile(r"(\S)\s+\)"): r"\1)",
+      re.compile(r",\s*(\S)"): r", \1",
+   }
+   for search_pattern, replace_pattern in list(normalize_map.items()):
+      normalized_text = re.sub(search_pattern, replace_pattern, normalized_text)
 
-    return normalized_text
+   return normalized_text
 
-
-doctest.NORMALIZE_INDENTATION = (
-    doctest.register_optionflag('NORMALIZE_INDENTATION'))
+doctest.NORMALIZE_INDENTATION = (doctest.register_optionflag('NORMALIZE_INDENTATION'))
 doctest.NORMALIZE_FUNCTION_PARAMETERS = (
-    doctest.register_optionflag('NORMALIZE_FUNCTION_PARAMETERS'))
-
+   doctest.register_optionflag('NORMALIZE_FUNCTION_PARAMETERS'))
 
 class MinimockOutputChecker(doctest.OutputChecker, object):
-    """Class for matching output of MiniMock objects against expectations.
+   """Class for matching output of MiniMock objects against expectations.
     """
+   def check_output(self, want, got, optionflags):
+      if (optionflags & doctest.NORMALIZE_INDENTATION):
+         want = textwrap.dedent(want).rstrip()
+         got = textwrap.dedent(got).rstrip()
+      if (optionflags & doctest.NORMALIZE_FUNCTION_PARAMETERS):
+         want = normalize_function_parameters(want)
+         got = normalize_function_parameters(got)
+      output_match = super(MinimockOutputChecker, self).check_output(want, got, optionflags)
+      return output_match
 
-    def check_output(self, want, got, optionflags):
-        if (optionflags & doctest.NORMALIZE_INDENTATION):
-            want = textwrap.dedent(want).rstrip()
-            got = textwrap.dedent(got).rstrip()
-        if (optionflags & doctest.NORMALIZE_FUNCTION_PARAMETERS):
-            want = normalize_function_parameters(want)
-            got = normalize_function_parameters(got)
-        output_match = super(MinimockOutputChecker, self).check_output(
-            want, got, optionflags)
-        return output_match
-    check_output.__doc__ = doctest.OutputChecker.check_output.__doc__
-
+   check_output.__doc__ = doctest.OutputChecker.check_output.__doc__
 
 class _DefaultTracker(object):
-    def __repr__(self):
-        return '(default tracker)'
-
+   def __repr__(self):
+      return '(default tracker)'
 
 DefaultTracker = _DefaultTracker()
 del _DefaultTracker
 
-
 class Mock(object):
+   def __init__(self, name, returns=None, returns_iter=None, returns_func=None, raises=None,
+                show_attrs=False, tracker=DefaultTracker, **kw):
+      _obsetattr = object.__setattr__
+      _obsetattr(self, 'mock_name', name)
+      _obsetattr(self, 'mock_returns', returns)
+      if returns_iter is not None:
+         returns_iter = iter(returns_iter)
+      _obsetattr(self, 'mock_returns_iter', returns_iter)
+      _obsetattr(self, 'mock_returns_func', returns_func)
+      _obsetattr(self, 'mock_raises', raises)
+      _obsetattr(self, 'mock_attrs', kw)
+      _obsetattr(self, 'mock_show_attrs', show_attrs)
+      if tracker is DefaultTracker:
+         tracker = Printer(sys.stdout)
+      _obsetattr(self, 'mock_tracker', tracker)
 
-    def __init__(self, name, returns=None, returns_iter=None,
-                 returns_func=None, raises=None, show_attrs=False,
-                 tracker=DefaultTracker, **kw):
-        _obsetattr = object.__setattr__
-        _obsetattr(self, 'mock_name', name)
-        _obsetattr(self, 'mock_returns', returns)
-        if returns_iter is not None:
-            returns_iter = iter(returns_iter)
-        _obsetattr(self, 'mock_returns_iter', returns_iter)
-        _obsetattr(self, 'mock_returns_func', returns_func)
-        _obsetattr(self, 'mock_raises', raises)
-        _obsetattr(self, 'mock_attrs', kw)
-        _obsetattr(self, 'mock_show_attrs', show_attrs)
-        if tracker is DefaultTracker:
-            tracker = Printer(sys.stdout)
-        _obsetattr(self, 'mock_tracker', tracker)
+   def __repr__(self):
+      return '<Mock %s %s>' % (hex(id(self)), self.mock_name)
 
-    def __repr__(self):
-        return '<Mock %s %s>' % (hex(id(self)), self.mock_name)
+   def __call__(self, *args, **kw):
+      if self.mock_tracker is not None:
+         self.mock_tracker.call(self.mock_name, *args, **kw)
+      return self._mock_return(*args, **kw)
 
-    def __call__(self, *args, **kw):
-        if self.mock_tracker is not None:
-            self.mock_tracker.call(self.mock_name, *args, **kw)
-        return self._mock_return(*args, **kw)
+   def _mock_return(self, *args, **kw):
+      if self.mock_raises is not None:
+         raise self.mock_raises
+      elif self.mock_returns is not None:
+         return self.mock_returns
+      elif self.mock_returns_iter is not None:
+         try:
+            return next(self.mock_returns_iter)
+         except StopIteration:
+            raise Exception("No more mock return values are present.")
+      elif self.mock_returns_func is not None:
+         return self.mock_returns_func(*args, **kw)
+      else:
+         return None
 
-    def _mock_return(self, *args, **kw):
-        if self.mock_raises is not None:
-            raise self.mock_raises
-        elif self.mock_returns is not None:
-            return self.mock_returns
-        elif self.mock_returns_iter is not None:
-            try:
-                return self.mock_returns_iter.next()
-            except StopIteration:
-                raise Exception("No more mock return values are present.")
-        elif self.mock_returns_func is not None:
-            return self.mock_returns_func(*args, **kw)
-        else:
-            return None
+   def __getattr__(self, attr):
+      if attr not in self.mock_attrs:
+         if self.mock_name:
+            new_name = self.mock_name + '.' + attr
+         else:
+            new_name = attr
+         self.mock_attrs[attr] = Mock(new_name, show_attrs=self.mock_show_attrs,
+                                      tracker=self.mock_tracker)
+      return self.mock_attrs[attr]
 
-    def __getattr__(self, attr):
-        if attr not in self.mock_attrs:
-            if self.mock_name:
-                new_name = self.mock_name + '.' + attr
-            else:
-                new_name = attr
-            self.mock_attrs[attr] = Mock(new_name,
-                                         show_attrs=self.mock_show_attrs,
-                                         tracker=self.mock_tracker)
-        return self.mock_attrs[attr]
-
-    def __setattr__(self, attr, value):
-        if attr in frozenset((
+   def __setattr__(self, attr, value):
+      if attr in frozenset((
             'mock_raises',
             'mock_returns',
             'mock_returns_func',
             'mock_returns_iter',
             'mock_tracker',
             'mock_show_attrs',
-        )):
-            if attr == 'mock_returns_iter' and value is not None:
-                value = iter(value)
-            object.__setattr__(self, attr, value)
-        else:
-            if self.mock_show_attrs and self.mock_tracker is not None:
-                self.mock_tracker.set(self.mock_name, attr, value)
-            self.mock_attrs[attr] = value
-
+      )):
+         if attr == 'mock_returns_iter' and value is not None:
+            value = iter(value)
+         object.__setattr__(self, attr, value)
+      else:
+         if self.mock_show_attrs and self.mock_tracker is not None:
+            self.mock_tracker.set(self.mock_name, attr, value)
+         self.mock_attrs[attr] = value
 
 __test__ = {
-    "Mock":
-    r"""
+   "Mock":
+   r"""
     Test setting various "mock_" attributes on an existing Mock object.
 
     >>> m = Mock('mock_obj', tracker=None)
@@ -587,9 +562,8 @@ __test__ = {
     >>> m.a = 2
     Set mock_obj.a = 2
     """,
-
-    "mock":
-    r"""
+   "mock":
+   r"""
     An additional test for mocking a function accessed directly (i.e.
     not via object attributes).
 
@@ -631,5 +605,5 @@ __test__ = {
 }
 
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod(optionflags=doctest.ELLIPSIS)
+   import doctest
+   doctest.testmod(optionflags=doctest.ELLIPSIS)

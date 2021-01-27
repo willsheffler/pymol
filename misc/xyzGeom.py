@@ -1,76 +1,157 @@
 """
 Easy 3D Linear Algebra, like xyz\* in rosetta
 """
-from random    import gauss,uniform
-from math      import pi,sqrt,sin,cos,acos,asin,atan2,degrees,radians,copysign
-from itertools import chain,product,izip
+from random import gauss, uniform
+from math import pi, sqrt, sin, cos, acos, asin, atan2, degrees, radians, copysign
+from itertools import chain, product, izip
 import operator as op
 import re
 
 EPS = 0.000000001
 SQRTEPS = sqrt(EPS)
 
-def isint   (x): return type(x) is int
-def isfloat (x): return type(x) is float
-def isnum   (x): return isint(x) or isfloat(x)
-def ispoint (x): return type(x) is Point
-def ispoints(x): return type(x) is Points
-def isvec   (x): return type(x) is Vec
-def isvecs  (x): return type(x) is Vecs
-def isvorpt (x): return isvec(x) or ispoint(x)
-def isline  (x): return type(x) is Line
-def isplane (x): return type(x) is Plane
-def ismat   (x): return type(x) is Mat
-def isxform (x): return type(x) is Xform
-def islist  (x): return type(x) is list
-def istuple (x): return type(x) is tuple
-def isiter  (x): return hasattr(x,"__iter__")
+def isint(x):
+   return type(x) is int
 
-def sametype(x,y): return type(x) is type(y)
+def isfloat(x):
+   return type(x) is float
 
-def allints  (*X): return reduce(op.and_,(type(x) is int for x in X),True)
-def allfloats(*X): return reduce(op.and_,(type(x) is float for x in X),True)
-def allnums  (*X): return reduce(op.and_,(isint(x) or isfloat(x) for x in X),True)
-def allpoints(*X): return reduce(op.and_,(type(x) is Point for x in X),True)
-def allvecs  (*X): return reduce(op.and_,(type(x) is Vec for x in X),True)
-def allvorpts(*X): return reduce(op.and_,(isvec(x) or ispoint(x) for x in X),True)
-def alllines (*X): return reduce(op.and_,(type(x) is Line for x in X),True)
-def allplanes(*X): return reduce(op.and_,(type(x) is Plane for x in X),True)
-def allmats  (*X): return reduce(op.and_,(type(x) is Mat for x in X),True)
-def allxforms(*X): return reduce(op.and_,(type(x) is Xform for x in X),True)
-def alllists (*X): return reduce(op.and_,(type(x) is list for x in X),True)
-def alltuples(*X): return reduce(op.and_,(type(x) is tuple for x in X),True)
-def alliters (*X): return reduce(op.and_,(hasattr(x,"__iter__") for x in X),True)
+def isnum(x):
+   return isint(x) or isfloat(x)
 
-def anyints  (*X): return reduce(op.or_,(type(x) is int for x in X),False)
-def anyfloats(*X): return reduce(op.or_,(type(x) is float for x in X),False)
-def anynums  (*X): return reduce(op.or_,(isint(x) or isfloat(x) for x in X),False)
-def anypoints(*X): return reduce(op.or_,(type(x) is Point for x in X),False)
-def anyvecs  (*X): return reduce(op.or_,(type(x) is Vec for x in X),False)
-def anyvorpts(*X): return reduce(op.or_,(isvec(x) or ispoint(x) for x in X),False)
-def anylines (*X): return reduce(op.or_,(type(x) is Line for x in X),False)
-def anyplanes(*X): return reduce(op.or_,(type(x) is Plane for x in X),False)
-def anymats  (*X): return reduce(op.or_,(type(x) is Mat for x in X),False)
-def anyxforms(*X): return reduce(op.or_,(type(x) is Xform for x in X),False)
-def anylists (*X): return reduce(op.or_,(type(x) is list for x in X),False)
-def anytuples(*X): return reduce(op.or_,(type(x) is tuple for x in X),False)
-def anyiters (*X): return reduce(op.or_,(hasattr(x,"__iter__") for x in X),False)
+def ispoint(x):
+   return type(x) is Point
 
-def typeerror(o,t1,t2): 
-   raise TypeError("unsupported operand type(s) for "+o+": '"+type(t1).__name__+"' and '"+type(t2).__name__+"'")
+def ispoints(x):
+   return type(x) is Points
+
+def isvec(x):
+   return type(x) is Vec
+
+def isvecs(x):
+   return type(x) is Vecs
+
+def isvorpt(x):
+   return isvec(x) or ispoint(x)
+
+def isline(x):
+   return type(x) is Line
+
+def isplane(x):
+   return type(x) is Plane
+
+def ismat(x):
+   return type(x) is Mat
+
+def isxform(x):
+   return type(x) is Xform
+
+def islist(x):
+   return type(x) is list
+
+def istuple(x):
+   return type(x) is tuple
+
+def isiter(x):
+   return hasattr(x, "__iter__")
+
+def sametype(x, y):
+   return type(x) is type(y)
+
+def allints(*X):
+   return reduce(op.and_, (type(x) is int for x in X), True)
+
+def allfloats(*X):
+   return reduce(op.and_, (type(x) is float for x in X), True)
+
+def allnums(*X):
+   return reduce(op.and_, (isint(x) or isfloat(x) for x in X), True)
+
+def allpoints(*X):
+   return reduce(op.and_, (type(x) is Point for x in X), True)
+
+def allvecs(*X):
+   return reduce(op.and_, (type(x) is Vec for x in X), True)
+
+def allvorpts(*X):
+   return reduce(op.and_, (isvec(x) or ispoint(x) for x in X), True)
+
+def alllines(*X):
+   return reduce(op.and_, (type(x) is Line for x in X), True)
+
+def allplanes(*X):
+   return reduce(op.and_, (type(x) is Plane for x in X), True)
+
+def allmats(*X):
+   return reduce(op.and_, (type(x) is Mat for x in X), True)
+
+def allxforms(*X):
+   return reduce(op.and_, (type(x) is Xform for x in X), True)
+
+def alllists(*X):
+   return reduce(op.and_, (type(x) is list for x in X), True)
+
+def alltuples(*X):
+   return reduce(op.and_, (type(x) is tuple for x in X), True)
+
+def alliters(*X):
+   return reduce(op.and_, (hasattr(x, "__iter__") for x in X), True)
+
+def anyints(*X):
+   return reduce(op.or_, (type(x) is int for x in X), False)
+
+def anyfloats(*X):
+   return reduce(op.or_, (type(x) is float for x in X), False)
+
+def anynums(*X):
+   return reduce(op.or_, (isint(x) or isfloat(x) for x in X), False)
+
+def anypoints(*X):
+   return reduce(op.or_, (type(x) is Point for x in X), False)
+
+def anyvecs(*X):
+   return reduce(op.or_, (type(x) is Vec for x in X), False)
+
+def anyvorpts(*X):
+   return reduce(op.or_, (isvec(x) or ispoint(x) for x in X), False)
+
+def anylines(*X):
+   return reduce(op.or_, (type(x) is Line for x in X), False)
+
+def anyplanes(*X):
+   return reduce(op.or_, (type(x) is Plane for x in X), False)
+
+def anymats(*X):
+   return reduce(op.or_, (type(x) is Mat for x in X), False)
+
+def anyxforms(*X):
+   return reduce(op.or_, (type(x) is Xform for x in X), False)
+
+def anylists(*X):
+   return reduce(op.or_, (type(x) is list for x in X), False)
+
+def anytuples(*X):
+   return reduce(op.or_, (type(x) is tuple for x in X), False)
+
+def anyiters(*X):
+   return reduce(op.or_, (hasattr(x, "__iter__") for x in X), False)
+
+def typeerror(o, t1, t2):
+   raise TypeError("unsupported operand type(s) for " + o + ": '" + type(t1).__name__ +
+                   "' and '" + type(t2).__name__ + "'")
 
 def stripfloats(s):
    """
    >>> stripfloats(" 1.10 100.00 0. 1.230000 3.34534500 (0.00000) ")
    ' 1.1 100 0 1.23 3.345345 (0) '
    """
-   s = re.sub(r"(\b\d+[.]\d*?)0+\b",r"\1",s)
-   s = re.sub(r"(\b\d+)[.]([ ,\s\)$])",r"\1\2",s)
+   s = re.sub(r"(\b\d+[.]\d*?)0+\b", r"\1", s)
+   s = re.sub(r"(\b\d+)[.]([ ,\s\)$])", r"\1\2", s)
    return s
 
 def sin_cos_range(x):
    assert -1.001 < x < 1.001
-   return min(1.0,max(-1.0,x))
+   return min(1.0, max(-1.0, x))
 
 class Point(object):
    """a Point like xyzVector<Real> in rosetta
@@ -111,62 +192,79 @@ class Point(object):
    Traceback (most recent call last):
    AttributeError: 'Point' object has no attribute 'length'
    """
-   def __init__(self,x=0.0,y=None,z=None):
+   def __init__(self, x=0.0, y=None, z=None):
       if y is None:
          if isnum(x):
-            self.x,self.y,self.z = (float(x),)*3
+            self.x, self.y, self.z = (float(x), ) * 3
          elif isvec(x) | ispoint(x):
-            self.x,self.y,self.z = x.x,x.y,x.z
-         elif isiter(x): 
+            self.x, self.y, self.z = x.x, x.y, x.z
+         elif isiter(x):
             i = iter(x)
-            self.x,self.y,self.z = i.next(),i.next(),i.next()
-         else: raise TypeError
+            self.x, self.y, self.z = i.next(), i.next(), i.next()
+         else:
+            raise TypeError
       elif z is not None:
          assert isnum(x) and isnum(y) and isnum(z)
-         self.x,self.y,self.z = float(x),float(y),float(z)
-      else: raise TypeError
-      assert allfloats(self.x,self.y,self.z)
-   def distance_squared(p,q): 
-      if not allpoints(p,q): raise TypeError("distance between vecs / ints doesn't make sense")
-      return reduce(op.add,((f-g)**2 for f,g in zip(p,q)))
-   def distance(u,v): return sqrt(u.distance_squared(v))
-   def __sub__(u,r):
-      if allpoints(u,r): return Vec(u.x-r.x,u.y-r.y,u.z-r.z)
+         self.x, self.y, self.z = float(x), float(y), float(z)
+      else:
+         raise TypeError
+      assert allfloats(self.x, self.y, self.z)
+
+   def distance_squared(p, q):
+      if not allpoints(p, q): raise TypeError("distance between vecs / ints doesn't make sense")
+      return reduce(op.add, ((f - g)**2 for f, g in zip(p, q)))
+
+   def distance(u, v):
+      return sqrt(u.distance_squared(v))
+
+   def __sub__(u, r):
+      if allpoints(u, r): return Vec(u.x - r.x, u.y - r.y, u.z - r.z)
       return u + -r
-   def __rsub__(u,l):
-      return l+-u
-   def __eq__(self,other): 
-      return ( type(self) is type(other) and
-               abs(self.x-other.x) < EPS and 
-               abs(self.y-other.y) < EPS and
-               abs(self.z-other.z) < EPS )
-   def rounded(self,sd):
-      return Vec(round(self.x,sd), round(self.y,sd), round(self.z,sd) )
+
+   def __rsub__(u, l):
+      return l + -u
+
+   def __eq__(self, other):
+      return (type(self) is type(other) and abs(self.x - other.x) < EPS
+              and abs(self.y - other.y) < EPS and abs(self.z - other.z) < EPS)
+
+   def rounded(self, sd):
+      return Vec(round(self.x, sd), round(self.y, sd), round(self.z, sd))
+
    def __len__(v):
       return 3
+
    def abs(v):
-      return Vec(abs(v.x),abs(v.y),abs(v.z))
-   def __getitem__(v,i):
+      return Vec(abs(v.x), abs(v.y), abs(v.z))
+
+   def __getitem__(v, i):
       if i is 0: return v.x
       if i is 1: return v.x
       if i is 2: return v.x
       raise IndexError
+
    def tuple(v):
-      return (v.x,v.y,v.z)
+      return (v.x, v.y, v.z)
+
    def key(v):
       return v.rounded(6).tuple()
+
    def __iter__(p):
       yield p.x
       yield p.y
       yield p.z
-   def __mul__(p,a):
-      if isnum(a): return Point(a*p.x,a*p.y,a*p.z)
-      typeerror('*',p,a)
-   def __rmul__(p,a):
-      if isnum(a): return Point(a*p.x,a*p.y,a*p.z)
-      typeerror('*',a,p)
+
+   def __mul__(p, a):
+      if isnum(a): return Point(a * p.x, a * p.y, a * p.z)
+      typeerror('*', p, a)
+
+   def __rmul__(p, a):
+      if isnum(a): return Point(a * p.x, a * p.y, a * p.z)
+      typeerror('*', a, p)
+
    def __repr__(self):
-      return "P(%f,%f,%f)"%(self.x,self.y,self.z)
+      return "P(%f,%f,%f)" % (self.x, self.y, self.z)
+
    def __str__(self):
       return stripfloats(repr(self))
 
@@ -211,88 +309,118 @@ class Vec(Point):
    V(1,1,1)
 
    """
-   def __init__(self,*args,**kwargs):
-      super(Vec,self).__init__(*args,**kwargs)
-   def dot(u,v):
+   def __init__(self, *args, **kwargs):
+      super(Vec, self).__init__(*args, **kwargs)
+
+   def dot(u, v):
       assert isvec(v)
-      return u.x*v.x+u.y*v.y+u.z*v.z
-   def cross(u,v):
+      return u.x * v.x + u.y * v.y + u.z * v.z
+
+   def cross(u, v):
       assert isvec(v)
-      return Vec(u.y*v.z-u.z*v.y,u.z*v.x-u.x*v.z,u.x*v.y-u.y*v.x)
+      return Vec(u.y * v.z - u.z * v.y, u.z * v.x - u.x * v.z, u.x * v.y - u.y * v.x)
+
    __and__ = dot
    __or__ = cross
-   def normdot(u,v): 
+
+   def normdot(u, v):
       assert isvec(v)
-      return min(1.0,max(-1.0,u.dot(v)/u.length()/v.length()))
-   def angle(u,v):
+      return min(1.0, max(-1.0, u.dot(v) / u.length() / v.length()))
+
+   def angle(u, v):
       assert isvec(v)
       d = u.normdot(v)
-      if d > 1.0-EPS: return 0.0;
-      if d < EPS-1.0: return pi
+      if d > 1.0 - EPS: return 0.0
+      if d < EPS - 1.0: return pi
       return acos(d)
-   def angle_degrees(u,v): return degrees(u.angle(v))
-   def lineangle(u,v):
-      assert isinstance(v,Vec); 
+
+   def angle_degrees(u, v):
+      return degrees(u.angle(v))
+
+   def lineangle(u, v):
+      assert isinstance(v, Vec)
       if u.length() < SQRTEPS or v.length < SQRTEPS: return 0.0
-      ang = abs(acos( u.normdot(v) ))
-      return ang if ang < pi/2.0 else pi-ang
-   def linemaxangle(u,v):
+      ang = abs(acos(u.normdot(v)))
+      return ang if ang < pi / 2.0 else pi - ang
+
+   def linemaxangle(u, v):
       return math.pi - u.lineangle(v)
-   def lineangle_degrees(u,v):    return degrees(lineangle   (u,v))
-   def linemaxangle_degrees(u,v): return degrees(linemaxangle(u,v))
-   def length(u):         return sqrt(u.dot(u))
-   def length_squared(u): return      u.dot(u)
+
+   def lineangle_degrees(u, v):
+      return degrees(lineangle(u, v))
+
+   def linemaxangle_degrees(u, v):
+      return degrees(linemaxangle(u, v))
+
+   def length(u):
+      return sqrt(u.dot(u))
+
+   def length_squared(u):
+      return u.dot(u)
+
    def unit(v):
-      if   abs(v.x) > SQRTEPS: return v/v.x
-      elif abs(v.y) > SQRTEPS: return v/v.y
-      elif abs(v.z) > SQRTEPS: return v/v.z
+      if abs(v.x) > SQRTEPS: return v / v.x
+      elif abs(v.y) > SQRTEPS: return v / v.y
+      elif abs(v.z) > SQRTEPS: return v / v.z
+
    def normalize(u):
       l = u.length()
       u.x /= l
       u.y /= l
       u.z /= l
+
    def normalized(u):
       v = Vec(u)
       v.normalize()
       return v
-   def outer(u,v): 
+
+   def outer(u, v):
       assert isvec(v)
-      return Mat( u.x*v.x, u.x*v.y, u.x*v.z,
-                  u.y*v.x, u.y*v.y, u.y*v.z,
-                  u.z*v.x, u.z*v.y, u.z*v.z      )
-   def __add__(v,r):
+      return Mat(u.x * v.x, u.x * v.y, u.x * v.z, u.y * v.x, u.y * v.y, u.y * v.z, u.z * v.x,
+                 u.z * v.y, u.z * v.z)
+
+   def __add__(v, r):
       assert isvorpt(v)
-      if isnum(r): return type(v)(v.x+r,v.y+r,v.z+r)
+      if isnum(r): return type(v)(v.x + r, v.y + r, v.z + r)
       elif isvorpt(r):
-         if isvec(v) and isvec(r): return Vec(v.x+r.x,v.y+r.y,v.z+r.z)
-         if isvec(v) or  isvec(r): return Point(v.x+r.x,v.y+r.y,v.z+r.z)
+         if isvec(v) and isvec(r): return Vec(v.x + r.x, v.y + r.y, v.z + r.z)
+         if isvec(v) or isvec(r): return Point(v.x + r.x, v.y + r.y, v.z + r.z)
          raise TypeError
       return v.__radd__(v)
-   def __radd__(v,r):
+
+   def __radd__(v, r):
       return v + r
-   def __mul__(p,a):
+
+   def __mul__(p, a):
       assert isvorpt(p)
-      if isnum(a):     return type(p)(f*a for f   in p)
-      if allvecs(p,a): return type(p)(f*g for f,g in izip(p,a))
-      if isvorpt(a): typeerror('*',p,a)
+      if isnum(a): return type(p)(f * a for f in p)
+      if allvecs(p, a): return type(p)(f * g for f, g in izip(p, a))
+      if isvorpt(a): typeerror('*', p, a)
       else: return a.__rmul__(p)
-   def __rmul__(u,a):
-      if anypoints(u,a): typeerror('*',a,u)
-      return u*a
+
+   def __rmul__(u, a):
+      if anypoints(u, a): typeerror('*', a, u)
+      return u * a
+
    def __neg__(u):
-      return Vec(-u.x,-u.y,-u.z)
-   def __div__(u,a):
-      if anypoints(u,a): typeerror('/',u,a)
-      if isnum(a): return Vec(u.x/a  ,u.y/a,  u.z/a)
-      if isvec(a): return Vec(u.x/a.x,u.y/a.y,u.z/a.z)
+      return Vec(-u.x, -u.y, -u.z)
+
+   def __div__(u, a):
+      if anypoints(u, a): typeerror('/', u, a)
+      if isnum(a): return Vec(u.x / a, u.y / a, u.z / a)
+      if isvec(a): return Vec(u.x / a.x, u.y / a.y, u.z / a.z)
       return a.__rdiv__(u)
-   def __rdiv__(u,a):
-      return a/u
+
+   def __rdiv__(u, a):
+      return a / u
+
    def __repr__(self):
-      return "V(%f,%f,%f)"%(self.x,self.y,self.z)
+      return "V(%f,%f,%f)" % (self.x, self.y, self.z)
+
    def __str__(self):
       return stripfloats(repr(self))
-   def proj(v,u):
+
+   def proj(v, u):
       """
       >>> print Vec(1,1,1).proj(Vec(abs(gauss(0,10)),0,0))
       V(1,0,0)
@@ -302,8 +430,9 @@ class Vec(Point):
       >>> puv = v.proj(u).normalized()
       >>> assert abs(abs(puv.dot(u.normalized()))-1.0) < EPS
       """
-      return u.dot(v)/u.dot(u)*u
-   def perp(v,u):
+      return u.dot(v) / u.dot(u) * u
+
+   def perp(v, u):
       """
       >>> u = Vec(1,0,0); v = Vec(1,1,1)
       >>> print v.perp(u)
@@ -314,27 +443,25 @@ class Vec(Point):
       """
       return v - v.proj(u)
 
-
-Ux = Vec(1,0,0)
-Uy = Vec(0,1,0)
-Uz = Vec(0,0,1)
-V0 = Vec(0,0,0)
-Px = Point(1,0,0)
-Py = Point(0,1,0)
-Pz = Point(0,0,1)
-P0 = Point(0,0,0)
+Ux = Vec(1, 0, 0)
+Uy = Vec(0, 1, 0)
+Uz = Vec(0, 0, 1)
+V0 = Vec(0, 0, 0)
+Px = Point(1, 0, 0)
+Py = Point(0, 1, 0)
+Pz = Point(0, 0, 1)
+P0 = Point(0, 0, 0)
 
 class Vecs(list):
    pass
 
-
 def randpoint(n=1):
-   if n is 1: return Point(gauss(0,1),gauss(0,1),gauss(0,1))
-   return Points(Point(gauss(0,1),gauss(0,1),gauss(0,1)) for i in range(n))
+   if n is 1: return Point(gauss(0, 1), gauss(0, 1), gauss(0, 1))
+   return Points(Point(gauss(0, 1), gauss(0, 1), gauss(0, 1)) for i in range(n))
 
 def randvec(n=1):
-   if n is 1: return Vec(gauss(0,1),gauss(0,1),gauss(0,1))
-   return Vecs(Vec(gauss(0,1),gauss(0,1),gauss(0,1)) for i in range(n))
+   if n is 1: return Vec(gauss(0, 1), gauss(0, 1), gauss(0, 1))
+   return Vecs(Vec(gauss(0, 1), gauss(0, 1), gauss(0, 1)) for i in range(n))
 
 def randnorm(n=1):
    """
@@ -343,30 +470,30 @@ def randnorm(n=1):
    if n is 1: return randvec().normalized()
    return Vecs(randvec().normalized() for i in range(n))
 
-def coplanar(x1,x2,x3,x4):
+def coplanar(x1, x2, x3, x4):
    """
    >>> u,v,w = randpoint(3)
    >>> a,b,c = (gauss(0,10) for i in range(3))
    >>> assert     coplanar(u, v, w, u + a*(u-v) + b*(v-w) + c*(w-u) )
    >>> assert not coplanar(u, v, w, u + a*(u-v) + b*(v-w) + c*(w-u) + randvec().cross(u-v) )   
    """
-   if allpoints(x1,x2,x3,x4): return abs((x3-x1).dot((x2-x1).cross(x4-x3))) < SQRTEPS
+   if allpoints(x1, x2, x3, x4): return abs((x3 - x1).dot((x2 - x1).cross(x4 - x3))) < SQRTEPS
    raise NotImplementedError
 
-def rmsd(l,m):
+def rmsd(l, m):
    """
    >>> l,m = randpoint(6),randpoint(6)
    >>> rmsd(l,l)
    0.0
    """
    assert ispoints(l)
-   assert ispoints(m)   
+   assert ispoints(m)
    rmsd = 0.0
-   for u,v in izip(l,m): 
+   for u, v in izip(l, m):
       rmsd += u.distance_squared(v)
    return sqrt(rmsd)
 
-def dihedral(p1,p2,p3,p4=None):
+def dihedral(p1, p2, p3, p4=None):
    """
    3 Vecs or 4 points
    >>> dihedral_degrees(Px,Py,P0,Pz)
@@ -378,29 +505,28 @@ def dihedral(p1,p2,p3,p4=None):
    >>> dihedral_degrees(Uy,Uz,Ux)
    90.0
    """
-   if allpoints(p1,p2,p3,p4):
-      a = ( p2 - p1 ).normalized()
-      b = ( p3 - p2 ).normalized()
-      c = ( p4 - p3 ).normalized()
+   if allpoints(p1, p2, p3, p4):
+      a = (p2 - p1).normalized()
+      b = (p3 - p2).normalized()
+      c = (p4 - p3).normalized()
       x = -a.dot(c) + a.dot(b) * b.dot(c)
-      y =  a.dot( b.cross(c) );
-      return atan2(y,x)
-   if allvecs(p1,p2,p3) and p4 is None:
-      return dihedral(P0,P0+p1,P0+p1+p2,P0+p1+p2+p3)
-   if anypoints(p1,p2,p3,p4):
+      y = a.dot(b.cross(c))
+      return atan2(y, x)
+   if allvecs(p1, p2, p3) and p4 is None:
+      return dihedral(P0, P0 + p1, P0 + p1 + p2, P0 + p1 + p2 + p3)
+   if anypoints(p1, p2, p3, p4):
       raise NotImplementedError
 
-def dihedral_degrees(p1,p2,p3,p4=None): 
-   return degrees(dihedral(p1,p2,p3,p4))
+def dihedral_degrees(p1, p2, p3, p4=None):
+   return degrees(dihedral(p1, p2, p3, p4))
 
-def angle(p1,p2,p3=None):
-   if allvecs(p1,p2) and p3 is None:
+def angle(p1, p2, p3=None):
+   if allvecs(p1, p2) and p3 is None:
       return p1.angle(p2)
-   elif allpoints(p1,p2,p3):
-         a = ( p2 - p1 ).normalized()
-         b = ( p2 - p3 ).normalized()
-         return acos( a.dot(b) )
-
+   elif allpoints(p1, p2, p3):
+      a = (p2 - p1).normalized()
+      b = (p2 - p3).normalized()
+      return acos(a.dot(b))
 
 class Line(object):
    """
@@ -420,20 +546,24 @@ class Line(object):
    >>> assert Line(Ux,P0) == Line(-Ux,Px)
    >>> assert Line(Ux,P0) != Line(Ux,Py)   
    """
-   def __init__(self,direction,position):
+   def __init__(self, direction, position):
       assert ispoint(position)
-      if ispoint(direction): 
-         direction = position-direction
+      if ispoint(direction):
+         direction = position - direction
       assert direction.length_squared() > SQRTEPS
       self.d = direction.normalized()
       self.p = position
-   def __eq__(l1,l2):
-      return (l1.d==l2.d or l1.d==-l2.d) and l1.d.lineangle(l1.p-l2.p) < EPS
+
+   def __eq__(l1, l2):
+      return (l1.d == l2.d or l1.d == -l2.d) and l1.d.lineangle(l1.p - l2.p) < EPS
+
    def __str__(l):
-      return "Line( %s + r * %s )"%(str(l.p),str(l.d))
+      return "Line( %s + r * %s )" % (str(l.p), str(l.d))
+
    def __repr__(l):
-      return "Line(%s,%s)"%(repr(p.d),repr(p.p))
-   def distance(l,r):
+      return "Line(%s,%s)" % (repr(p.d), repr(p.p))
+
+   def distance(l, r):
       """
       >>> l = Line(Uy,P0)
       >>> l.distance(P0)
@@ -456,19 +586,19 @@ class Line(object):
       # >>> X = randxform()
       # >>> round(Line(X.R*Ux,X*Point(0,1,2)).distance(Line(X.R*Ux,X*Point(3,2,1))) , 8)
       """
-      if ispoint(r): return (r-l.p).perp(l.d).length()
+      if ispoint(r): return (r - l.p).perp(l.d).length()
       if isvec(r): raise TypeError("Line distance to Vec not defined")
       if isline(r):
          a1 = l.d.normalized()
-         a2 = r.d.normalized()   
-         if abs(a1.dot(a2)) > 0.9999: return (r.p-l.p).perp(a1).length()
+         a2 = r.d.normalized()
+         if abs(a1.dot(a2)) > 0.9999: return (r.p - l.p).perp(a1).length()
          a = a1
          b = a2
-         c = r.p-l.p
+         c = r.p - l.p
          n = abs(c.dot(a.cross(b)))
          d = a.cross(b).length()
          if abs(d) < EPS: return 0
-         return n/d
+         return n / d
 
 # def line_line_distance(a1,c1,a2,c2):
 #    """
@@ -484,7 +614,7 @@ class Line(object):
 #    # 1.41421356
 #    """
 #    a1 = a1.normalized()
-#    a2 = a2.normalized()   
+#    a2 = a2.normalized()
 #    if abs(a1.dot(a2)) > 0.9999: return (c1-c2).perp(a1).length()
 #    a = a1
 #    b = a2
@@ -494,8 +624,7 @@ class Line(object):
 #    if abs(d) < EPS: return 0
 #    return n/d
 
-
-def line_plane_intersection(l,l0,n,p0):
+def line_plane_intersection(l, l0, n, p0):
    """
    >>> l  = Ux
    >>> l0 = randvec()
@@ -509,10 +638,10 @@ def line_plane_intersection(l,l0,n,p0):
    >>> assert line_plane_intersection(l,l0,n,p0)[1] == p0
    """
    n = n.normalized()
-   d = (p0-l0).dot(n) / l.dot(n)
-   return d,d*l+l0
+   d = (p0 - l0).dot(n) / l.dot(n)
+   return d, d * l + l0
 
-def slide_to_make_lines_intersect(dof,l,l0,m,m0):
+def slide_to_make_lines_intersect(dof, l, l0, m, m0):
    """
    >>> v = randvec()
    >>> assert abs(slide_to_make_lines_intersect(Ux,Uy,v,Uz,V0) + v.x ) < EPS
@@ -521,13 +650,12 @@ def slide_to_make_lines_intersect(dof,l,l0,m,m0):
    >>> l0 = l0 + d*dof
    >>> assert abs(Line(l,P0+l0).distance(Line(m,P0+m0))) < EPS
    """
-   n  = l.cross(m)
+   n = l.cross(m)
    p0 = m0
-   d,i = line_plane_intersection(dof,l0,n,p0)   
-   assert ( (i-l0).normalized().dot(dof.normalized()) - 1.0 ) < EPS
-   assert i-l0 == dof*d
+   d, i = line_plane_intersection(dof, l0, n, p0)
+   assert ((i - l0).normalized().dot(dof.normalized()) - 1.0) < EPS
+   assert i - l0 == dof * d
    return d
-
 
 # def slide_to_make_lines_intersect(dof,l,l0,m,m0):
 #    """
@@ -567,22 +695,26 @@ class Plane(object):
    >>> assert Plane( Line(Uy,P0), Uz) == Plane(-Ux,P0)
    >>> assert Plane( Line(Uy,P0), Uz) != Plane(-Ux,P0+Vec(0.0001) )
    """
-   def __init__(self,a,b=None,c=None):
-      if isplane(a):  a,b = a.n,a.p
-      elif isline(a) and ispoint(b) and c is None: a,b = a.d.cross(a.p-b),b
-      elif isline(a) and isvec(b)   and c is None: a,b = a.d.cross(b),a.p
-      if allpoints(a,b,c): a,b = (a-b).cross(a-c),a
+   def __init__(self, a, b=None, c=None):
+      if isplane(a): a, b = a.n, a.p
+      elif isline(a) and ispoint(b) and c is None: a, b = a.d.cross(a.p - b), b
+      elif isline(a) and isvec(b) and c is None: a, b = a.d.cross(b), a.p
+      if allpoints(a, b, c): a, b = (a - b).cross(a - c), a
       assert isvec(a) and ispoint(b)
       assert a.length_squared() > SQRTEPS
       self.n = a.normalized()
       self.p = b
-   def __eq__(p1,p2):
-      return (p1.n==p2.n or p1.n==-p2.n) and abs(p1.n.dot(p1.p-p2.p)) < EPS
+
+   def __eq__(p1, p2):
+      return (p1.n == p2.n or p1.n == -p2.n) and abs(p1.n.dot(p1.p - p2.p)) < EPS
+
    def __str__(p):
-      return "Plane(norm=%s,p0=%s)"%(str(p.n),str(p.p))
+      return "Plane(norm=%s,p0=%s)" % (str(p.n), str(p.p))
+
    def __repr__(p):
-      return "Plane(%s,%s)"%(repr(p.n),repr(p.p))
-   def intersection(p,l):
+      return "Plane(%s,%s)" % (repr(p.n), repr(p.p))
+
+   def intersection(p, l):
       """
       >>> l  = Ux
       >>> l0 = randpoint()
@@ -596,11 +728,8 @@ class Plane(object):
       >>> assert Plane(n,p0).intersection(Line(l,l0))[1] == p0
       """
       n = p.n.normalized()
-      d = (p.p-l.p).dot(n) / l.d.dot(n)
-      return d, d*l.d + l.p
-
-
-
+      d = (p.p - l.p).dot(n) / l.d.dot(n)
+      return d, d * l.d + l.p
 
 # class Mat(object):
 #    """docstring for Mat
@@ -658,7 +787,7 @@ class Plane(object):
 #       else: assert 0 <= i and i <= 2
 #    def rowx(m): return m.row(0)
 #    def rowy(m): return m.row(1)
-#    def rowz(m): return m.row(2)      
+#    def rowz(m): return m.row(2)
 #    def colx(m): return m.col(0)
 #    def coly(m): return m.col(1)
 #    def colz(m): return m.col(2)
@@ -689,14 +818,14 @@ class Plane(object):
 #    def det(m):
 #           #   a11  (a33  a22- a32  a23)- a21 ( a33  a12- a32  a13)+ a31(  a23  a12- a22  a13)
 #       return m.xx*(m.zz*m.yy-m.zy*m.yz)-m.yx*(m.zz*m.xy-m.zy*m.xz)+m.zx*(m.yz*m.xy-m.yy*m.xz)
-#    def trace(m): 
+#    def trace(m):
 #       return m.xx+m.yy+m.zz
-#    def add_diagonal(m,v): 
+#    def add_diagonal(m,v):
 #       return Mat( v.x+m.xx, m.xy, m.xz, m.yx, v.y+m.yy, m.yz, m.zx, m.zy, v.z+m.zz )
-#    def is_rotation(m): 
+#    def is_rotation(m):
 #       return (m.colx().isnormal() and m.coly().isnormal() and m.colz().isnormal() and
 #               m.rowx().isnormal() and m.rowy().isnormal() and m.rowz().isnormal()   )
-#    def __eq__(self,other): return ( abs(self.xx-other.xx) < EPS and 
+#    def __eq__(self,other): return ( abs(self.xx-other.xx) < EPS and
 #                abs(self.xy-other.xy) < EPS and
 #                abs(self.xz-other.xz) < EPS and
 #                abs(self.yx-other.yx) < EPS and
@@ -740,13 +869,11 @@ class Plane(object):
 #          assert abs( x*x + y*y + z*z - 1.0 ) <= 0.01
 #          return Vec( x, y, z ),pi
 
-
 # Imat = Mat(1,0,0,0,1,0,0,0,1)
 
 # def projection_matrix(v):
 #    m = Mat( v.x * v.x, v.x * v.y, v.x * v.z, v.y * v.x, v.y * v.y, v.y * v.z, v.z * v.x, v.z * v.y, v.z * v.z )
 #    return m / v.dot(v)
-
 
 # def rotation_matrix(axis,angle):
 #    n = axis.normalized()
@@ -806,7 +933,6 @@ class Plane(object):
 #          print "FAIL"
 #          return
 #    print "test_rotation_mat PASS"
-
 
 # def randrot(n=1):
 #    if n is 1: return rotation_matrix_degrees(randvec(),uniform(0,1)*360)
@@ -875,7 +1001,7 @@ class Plane(object):
 #    >>> assert X*Xform(u)*v == (X+u)*v
 #    >>> assert X*v-u == (u-X)*v
 #    >>> assert X*(v-u) == (X-u)*v
-   
+
 #    mul,div with Mats:
 #    >>> R = randrot()
 #    >>> assert isxform(R*X) and isxform(X*R)
@@ -916,7 +1042,7 @@ class Plane(object):
 #       # print "from_four_points"
 #       # print e1
 #       # print e2
-#       # print e3            
+#       # print e3
 #       s.R = Mat(e1.x,e2.x,e3.x,e1.y,e2.y,e3.y,e1.z,e2.z,e3.z)
 #       return s
 #    def from_two_vecs(s,a,b):
@@ -940,7 +1066,7 @@ class Plane(object):
 #       else:            return o.__rmul__(X)
 #    def __rmul__(X,o):
 #       if ismat(o): return Xform(o*X.R,o*X.t)
-#       raise TypeError      
+#       raise TypeError
 #    def __div__(X,o):
 #       if isxform(o): return X*~o
 #       return o.__rdiv__(X)
@@ -965,7 +1091,7 @@ class Plane(object):
 #    def pretty(self):
 #       a,r = self.rotation_axis()
 #       if self.t.length() > EPS: return "Xform( axis=%s, ang=%f, dir=%s, dis=%f )"%(str(a),degrees(r),str(self.t.normalized()),self.t.length())
-#       else: return "Xform( axis=%s, ang=%f, dir=%s, dis=%f )"%(str(a),degrees(r),str(V0),0)         
+#       else: return "Xform( axis=%s, ang=%f, dir=%s, dis=%f )"%(str(a),degrees(r),str(V0),0)
 
 # Ixform = Xform(Imat,V0)
 
@@ -977,7 +1103,7 @@ class Plane(object):
 
 # def rotation_around(axs,ang,cen):
 #    """
-#    >>> 
+#    >>>
 #    """
 #    R = rotation_matrix(axs,ang)
 #    return Xform(R,R*-cen+cen)
@@ -986,8 +1112,6 @@ class Plane(object):
 
 # def test():
 #    test_rotation_mat()
-
-
 
 # def alignvector(a,b):
 #    """
@@ -1036,7 +1160,7 @@ class Plane(object):
 #    baxis = (b1.normalized()+b2.normalized())/2.0
 #    Xmiddle = alignvector(aaxis,baxis)
 #    assert (baxis).angle(Xmiddle*(aaxis)) < SQRTEPS
-#    Xaround = alignaroundaxis(baxis, Xmiddle*a1, b1 )# 
+#    Xaround = alignaroundaxis(baxis, Xmiddle*a1, b1 )#
 #    X = Xaround * Xmiddle
 #    assert (b1.angle(a1)+b2.angle(a2)) > (b1.angle(X*a1)+b2.angle(X*a2))
 #    return X
@@ -1073,12 +1197,12 @@ class Plane(object):
 # #    ...   print a1
 # #    ...   print a2
 # #    ...   print Xa2b*a1
-# #    ...   print Xa2b*a2               
+# #    ...   print Xa2b*a2
 # #    """
 # #    Xmiddle = alignvector(a1+a2,b1+b2)
 # #    assert (b1+b2).angle(Xmiddle*(a1+a2)) < SQRTEPS
-# #    assert (b1+b2).angle(Xmiddle*a1+Xmiddle*a2) < SQRTEPS   
-# #    Xaround = alignaroundaxis(b1+b2, Xmiddle*a1, b1 )# 
+# #    assert (b1+b2).angle(Xmiddle*a1+Xmiddle*a2) < SQRTEPS
+# #    Xaround = alignaroundaxis(b1+b2, Xmiddle*a1, b1 )#
 # #    return Xaround * Xmiddle
 # #    # xa = Xform().from_two_vecs(a2,a1)
 # #    # xb = Xform().from_two_vecs(b2,b1)
@@ -1140,32 +1264,6 @@ class Plane(object):
 #       if abs(i.x) < SQRTEPS and abs(i.y) > SQRTEPS and abs(i.z) < SQRTEPS: mny = min(mny,abs(i.y))
 #       if abs(i.x) < SQRTEPS and abs(i.y) < SQRTEPS and abs(i.z) > SQRTEPS: mnz = min(mnz,abs(i.z))
 #    return round(mnx,3),round(mny,3),round(mnz,3)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 if __name__ == '__main__':
    import doctest

@@ -16,17 +16,14 @@ from __future__ import print_function
 import sys
 import os
 
-
 def add_proj_root_to_sys_path():
-    assert __file__.endswith("/docs/conf.py")
-    newpath = __file__[:-13]
-    assert os.path.exists(newpath)
-    if newpath not in sys.path:
-        sys.path.append(newpath)
-
+   assert __file__.endswith("/docs/conf.py")
+   newpath = __file__[:-13]
+   assert os.path.exists(newpath)
+   if newpath not in sys.path:
+      sys.path.append(newpath)
 
 add_proj_root_to_sys_path()
-
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -40,13 +37,14 @@ add_proj_root_to_sys_path()
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.doctest',
-              'sphinx.ext.todo',
-              'sphinx.ext.coverage',
-              'sphinx.ext.pngmath',
-              'sphinx.ext.viewcode',
-              ]
+extensions = [
+   'sphinx.ext.autodoc',
+   'sphinx.ext.doctest',
+   'sphinx.ext.todo',
+   'sphinx.ext.coverage',
+   'sphinx.ext.pngmath',
+   'sphinx.ext.viewcode',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -106,7 +104,6 @@ pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
-
 
 # -- Options for HTML output ---------------------------------------------
 
@@ -187,25 +184,24 @@ html_static_path = ['_static']
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'WillsPyMOLScriptsdoc'
 
-
 # -- Options for LaTeX output --------------------------------------------
 
 latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #'papersize': 'letterpaper',
+   # The paper size ('letterpaper' or 'a4paper').
+   #'papersize': 'letterpaper',
 
-    # The font size ('10pt', '11pt' or '12pt').
-    #'pointsize': '10pt',
+   # The font size ('10pt', '11pt' or '12pt').
+   #'pointsize': '10pt',
 
-    # Additional stuff for the LaTeX preamble.
-    #'preamble': '',
+   # Additional stuff for the LaTeX preamble.
+   #'preamble': '',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ('index', 'WillsPyMOLScripts.tex', u'Will\'s PyMOL Scripts Documentation',
-     u'Will Sheffler', 'manual'),
+   ('index', 'WillsPyMOLScripts.tex', u'Will\'s PyMOL Scripts Documentation', u'Will Sheffler',
+    'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -228,19 +224,16 @@ latex_documents = [
 # If false, no module index is generated.
 #latex_domain_indices = True
 
-
 # -- Options for manual page output --------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    ('index', 'willspymolscripts', u'Will\'s PyMOL Scripts Documentation',
-     [u'Will Sheffler'], 1)
-]
+man_pages = [('index', 'willspymolscripts', u'Will\'s PyMOL Scripts Documentation', [
+   u'Will Sheffler'
+], 1)]
 
 # If true, show URL addresses after external links.
 #man_show_urls = False
-
 
 # -- Options for Texinfo output ------------------------------------------
 
@@ -248,9 +241,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    ('index', 'WillsPyMOLScripts', u'Will\'s PyMOL Scripts Documentation',
-     u'Will Sheffler', 'WillsPyMOLScripts', 'One line description of project.',
-     'Miscellaneous'),
+   ('index', 'WillsPyMOLScripts', u'Will\'s PyMOL Scripts Documentation', u'Will Sheffler',
+    'WillsPyMOLScripts', 'One line description of project.', 'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.
